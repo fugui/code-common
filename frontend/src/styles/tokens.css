@@ -1,0 +1,28 @@
+:root {
+  --portal-primary-color: #3b82f6;
+  --portal-primary-hover: #2563eb;
+  --portal-bg-color: #0f172a;
+  --portal-card-bg: #1e293b;
+  --portal-border-color: #334155;
+  --portal-text-color: #f8fafc;
+  --portal-text-secondary: #94a3b8;
+  --portal-success-color: #10b981;
+  --portal-danger-color: #ef4444;
+  --portal-warning-color: #f59e0b;
+
+  --primary-color: var(--portal-primary-color);
+  --primary-hover: var(--portal-primary-hover);
+  --bg-color: var(--portal-bg-color);
+  --card-bg: var(--portal-card-bg);
+  --border-color: var(--portal-border-color);
+  --text-color: var(--portal-text-color);
+  --text-secondary: var(--portal-text-secondary);
+}
+
+:root.light-theme {
+  --portal-bg-color: #f8fafc;
+  --portal-card-bg: #ffffff;
+  --portal-border-color: #cbd5e1;
+  --portal-text-color: #0f172a;
+  --portal-text-secondary: #475569;
+}

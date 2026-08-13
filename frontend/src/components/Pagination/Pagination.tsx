@@ -1,5 +1,6 @@
-import React, { useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React from 'react';
+import { usePagination } from '../../hooks/usePagination';
+import { PAGE_SIZE_OPTIONS, DEFAULT_PAGE_SIZE } from '../../utils/constants';
 
 export interface PaginationProps {
   /**
@@ -28,28 +29,18 @@ export interface PaginationProps {
 
 export const Pagination: React.FC<PaginationProps> = ({
   totalItems,
-  pageSizeOptions = [15, 25, 50, 100],
-  defaultPageSize = 25,
+  pageSizeOptions = PAGE_SIZE_OPTIONS,
+  defaultPageSize = DEFAULT_PAGE_SIZE,
   pageKey = 'page',
   pageSizeKey = 'pageSize'
 }) => {
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  const pageParam = parseInt(searchParams.get(pageKey) || '1', 10);
-  const page = isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
-
-  const pageSizeParam = parseInt(searchParams.get(pageSizeKey) || String(defaultPageSize), 10);
-  const pageSize = isNaN(pageSizeParam) || pageSizeParam < 1 ? defaultPageSize : pageSizeParam;
+  const { page, pageSize, updateParams } = usePagination({
+    defaultPageSize,
+    pageKey,
+    pageSizeKey
+  });
 
   const totalPages = Math.ceil(totalItems / pageSize) || 1;
-
-  const updateParams = useCallback((newParams: Record<string, string | number>) => {
-    const nextParams = new URLSearchParams(searchParams);
-    Object.keys(newParams).forEach(key => {
-      nextParams.set(key, String(newParams[key]));
-    });
-    setSearchParams(nextParams);
-  }, [searchParams, setSearchParams]);
 
   const getPageNumbers = () => {
     const maxVisible = 5;

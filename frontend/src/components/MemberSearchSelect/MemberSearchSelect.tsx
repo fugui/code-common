@@ -1,0 +1,224 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { User } from '../../types/user';
+import { useOutsideClick } from '../../hooks/useOutsideClick';
+
+export interface MemberSearchSelectProps {
+  value: number | string | '';
+  onChange: (userId: number | '', selectedUser?: User) => void;
+  style?: React.CSSProperties;
+  fetchFn?: (url: string, options?: RequestInit) => Promise<Response>;
+}
+
+export const MemberSearchSelect: React.FC<MemberSearchSelectProps> = ({
+  value,
+  onChange,
+  style,
+  fetchFn = window.fetch.bind(window)
+}) => {
+  const [query, setQuery] = useState('');
+  const [displayText, setDisplayText] = useState('');
+  const [results, setResults] = useState<User[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<number | null>(null);
+
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  useOutsideClick(containerRef, () => setShowDropdown(false));
+
+  // Fetch current user info for quick selection
+  useEffect(() => {
+    fetchFn('/api/me')
+      .then(res => (res.ok ? res.json() : null))
+      .then(data => {
+        if (data && data.id) {
+          setCurrentUser({
+            id: data.id,
+            name: data.name,
+            employee_id: data.employee_id || ''
+          });
+        }
+      })
+      .catch(() => {});
+  }, [fetchFn]);
+
+  const lastValueRef = useRef(value);
+  // When value changes externally, resolve the display name
+  useEffect(() => {
+    lastValueRef.current = value;
+    if (value !== undefined && value !== null && value !== '') {
+      const isIdOnly = /^\d+$/.test(value.toString());
+      const queryParam = isIdOnly ? `id=${value}` : `search=${encodeURIComponent(value.toString())}`;
+      fetchFn(`/api/users?${queryParam}&pageSize=5`)
+        .then(res => res.json())
+        .then(data => {
+          if (lastValueRef.current !== value) return;
+          const list: User[] = data.items || [];
+          const match = list.find((m: User) => m.id === Number(value) || m.employee_id === value.toString());
+          if (match) {
+            setDisplayText(`${match.name} (${match.employee_id || match.id})`);
+          } else {
+            setDisplayText(value.toString());
+          }
+        })
+        .catch(() => setDisplayText(value.toString()));
+    } else {
+      setDisplayText('');
+    }
+  }, [value, fetchFn]);
+
+  const doSearch = (q: string) => {
+    if (!q.trim()) {
+      setLoading(true);
+      fetchFn('/api/users?pageSize=20')
+        .then(res => res.json())
+        .then(data => setResults(data.items || []))
+        .catch(() => setResults([]))
+        .finally(() => setLoading(false));
+      return;
+    }
+    setLoading(true);
+    fetchFn(`/api/users?search=${encodeURIComponent(q)}&pageSize=20`)
+      .then(res => res.json())
+      .then(data => setResults(data.items || []))
+      .catch(() => setResults([]))
+      .finally(() => setLoading(false));
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setQuery(val);
+    setShowDropdown(true);
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = window.setTimeout(() => doSearch(val), 250);
+  };
+
+  const handleFocus = () => {
+    setShowDropdown(true);
+    doSearch(query);
+  };
+
+  const handleSelect = (user: User) => {
+    onChange(user.id, user);
+    setDisplayText(`${user.name} (${user.employee_id || user.id})`);
+    setQuery('');
+    setShowDropdown(false);
+  };
+
+  const handleClear = () => {
+    onChange('');
+    setDisplayText('');
+    setQuery('');
+    setResults([]);
+  };
+
+  return (
+    <div ref={containerRef} style={{ position: 'relative', ...style }}>
+      <div style={{ position: 'relative' }}>
+        <input
+          type="text"
+          value={showDropdown ? (query || displayText) : (displayText || query)}
+          onChange={handleInputChange}
+          onFocus={handleFocus}
+          placeholder={displayText || '输入姓名或工号搜索...'}
+          style={{
+            width: '100%', padding: '0.625rem 2rem 0.625rem 0.75rem', borderRadius: '6px',
+            border: '1px solid var(--border-color)', background: 'var(--bg-color)',
+            color: 'var(--text-color)', boxSizing: 'border-box', fontSize: '0.875rem',
+            transition: 'border-color 0.2s', outline: 'none'
+          }}
+          onKeyDown={e => {
+            if (e.key === 'Escape') setShowDropdown(false);
+          }}
+        />
+        {displayText ? (
+          <button
+            type="button"
+            onClick={handleClear}
+            style={{
+              position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)',
+              background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px',
+              color: '#94a3b8', display: 'flex', alignItems: 'center'
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        ) : (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        )}
+      </div>
+
+      {showDropdown && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '4px',
+          background: 'var(--card-bg)', border: '1px solid var(--border-color)',
+          borderRadius: '8px', boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+          maxHeight: '240px', overflowY: 'auto', zIndex: 100
+        }}>
+          {currentUser && (!query || currentUser.name.includes(query) || (currentUser.employee_id && currentUser.employee_id.includes(query))) && (
+            <div
+              onClick={() => handleSelect(currentUser)}
+              style={{
+                padding: '0.5rem 0.75rem', cursor: 'pointer', fontSize: '0.875rem',
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                borderBottom: '1px dashed var(--border-color)',
+                background: currentUser.id === Number(value) ? 'rgba(37,99,235,0.12)' : 'rgba(59,130,246,0.04)',
+                color: 'var(--text-color)'
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(59,130,246,0.1)'}
+              onMouseLeave={e => e.currentTarget.style.background = currentUser.id === Number(value) ? 'rgba(37,99,235,0.12)' : 'rgba(59,130,246,0.04)'}
+            >
+              <span>
+                <span style={{ fontWeight: 600, color: '#3b82f6' }}>⭐ 我 (当前账号: {currentUser.name})</span>
+                <span style={{ color: '#94a3b8', marginLeft: '0.4rem', fontSize: '0.8rem' }}>({currentUser.employee_id || currentUser.id})</span>
+              </span>
+              <span style={{ fontSize: '0.75rem', padding: '0.1rem 0.4rem', borderRadius: '4px', background: 'rgba(59,130,246,0.1)', color: '#3b82f6', fontWeight: 500 }}>
+                快捷指派
+              </span>
+            </div>
+          )}
+          {loading ? (
+            <div style={{ padding: '1rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.8rem' }}>搜索中...</div>
+          ) : results.length === 0 && !currentUser ? (
+            <div style={{ padding: '1rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.8rem' }}>
+              {query ? '未找到匹配的人员' : '输入关键字开始搜索'}
+            </div>
+          ) : (
+            results.filter(m => !currentUser || m.id !== currentUser.id).map(m => {
+              const deptName = typeof m.department === 'string' ? m.department : (m.department && typeof m.department === 'object' ? m.department.name : '');
+              return (
+                <div
+                  key={m.id}
+                  onClick={() => handleSelect(m)}
+                  style={{
+                    padding: '0.5rem 0.75rem', cursor: 'pointer', fontSize: '0.875rem',
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    transition: 'background 0.15s',
+                    background: m.id === Number(value) ? 'rgba(37,99,235,0.08)' : 'transparent',
+                    color: 'var(--text-color)'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-color)'}
+                  onMouseLeave={e => e.currentTarget.style.background = m.id === Number(value) ? 'rgba(37,99,235,0.08)' : 'transparent'}
+                >
+                  <span>
+                    <span style={{ fontWeight: 500 }}>{m.name}</span>
+                    <span style={{ color: '#94a3b8', marginLeft: '0.4rem', fontSize: '0.8rem' }}>({m.employee_id || m.id})</span>
+                  </span>
+                  {deptName && (
+                    <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>{deptName}</span>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
