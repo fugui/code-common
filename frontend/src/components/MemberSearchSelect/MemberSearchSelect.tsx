@@ -7,13 +7,17 @@ export interface MemberSearchSelectProps {
   onChange: (userId: number | '', selectedUser?: User) => void;
   style?: React.CSSProperties;
   fetchFn?: (url: string, options?: RequestInit) => Promise<Response>;
+  searchEndpoint?: string;
+  meEndpoint?: string;
 }
 
 export const MemberSearchSelect: React.FC<MemberSearchSelectProps> = ({
   value,
   onChange,
   style,
-  fetchFn = window.fetch.bind(window)
+  fetchFn = window.fetch.bind(window),
+  searchEndpoint = '/api/users',
+  meEndpoint = '/api/me'
 }) => {
   const [query, setQuery] = useState('');
   const [displayText, setDisplayText] = useState('');
@@ -29,7 +33,8 @@ export const MemberSearchSelect: React.FC<MemberSearchSelectProps> = ({
 
   // Fetch current user info for quick selection
   useEffect(() => {
-    fetchFn('/api/me')
+    if (!meEndpoint) return;
+    fetchFn(meEndpoint)
       .then(res => (res.ok ? res.json() : null))
       .then(data => {
         if (data && data.id) {
@@ -50,7 +55,8 @@ export const MemberSearchSelect: React.FC<MemberSearchSelectProps> = ({
     if (value !== undefined && value !== null && value !== '') {
       const isIdOnly = /^\d+$/.test(value.toString());
       const queryParam = isIdOnly ? `id=${value}` : `search=${encodeURIComponent(value.toString())}`;
-      fetchFn(`/api/users?${queryParam}&pageSize=5`)
+      const sep = searchEndpoint.includes('?') ? '&' : '?';
+      fetchFn(`${searchEndpoint}${sep}${queryParam}&pageSize=5`)
         .then(res => res.json())
         .then(data => {
           if (lastValueRef.current !== value) return;
@@ -66,12 +72,13 @@ export const MemberSearchSelect: React.FC<MemberSearchSelectProps> = ({
     } else {
       setDisplayText('');
     }
-  }, [value, fetchFn]);
+  }, [value, fetchFn, searchEndpoint]);
 
   const doSearch = (q: string) => {
+    const sep = searchEndpoint.includes('?') ? '&' : '?';
     if (!q.trim()) {
       setLoading(true);
-      fetchFn('/api/users?pageSize=20')
+      fetchFn(`${searchEndpoint}${sep}pageSize=20`)
         .then(res => res.json())
         .then(data => setResults(data.items || []))
         .catch(() => setResults([]))
@@ -79,7 +86,7 @@ export const MemberSearchSelect: React.FC<MemberSearchSelectProps> = ({
       return;
     }
     setLoading(true);
-    fetchFn(`/api/users?search=${encodeURIComponent(q)}&pageSize=20`)
+    fetchFn(`${searchEndpoint}${sep}search=${encodeURIComponent(q)}&pageSize=20`)
       .then(res => res.json())
       .then(data => setResults(data.items || []))
       .catch(() => setResults([]))

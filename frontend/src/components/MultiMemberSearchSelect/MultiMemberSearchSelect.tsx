@@ -8,6 +8,7 @@ export interface MultiMemberSearchSelectProps {
   style?: React.CSSProperties;
   maxSelections?: number;
   fetchFn?: (url: string, options?: RequestInit) => Promise<Response>;
+  searchEndpoint?: string;
 }
 
 export const MultiMemberSearchSelect: React.FC<MultiMemberSearchSelectProps> = ({
@@ -15,7 +16,8 @@ export const MultiMemberSearchSelect: React.FC<MultiMemberSearchSelectProps> = (
   onChange,
   style,
   maxSelections = 20,
-  fetchFn = window.fetch.bind(window)
+  fetchFn = window.fetch.bind(window),
+  searchEndpoint = '/api/users'
 }) => {
   const [query, setQuery] = useState('');
   const [selectedMembers, setSelectedMembers] = useState<User[]>([]);
@@ -55,7 +57,8 @@ export const MultiMemberSearchSelect: React.FC<MultiMemberSearchSelectProps> = (
   // Optionally fetch fully resolved members on mount if value is not empty (async cleanup)
   useEffect(() => {
     if (value && value.length > 0) {
-      fetchFn('/api/users?pageSize=1000')
+      const sep = searchEndpoint.includes('?') ? '&' : '?';
+      fetchFn(`${searchEndpoint}${sep}pageSize=1000`)
         .then(res => res.json())
         .then(data => {
           const list: User[] = data.items || [];
@@ -67,11 +70,12 @@ export const MultiMemberSearchSelect: React.FC<MultiMemberSearchSelectProps> = (
           });
         }).catch(() => {});
     }
-  }, [fetchFn]);
+  }, [fetchFn, searchEndpoint]);
 
   const doSearch = (q: string) => {
     setLoading(true);
-    const url = q.trim() ? `/api/users?search=${encodeURIComponent(q)}&pageSize=20` : '/api/users?pageSize=20';
+    const sep = searchEndpoint.includes('?') ? '&' : '?';
+    const url = q.trim() ? `${searchEndpoint}${sep}search=${encodeURIComponent(q)}&pageSize=20` : `${searchEndpoint}${sep}pageSize=20`;
     fetchFn(url)
       .then(res => res.json())
       .then(data => setResults(data.items || []))
