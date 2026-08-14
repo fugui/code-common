@@ -29,6 +29,13 @@ type OAuth2Config struct {
 	DeptAPIURL          string             `yaml:"dept_api_url"`
 }
 
+type AuthConfig struct {
+	StandaloneMode       bool         `yaml:"standalone_mode"`
+	JWTSecret            string       `yaml:"jwt_secret"`
+	PasswordLoginEnabled bool         `yaml:"password_login_enabled"`
+	OAuth2               OAuth2Config `yaml:"oauth2"`
+}
+
 type DatabaseConfig struct {
 	Host         string `yaml:"host"`
 	Port         int    `yaml:"port"`
