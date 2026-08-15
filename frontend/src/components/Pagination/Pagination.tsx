@@ -13,7 +13,7 @@ export interface PaginationProps {
    */
   pageSizeOptions?: number[];
   /**
-   * The default page size if not present in URL
+   * The default page size if not present in URL or props
    * @default 25
    */
   defaultPageSize?: number;
@@ -25,21 +25,42 @@ export interface PaginationProps {
    * Override the search params key for pageSize. Default is 'pageSize'
    */
   pageSizeKey?: string;
+
+  /**
+   * Optional controlled page number (for state/memory pagination)
+   */
+  page?: number;
+  /**
+   * Optional controlled page size (for state/memory pagination)
+   */
+  pageSize?: number;
+  /**
+   * Optional callback when page changes (for state/memory pagination)
+   */
+  onPageChange?: (newPage: number) => void;
+  /**
+   * Optional callback when page size changes (for state/memory pagination)
+   */
+  onPageSizeChange?: (newPageSize: number) => void;
 }
 
-export const Pagination: React.FC<PaginationProps> = ({
-  totalItems,
-  pageSizeOptions = PAGE_SIZE_OPTIONS,
-  defaultPageSize = DEFAULT_PAGE_SIZE,
-  pageKey = 'page',
-  pageSizeKey = 'pageSize'
-}) => {
-  const { page, pageSize, updateParams } = usePagination({
-    defaultPageSize,
-    pageKey,
-    pageSizeKey
-  });
+interface PaginationRendererProps {
+  totalItems: number;
+  page: number;
+  pageSize: number;
+  pageSizeOptions: number[];
+  onPageChange: (newPage: number) => void;
+  onPageSizeChange: (newPageSize: number) => void;
+}
 
+const PaginationRenderer: React.FC<PaginationRendererProps> = ({
+  totalItems,
+  page,
+  pageSize,
+  pageSizeOptions,
+  onPageChange,
+  onPageSizeChange,
+}) => {
   const totalPages = Math.ceil(totalItems / pageSize) || 1;
 
   const getPageNumbers = () => {
@@ -88,7 +109,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         {/* 首页 */}
         <button
           disabled={page === 1}
-          onClick={() => updateParams({ [pageKey]: 1 })}
+          onClick={() => onPageChange(1)}
           style={{
             padding: '0.3rem 0.6rem', border: '1px solid var(--border-color, #e2e8f0)', background: 'transparent',
             borderRadius: '4px', cursor: page === 1 ? 'not-allowed' : 'pointer',
@@ -103,7 +124,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         {/* 上一页 */}
         <button
           disabled={page === 1}
-          onClick={() => updateParams({ [pageKey]: Math.max(page - 1, 1) })}
+          onClick={() => onPageChange(Math.max(page - 1, 1))}
           style={{
             padding: '0.3rem 0.6rem', border: '1px solid var(--border-color, #e2e8f0)', background: 'transparent',
             borderRadius: '4px', cursor: page === 1 ? 'not-allowed' : 'pointer',
@@ -122,7 +143,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           return (
             <button
               key={pageNum}
-              onClick={() => updateParams({ [pageKey]: pageNum })}
+              onClick={() => onPageChange(pageNum)}
               style={{
                 minWidth: '28px', height: '28px', padding: '0 0.3rem',
                 border: '1px solid',
@@ -143,7 +164,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         {/* 下一页 */}
         <button
           disabled={page === totalPages || totalPages === 0}
-          onClick={() => updateParams({ [pageKey]: Math.min(page + 1, totalPages) })}
+          onClick={() => onPageChange(Math.min(page + 1, totalPages))}
           style={{
             padding: '0.3rem 0.6rem', border: '1px solid var(--border-color, #e2e8f0)', background: 'transparent',
             borderRadius: '4px', cursor: (page === totalPages || totalPages === 0) ? 'not-allowed' : 'pointer',
@@ -159,7 +180,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         {/* 末页 */}
         <button
           disabled={page === totalPages || totalPages === 0}
-          onClick={() => updateParams({ [pageKey]: totalPages })}
+          onClick={() => onPageChange(totalPages)}
           style={{
             padding: '0.3rem 0.6rem', border: '1px solid var(--border-color, #e2e8f0)', background: 'transparent',
             borderRadius: '4px', cursor: (page === totalPages || totalPages === 0) ? 'not-allowed' : 'pointer',
@@ -175,7 +196,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         {/* 条/页下拉框 */}
         <select
           value={pageSize}
-          onChange={e => updateParams({ [pageSizeKey]: Number(e.target.value), [pageKey]: 1 })}
+          onChange={e => onPageSizeChange(Number(e.target.value))}
           style={{
             padding: '0.25rem 0.5rem', borderRadius: '4px', border: '1px solid var(--border-color, #e2e8f0)',
             fontSize: '0.825rem', outline: 'none', background: 'transparent', color: 'var(--text-color, #334155)', marginLeft: '0.5rem',
@@ -190,3 +211,72 @@ export const Pagination: React.FC<PaginationProps> = ({
     </div>
   );
 };
+
+const UrlPagination: React.FC<PaginationProps> = ({
+  totalItems,
+  pageSizeOptions = PAGE_SIZE_OPTIONS,
+  defaultPageSize = DEFAULT_PAGE_SIZE,
+  pageKey = 'page',
+  pageSizeKey = 'pageSize',
+}) => {
+  const { page, pageSize, updateParams } = usePagination({
+    defaultPageSize,
+    pageKey,
+    pageSizeKey,
+  });
+
+  const handlePageChange = (newPage: number) => {
+    updateParams({ [pageKey]: newPage });
+  };
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    updateParams({ [pageSizeKey]: newPageSize, [pageKey]: 1 });
+  };
+
+  return (
+    <PaginationRenderer
+      totalItems={totalItems}
+      page={page}
+      pageSize={pageSize}
+      pageSizeOptions={pageSizeOptions}
+      onPageChange={handlePageChange}
+      onPageSizeChange={handlePageSizeChange}
+    />
+  );
+};
+
+export const Pagination: React.FC<PaginationProps> = (props) => {
+  const isControlled = props.onPageChange !== undefined || props.page !== undefined;
+
+  if (isControlled) {
+    const controlledPage = props.page || 1;
+    const controlledPageSize = props.pageSize || props.defaultPageSize || DEFAULT_PAGE_SIZE;
+    const pageSizeOptions = props.pageSizeOptions || PAGE_SIZE_OPTIONS;
+
+    const handlePageChange = (newPage: number) => {
+      props.onPageChange?.(newPage);
+    };
+
+    const handlePageSizeChange = (newPageSize: number) => {
+      if (props.onPageSizeChange) {
+        props.onPageSizeChange(newPageSize);
+      } else {
+        props.onPageChange?.(1);
+      }
+    };
+
+    return (
+      <PaginationRenderer
+        totalItems={props.totalItems}
+        page={controlledPage}
+        pageSize={controlledPageSize}
+        pageSizeOptions={pageSizeOptions}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+      />
+    );
+  }
+
+  return <UrlPagination {...props} />;
+};
+

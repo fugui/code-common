@@ -13,6 +13,7 @@ export * from './hooks/useDebounce';
 export * from './hooks/useTheme';
 export * from './hooks/useAuthFetch';
 export * from './hooks/usePagination';
+export * from './hooks/usePaginationState';
 
 // Components
 export * from './components/Pagination/Pagination';
