@@ -22,3 +22,6 @@ export * from './components/MemberSearchSelect/MemberSearchSelect';
 export * from './components/MultiMemberSearchSelect/MultiMemberSearchSelect';
 export * from './components/ErrorBoundary/ErrorBoundary';
 export * from './components/UnifiedLogin';
+export * from './components/Drawer';
+export * from './components/ConfirmDialog';
+
