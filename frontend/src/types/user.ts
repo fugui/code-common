@@ -4,9 +4,12 @@ export interface User {
   name: string;
   email?: string;
   username?: string;
-  roles?: string[];
+  is_admin?: boolean;
+  is_active?: boolean;
+  roles?: string[] | string;
+  department_id?: number | null;
   department?: {
-    id: number;
+    id?: number;
     name: string;
-  } | string;
+  } | string | null;
 }

@@ -16,7 +16,9 @@ const (
 	ContextRoles      = "roles"
 	ContextEmail      = "email"
 	ContextUsername   = "username"
+	ContextName       = "name"
 	ContextEmployeeID = "employeeID"
+	ContextIsAdmin    = "isAdmin"
 	ContextClaims     = "claims"
 )
 

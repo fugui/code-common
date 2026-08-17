@@ -7,6 +7,7 @@ export * from './utils/urlUtils';
 export * from './utils/routing';
 export * from './utils/apiClient';
 export * from './utils/roleMeta';
+export * from './utils/fetchInterceptor';
 
 // Hooks
 export * from './hooks/useOutsideClick';
@@ -15,6 +16,7 @@ export * from './hooks/useTheme';
 export * from './hooks/useAuthFetch';
 export * from './hooks/usePagination';
 export * from './hooks/usePaginationState';
+export * from './hooks/useCurrentUser';
 
 // Components
 export * from './components/Pagination/Pagination';
@@ -28,5 +30,6 @@ export * from './components/ConfirmDialog';
 export * from './components/Modal';
 export * from './components/EmptyState';
 export * from './components/StatusTag';
+export * from './components/UserMenu/UserMenu';
 
 
