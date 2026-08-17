@@ -1,24 +1,16 @@
-import { useState, useCallback } from 'react';
-import { DEFAULT_PAGE_SIZE } from '../utils/constants';
+import { useState } from 'react';
 
 export interface UsePaginationStateOptions {
+  defaultPage?: number;
   defaultPageSize?: number;
-  initialPage?: number;
 }
 
 export function usePaginationState(options: UsePaginationStateOptions = {}) {
-  const { defaultPageSize = DEFAULT_PAGE_SIZE, initialPage = 1 } = options;
-  const [page, setPage] = useState<number>(initialPage);
+  const { defaultPage = 1, defaultPageSize = 15 } = options;
+  const [page, setPage] = useState<number>(defaultPage);
   const [pageSize, setPageSize] = useState<number>(defaultPageSize);
 
-  const resetPage = useCallback(() => {
-    setPage(1);
-  }, []);
-
-  const handlePageSizeChange = useCallback((newPageSize: number) => {
-    setPageSize(newPageSize);
-    setPage(1);
-  }, []);
+  const resetPage = () => setPage(1);
 
   return {
     page,
@@ -26,6 +18,7 @@ export function usePaginationState(options: UsePaginationStateOptions = {}) {
     setPage,
     setPageSize,
     resetPage,
-    handlePageSizeChange
   };
 }
+
+export default usePaginationState;

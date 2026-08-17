@@ -6,6 +6,7 @@ export * from './utils/constants';
 export * from './utils/urlUtils';
 export * from './utils/routing';
 export * from './utils/apiClient';
+export * from './utils/roleMeta';
 
 // Hooks
 export * from './hooks/useOutsideClick';
