@@ -200,7 +200,7 @@ export const Drawer: React.FC<DrawerProps> = ({
             left: 0,
             right: 0,
             height: 3,
-            background: 'linear-gradient(90deg, #2563eb, #7c3aed, #2563eb)',
+            background: 'linear-gradient(90deg, var(--color-primary), var(--color-info), var(--color-primary))',
             backgroundSize: '200% 100%',
             zIndex: 10,
           }}
@@ -211,11 +211,11 @@ export const Drawer: React.FC<DrawerProps> = ({
           <div
             style={{
               padding: '20px 24px 16px 24px',
-              borderBottom: '1px solid var(--border-color, rgba(255, 255, 255, 0.08))',
+              borderBottom: '1px solid var(--border-color, var(--color-border-subtle))',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'flex-start',
-              background: 'var(--bg-color, var(--bg-primary, #090d16))',
+              background: 'var(--bg-color, var(--color-bg-app))',
               flexShrink: 0,
               gap: 16,
               ...headerStyle,
@@ -228,7 +228,7 @@ export const Drawer: React.FC<DrawerProps> = ({
                     fontSize: '1.15rem',
                     fontWeight: 700,
                     margin: 0,
-                    color: 'var(--text-color, var(--text-main, #f3f4f6))',
+                    color: 'var(--text-color, var(--color-text-primary))',
                     letterSpacing: '-0.3px',
                     wordBreak: 'break-word',
                   }}
@@ -239,7 +239,7 @@ export const Drawer: React.FC<DrawerProps> = ({
                 title
               )}
               {subtitle && (
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary, #94a3b8)', marginTop: 2 }}>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary, var(--color-text-secondary))', marginTop: 2 }}>
                   {subtitle}
                 </div>
               )}
@@ -253,10 +253,10 @@ export const Drawer: React.FC<DrawerProps> = ({
                   onClick={handleClose}
                   style={{
                     padding: '6px',
-                    borderRadius: '8px',
+                    borderRadius: 'var(--radius-md, 8px)',
                     border: '1px solid transparent',
-                    background: 'var(--bg-secondary, rgba(255, 255, 255, 0.06))',
-                    color: 'var(--text-secondary, #94a3b8)',
+                    background: 'var(--color-bg-hover)',
+                    color: 'var(--text-secondary, var(--color-text-secondary))',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -264,12 +264,12 @@ export const Drawer: React.FC<DrawerProps> = ({
                     transition: 'all 0.2s ease',
                   }}
                   onMouseEnter={e => {
-                    e.currentTarget.style.color = '#ef4444';
-                    e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)';
+                    e.currentTarget.style.color = 'var(--color-danger)';
+                    e.currentTarget.style.background = 'var(--color-danger-subtle)';
                   }}
                   onMouseLeave={e => {
-                    e.currentTarget.style.color = 'var(--text-secondary, #94a3b8)';
-                    e.currentTarget.style.background = 'var(--bg-secondary, rgba(255, 255, 255, 0.06))';
+                    e.currentTarget.style.color = 'var(--text-secondary, var(--color-text-secondary))';
+                    e.currentTarget.style.background = 'var(--color-bg-hover)';
                   }}
                   title="关闭 (Esc)"
                   aria-label="关闭抽屉"
@@ -313,12 +313,12 @@ export const Drawer: React.FC<DrawerProps> = ({
           <div
             style={{
               padding: '16px 24px',
-              borderTop: '1px solid var(--border-color, rgba(255, 255, 255, 0.08))',
+              borderTop: '1px solid var(--border-color, var(--color-border-subtle))',
               display: 'flex',
               justifyContent: 'flex-end',
               alignItems: 'center',
               gap: '12px',
-              background: 'var(--bg-color, var(--bg-primary, #090d16))',
+              background: 'var(--bg-color, var(--color-bg-app))',
               flexShrink: 0,
               ...footerStyle,
             }}

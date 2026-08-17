@@ -49,13 +49,13 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
         }}
       >
         {toasts.map(toast => {
-          let bg = '#3b82f6'; // info / default
+          let bg = 'var(--color-info)'; // info / default
           let icon = 'ℹ️';
           if (toast.type === 'success') {
-            bg = '#10b981';
+            bg = 'var(--color-success)';
             icon = '✅';
           } else if (toast.type === 'error') {
-            bg = '#ef4444';
+            bg = 'var(--color-danger)';
             icon = '❌';
           }
 

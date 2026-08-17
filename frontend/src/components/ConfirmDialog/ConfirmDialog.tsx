@@ -102,12 +102,12 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   // 类型图标与颜色
   const typeConfig = {
     danger: {
-      color: '#ef4444',
-      bgColor: 'rgba(239, 68, 68, 0.12)',
-      btnBg: '#dc2626',
-      btnHover: '#b91c1c',
+      color: 'var(--color-danger)',
+      bgColor: 'var(--color-danger-subtle)',
+      btnBg: 'var(--color-danger)',
+      btnHover: 'var(--color-danger-hover)',
       icon: (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-danger)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />
           <line x1="12" y1="8" x2="12" y2="12" />
           <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -115,12 +115,12 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       ),
     },
     warning: {
-      color: '#f59e0b',
-      bgColor: 'rgba(245, 158, 11, 0.12)',
-      btnBg: '#d97706',
-      btnHover: '#b45309',
+      color: 'var(--color-warning)',
+      bgColor: 'var(--color-warning-subtle)',
+      btnBg: 'var(--color-warning)',
+      btnHover: 'var(--color-warning-hover)',
       icon: (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-warning)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
           <line x1="12" y1="9" x2="12" y2="13" />
           <line x1="12" y1="17" x2="12.01" y2="17" />
@@ -128,12 +128,12 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       ),
     },
     info: {
-      color: '#3b82f6',
-      bgColor: 'rgba(59, 130, 246, 0.12)',
-      btnBg: '#2563eb',
-      btnHover: '#1d4ed8',
+      color: 'var(--color-info)',
+      bgColor: 'var(--color-info-subtle)',
+      btnBg: 'var(--color-primary)',
+      btnHover: 'var(--color-primary-hover)',
       icon: (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-info)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />
           <line x1="12" y1="16" x2="12" y2="12" />
           <line x1="12" y1="8" x2="12.01" y2="8" />

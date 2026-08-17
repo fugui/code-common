@@ -37,68 +37,68 @@ interface StatusTheme {
 const THEME_MAP: Record<string, StatusTheme> = {
   success: {
     label: '成功 / 正常',
-    color: '#10b981',
-    bgSubtle: 'rgba(16, 185, 129, 0.12)',
-    bgSolid: '#10b981',
-    border: 'rgba(16, 185, 129, 0.25)',
-    dotColor: '#10b981',
+    color: 'var(--color-success)',
+    bgSubtle: 'var(--color-success-subtle)',
+    bgSolid: 'var(--color-success)',
+    border: 'var(--color-success-border)',
+    dotColor: 'var(--color-success)',
   },
   running: {
     label: '进行中 / 运行',
-    color: '#3b82f6',
-    bgSubtle: 'rgba(59, 130, 246, 0.12)',
-    bgSolid: '#3b82f6',
-    border: 'rgba(59, 130, 246, 0.25)',
-    dotColor: '#3b82f6',
+    color: 'var(--color-primary)',
+    bgSubtle: 'var(--color-primary-subtle)',
+    bgSolid: 'var(--color-primary)',
+    border: 'var(--color-primary-border)',
+    dotColor: 'var(--color-primary)',
     hasPulse: true,
   },
   failed: {
     label: '失败 / 异常',
-    color: '#ef4444',
-    bgSubtle: 'rgba(239, 68, 68, 0.12)',
-    bgSolid: '#ef4444',
-    border: 'rgba(239, 68, 68, 0.25)',
-    dotColor: '#ef4444',
+    color: 'var(--color-danger)',
+    bgSubtle: 'var(--color-danger-subtle)',
+    bgSolid: 'var(--color-danger)',
+    border: 'var(--color-danger-border)',
+    dotColor: 'var(--color-danger)',
   },
   error: {
     label: '错误 / 严重',
-    color: '#ef4444',
-    bgSubtle: 'rgba(239, 68, 68, 0.12)',
-    bgSolid: '#ef4444',
-    border: 'rgba(239, 68, 68, 0.25)',
-    dotColor: '#ef4444',
+    color: 'var(--color-danger)',
+    bgSubtle: 'var(--color-danger-subtle)',
+    bgSolid: 'var(--color-danger)',
+    border: 'var(--color-danger-border)',
+    dotColor: 'var(--color-danger)',
   },
   warning: {
     label: '警告 / 注意',
-    color: '#f59e0b',
-    bgSubtle: 'rgba(245, 158, 11, 0.12)',
-    bgSolid: '#f59e0b',
-    border: 'rgba(245, 158, 11, 0.25)',
-    dotColor: '#f59e0b',
+    color: 'var(--color-warning)',
+    bgSubtle: 'var(--color-warning-subtle)',
+    bgSolid: 'var(--color-warning)',
+    border: 'var(--color-warning-border)',
+    dotColor: 'var(--color-warning)',
   },
   pending: {
     label: '排队中 / 等待',
-    color: '#a855f7',
-    bgSubtle: 'rgba(168, 85, 247, 0.12)',
-    bgSolid: '#a855f7',
-    border: 'rgba(168, 85, 247, 0.25)',
-    dotColor: '#a855f7',
+    color: 'var(--color-info)',
+    bgSubtle: 'var(--color-info-subtle)',
+    bgSolid: 'var(--color-info)',
+    border: 'var(--color-info-border)',
+    dotColor: 'var(--color-info)',
   },
   queued: {
     label: '已入队',
-    color: '#a855f7',
-    bgSubtle: 'rgba(168, 85, 247, 0.12)',
-    bgSolid: '#a855f7',
-    border: 'rgba(168, 85, 247, 0.25)',
-    dotColor: '#a855f7',
+    color: 'var(--color-info)',
+    bgSubtle: 'var(--color-info-subtle)',
+    bgSolid: 'var(--color-info)',
+    border: 'var(--color-info-border)',
+    dotColor: 'var(--color-info)',
   },
   neutral: {
     label: '未开始 / 默认',
-    color: '#94a3b8',
-    bgSubtle: 'rgba(148, 163, 184, 0.12)',
-    bgSolid: '#64748b',
-    border: 'rgba(148, 163, 184, 0.25)',
-    dotColor: '#94a3b8',
+    color: 'var(--color-text-secondary)',
+    bgSubtle: 'var(--color-bg-muted)',
+    bgSolid: 'var(--color-text-muted)',
+    border: 'var(--color-border-subtle)',
+    dotColor: 'var(--color-text-secondary)',
   },
 };
 
@@ -114,13 +114,14 @@ export const StatusTag: React.FC<StatusTagProps> = ({
 }) => {
   const theme = THEME_MAP[status] || THEME_MAP.neutral;
   const isSm = size === 'sm';
+  const displayText = text || theme.label;
 
-  const getColors = () => {
+  const getVariantStyles = (): React.CSSProperties => {
     switch (variant) {
       case 'solid':
         return {
-          background: theme.bgSolid,
-          color: '#ffffff',
+          backgroundColor: theme.bgSolid,
+          color: 'var(--color-text-white, #ffffff)',
           border: '1px solid transparent',
         };
       case 'outline':
@@ -139,7 +140,7 @@ export const StatusTag: React.FC<StatusTagProps> = ({
     }
   };
 
-  const colors = getColors();
+  const colors = getVariantStyles();
 
   return (
     <span
@@ -190,12 +191,12 @@ export const StatusTag: React.FC<StatusTagProps> = ({
               width: isSm ? '5px' : '6px',
               height: isSm ? '5px' : '6px',
               borderRadius: '50%',
-              backgroundColor: variant === 'solid' ? '#ffffff' : theme.dotColor,
+              backgroundColor: variant === 'solid' ? 'var(--color-text-white, #ffffff)' : theme.dotColor,
             }}
           />
         </span>
       )}
-      <span>{text !== undefined ? text : theme.label}</span>
+      <span>{displayText}</span>
 
       <style>{`
         @keyframes statusTagPing {

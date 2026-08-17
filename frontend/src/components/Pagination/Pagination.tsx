@@ -98,11 +98,11 @@ const PaginationRenderer: React.FC<PaginationRendererProps> = ({
       gap: '0.75rem', 
       marginTop: '1rem', 
       padding: '0.5rem 1rem', 
-      background: 'var(--card-bg, #ffffff)', 
-      border: '1px solid var(--border-color, #e2e8f0)', 
-      borderRadius: '6px' 
+      background: 'var(--card-bg, var(--color-bg-surface))', 
+      border: '1px solid var(--border-color, var(--color-border-primary))', 
+      borderRadius: 'var(--radius-sm, 6px)' 
     }}>
-      <div style={{ color: '#64748b', fontSize: '0.875rem' }}>
+      <div style={{ color: 'var(--text-secondary, var(--color-text-secondary))', fontSize: '0.875rem' }}>
         共 {totalItems} 条记录，当前第 {page} / {totalPages} 页
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
@@ -111,12 +111,12 @@ const PaginationRenderer: React.FC<PaginationRendererProps> = ({
           disabled={page === 1}
           onClick={() => onPageChange(1)}
           style={{
-            padding: '0.3rem 0.6rem', border: '1px solid var(--border-color, #e2e8f0)', background: 'transparent',
-            borderRadius: '4px', cursor: page === 1 ? 'not-allowed' : 'pointer',
-            color: page === 1 ? 'var(--text-secondary, #94a3b8)' : 'var(--text-color, #334155)', fontSize: '0.825rem',
+            padding: '0.3rem 0.6rem', border: '1px solid var(--border-color, var(--color-border-primary))', background: 'transparent',
+            borderRadius: 'var(--radius-xs, 4px)', cursor: page === 1 ? 'not-allowed' : 'pointer',
+            color: page === 1 ? 'var(--text-secondary, var(--color-text-secondary))' : 'var(--text-color, var(--color-text-primary))', fontSize: '0.825rem',
             transition: 'all 0.2s', whiteSpace: 'nowrap', opacity: page === 1 ? 0.5 : 1
           }}
-          onMouseEnter={e => { if (page !== 1) e.currentTarget.style.background = 'rgba(0,0,0,0.04)'; }}
+          onMouseEnter={e => { if (page !== 1) e.currentTarget.style.background = 'var(--color-bg-hover)'; }}
           onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
         >
           首页
@@ -126,12 +126,12 @@ const PaginationRenderer: React.FC<PaginationRendererProps> = ({
           disabled={page === 1}
           onClick={() => onPageChange(Math.max(page - 1, 1))}
           style={{
-            padding: '0.3rem 0.6rem', border: '1px solid var(--border-color, #e2e8f0)', background: 'transparent',
-            borderRadius: '4px', cursor: page === 1 ? 'not-allowed' : 'pointer',
-            color: page === 1 ? 'var(--text-secondary, #94a3b8)' : 'var(--text-color, #334155)', fontSize: '0.825rem',
+            padding: '0.3rem 0.6rem', border: '1px solid var(--border-color, var(--color-border-primary))', background: 'transparent',
+            borderRadius: 'var(--radius-xs, 4px)', cursor: page === 1 ? 'not-allowed' : 'pointer',
+            color: page === 1 ? 'var(--text-secondary, var(--color-text-secondary))' : 'var(--text-color, var(--color-text-primary))', fontSize: '0.825rem',
             transition: 'all 0.2s', whiteSpace: 'nowrap', opacity: page === 1 ? 0.5 : 1
           }}
-          onMouseEnter={e => { if (page !== 1) e.currentTarget.style.background = 'rgba(0,0,0,0.04)'; }}
+          onMouseEnter={e => { if (page !== 1) e.currentTarget.style.background = 'var(--color-bg-hover)'; }}
           onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
         >
           上一页
@@ -147,13 +147,13 @@ const PaginationRenderer: React.FC<PaginationRendererProps> = ({
               style={{
                 minWidth: '28px', height: '28px', padding: '0 0.3rem',
                 border: '1px solid',
-                borderColor: isCurrent ? 'var(--primary-color, #2563eb)' : 'var(--border-color, #e2e8f0)',
-                background: isCurrent ? 'var(--primary-color, #2563eb)' : 'transparent',
-                color: isCurrent ? '#ffffff' : 'var(--text-color, #334155)',
-                borderRadius: '4px', cursor: 'pointer', fontSize: '0.825rem', fontWeight: isCurrent ? 600 : 400,
+                borderColor: isCurrent ? 'var(--primary-color, var(--color-primary))' : 'var(--border-color, var(--color-border-primary))',
+                background: isCurrent ? 'var(--primary-color, var(--color-primary))' : 'transparent',
+                color: isCurrent ? 'var(--color-text-white, #ffffff)' : 'var(--text-color, var(--color-text-primary))',
+                borderRadius: 'var(--radius-xs, 4px)', cursor: 'pointer', fontSize: '0.825rem', fontWeight: isCurrent ? 600 : 400,
                 transition: 'all 0.2s', whiteSpace: 'nowrap'
               }}
-              onMouseEnter={e => { if (!isCurrent) e.currentTarget.style.background = 'rgba(37,99,235,0.04)'; }}
+              onMouseEnter={e => { if (!isCurrent) e.currentTarget.style.background = 'var(--color-primary-subtle)'; }}
               onMouseLeave={e => { if (!isCurrent) e.currentTarget.style.background = 'transparent'; }}
             >
               {pageNum}
@@ -166,12 +166,12 @@ const PaginationRenderer: React.FC<PaginationRendererProps> = ({
           disabled={page === totalPages || totalPages === 0}
           onClick={() => onPageChange(Math.min(page + 1, totalPages))}
           style={{
-            padding: '0.3rem 0.6rem', border: '1px solid var(--border-color, #e2e8f0)', background: 'transparent',
-            borderRadius: '4px', cursor: (page === totalPages || totalPages === 0) ? 'not-allowed' : 'pointer',
-            color: (page === totalPages || totalPages === 0) ? 'var(--text-secondary, #94a3b8)' : 'var(--text-color, #334155)', fontSize: '0.825rem',
+            padding: '0.3rem 0.6rem', border: '1px solid var(--border-color, var(--color-border-primary))', background: 'transparent',
+            borderRadius: 'var(--radius-xs, 4px)', cursor: (page === totalPages || totalPages === 0) ? 'not-allowed' : 'pointer',
+            color: (page === totalPages || totalPages === 0) ? 'var(--text-secondary, var(--color-text-secondary))' : 'var(--text-color, var(--color-text-primary))', fontSize: '0.825rem',
             transition: 'all 0.2s', whiteSpace: 'nowrap', opacity: (page === totalPages || totalPages === 0) ? 0.5 : 1
           }}
-          onMouseEnter={e => { if (page !== totalPages && totalPages > 0) e.currentTarget.style.background = 'rgba(0,0,0,0.04)'; }}
+          onMouseEnter={e => { if (page !== totalPages && totalPages > 0) e.currentTarget.style.background = 'var(--color-bg-hover)'; }}
           onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
         >
           下一页
@@ -182,12 +182,12 @@ const PaginationRenderer: React.FC<PaginationRendererProps> = ({
           disabled={page === totalPages || totalPages === 0}
           onClick={() => onPageChange(totalPages)}
           style={{
-            padding: '0.3rem 0.6rem', border: '1px solid var(--border-color, #e2e8f0)', background: 'transparent',
-            borderRadius: '4px', cursor: (page === totalPages || totalPages === 0) ? 'not-allowed' : 'pointer',
-            color: (page === totalPages || totalPages === 0) ? 'var(--text-secondary, #94a3b8)' : 'var(--text-color, #334155)', fontSize: '0.825rem',
+            padding: '0.3rem 0.6rem', border: '1px solid var(--border-color, var(--color-border-primary))', background: 'transparent',
+            borderRadius: 'var(--radius-xs, 4px)', cursor: (page === totalPages || totalPages === 0) ? 'not-allowed' : 'pointer',
+            color: (page === totalPages || totalPages === 0) ? 'var(--text-secondary, var(--color-text-secondary))' : 'var(--text-color, var(--color-text-primary))', fontSize: '0.825rem',
             transition: 'all 0.2s', whiteSpace: 'nowrap', opacity: (page === totalPages || totalPages === 0) ? 0.5 : 1
           }}
-          onMouseEnter={e => { if (page !== totalPages && totalPages > 0) e.currentTarget.style.background = 'rgba(0,0,0,0.04)'; }}
+          onMouseEnter={e => { if (page !== totalPages && totalPages > 0) e.currentTarget.style.background = 'var(--color-bg-hover)'; }}
           onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
         >
           末页
@@ -198,8 +198,8 @@ const PaginationRenderer: React.FC<PaginationRendererProps> = ({
           value={pageSize}
           onChange={e => onPageSizeChange(Number(e.target.value))}
           style={{
-            padding: '0.25rem 0.5rem', borderRadius: '4px', border: '1px solid var(--border-color, #e2e8f0)',
-            fontSize: '0.825rem', outline: 'none', background: 'transparent', color: 'var(--text-color, #334155)', marginLeft: '0.5rem',
+            padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-xs, 4px)', border: '1px solid var(--border-color, var(--color-border-primary))',
+            fontSize: '0.825rem', outline: 'none', background: 'var(--card-bg, transparent)', color: 'var(--text-color, var(--color-text-primary))', marginLeft: '0.5rem',
             cursor: 'pointer'
           }}
         >

@@ -54,14 +54,14 @@ const renderDefaultIcon = (type: EmptyStateType, compact: boolean) => {
       );
     case 'success':
       return (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
           <polyline points="22 4 12 14.01 9 11.01" />
         </svg>
       );
     case 'error':
       return (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="var(--color-danger)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />
           <line x1="12" y1="8" x2="12" y2="12" />
           <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -90,13 +90,13 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   type = 'data',
   title,
   description,
-  icon,
   action,
+  icon,
   compact = false,
-  inTable = false,
-  colSpan,
-  style,
   className = '',
+  style = {},
+  inTable = false,
+  colSpan = 1,
 }) => {
   const displayTitle = title !== undefined ? title : DEFAULT_TITLES[type];
 
@@ -110,7 +110,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         justifyContent: 'center',
         padding: compact ? '1.5rem 1rem' : '3.5rem 1.5rem',
         textAlign: 'center',
-        color: 'var(--text-secondary, #94a3b8)',
+        color: 'var(--color-text-secondary)',
         ...style,
       }}
     >
@@ -119,15 +119,15 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         style={{
           width: compact ? 56 : 72,
           height: compact ? 56 : 72,
-          borderRadius: '50%',
-          background: 'rgba(255, 255, 255, 0.03)',
-          border: '1px solid var(--border-color, rgba(255, 255, 255, 0.06))',
+          borderRadius: 'var(--radius-full, 50%)',
+          background: 'var(--color-bg-muted)',
+          border: '1px solid var(--border-color, var(--color-border-subtle))',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           marginBottom: compact ? '0.75rem' : '1.25rem',
-          color: 'var(--text-secondary, #64748b)',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+          color: 'var(--color-text-muted)',
+          boxShadow: 'var(--shadow-sm, 0 4px 16px rgba(0, 0, 0, 0.1))',
         }}
       >
         {icon || renderDefaultIcon(type, compact)}
@@ -140,7 +140,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
             margin: 0,
             fontSize: compact ? '0.9rem' : '1.05rem',
             fontWeight: 600,
-            color: 'var(--text-color, var(--text-main, #f3f4f6))',
+            color: 'var(--text-color, var(--color-text-primary))',
             letterSpacing: '-0.2px',
           }}
         >
@@ -154,7 +154,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           style={{
             margin: compact ? '0.25rem 0 0 0' : '0.5rem 0 0 0',
             fontSize: compact ? '0.8rem' : '0.875rem',
-            color: 'var(--text-secondary, #64748b)',
+            color: 'var(--text-secondary, var(--color-text-secondary))',
             maxWidth: compact ? '240px' : '420px',
             lineHeight: 1.5,
           }}

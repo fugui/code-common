@@ -154,7 +154,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
             {displayName}
           </span>
           {isSuperAdmin ? (
-            <span style={{ fontSize: '0.75rem', color: '#ef4444', fontWeight: 600 }}>超级管理员</span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--color-danger)', fontWeight: 600 }}>超级管理员</span>
           ) : (
             (() => {
               const matchedRoles = roles
@@ -170,7 +170,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                           background: item.badgeBg,
                           color: item.badgeColor,
                           padding: '0 4px',
-                          borderRadius: '3px',
+                          borderRadius: 'var(--radius-xs, 3px)',
                           fontSize: '0.65rem',
                           fontWeight: 700,
                           lineHeight: '1.2',
@@ -179,12 +179,12 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                         {item.shortName}
                       </span>
                     ))}
-                    <span style={{ fontSize: '0.7rem', color: '#64748b', marginLeft: '1px' }}>管理员</span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary, var(--color-text-secondary))', marginLeft: '1px' }}>管理员</span>
                   </div>
                 );
               }
               return (
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #64748b)' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary, var(--color-text-secondary))' }}>
                   {deptName || '普通成员'}
                 </span>
               );
@@ -201,17 +201,17 @@ export const UserMenu: React.FC<UserMenuProps> = ({
             right: 0,
             marginTop: '0.5rem',
             width: '220px',
-            backgroundColor: 'var(--card-bg, #ffffff)',
-            borderRadius: '8px',
-            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
-            border: '1px solid var(--border-color, #e2e8f0)',
+            backgroundColor: 'var(--card-bg, var(--color-bg-surface))',
+            borderRadius: 'var(--radius-md, 8px)',
+            boxShadow: 'var(--shadow-md, 0 10px 25px -5px rgba(0, 0, 0, 0.1))',
+            border: '1px solid var(--border-color, var(--color-border-primary))',
             zIndex: 1000,
             overflow: 'hidden',
           }}
         >
-          <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-color, #e2e8f0)' }}>
-            <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-color, #1e293b)' }}>{displayName}</div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #64748b)', marginTop: '0.25rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-color, var(--color-border-primary))' }}>
+            <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-color, var(--color-text-primary))' }}>{displayName}</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, var(--color-text-secondary))', marginTop: '0.25rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {user.email || user.employee_id || ''}
             </div>
           </div>
@@ -232,7 +232,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                 textAlign: 'left',
                 padding: '0.625rem 1rem',
                 fontSize: '0.875rem',
-                color: 'var(--text-color, #1e293b)',
+                color: 'var(--text-color, var(--color-text-primary))',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
@@ -240,7 +240,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                 alignItems: 'center',
                 gap: '0.5rem',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--bg-color, #f8fafc)')}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-bg-hover)')}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
             >
               <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -259,7 +259,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                 textAlign: 'left',
                 padding: '0.625rem 1rem',
                 fontSize: '0.875rem',
-                color: '#ef4444',
+                color: 'var(--color-danger)',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
@@ -267,7 +267,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                 alignItems: 'center',
                 gap: '0.5rem',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--bg-color, #f8fafc)')}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-danger-subtle)')}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
             >
               <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -289,18 +289,18 @@ export const UserMenu: React.FC<UserMenuProps> = ({
         <form onSubmit={handlePasswordSubmit}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '0.5rem 0' }}>
             {passwordError && (
-              <div style={{ padding: '0.75rem', borderRadius: '6px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', fontSize: '0.875rem' }}>
+              <div style={{ padding: '0.75rem', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--color-danger-subtle)', color: 'var(--color-danger)', fontSize: '0.875rem' }}>
                 {passwordError}
               </div>
             )}
             {passwordSuccess && (
-              <div style={{ padding: '0.75rem', borderRadius: '6px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', fontSize: '0.875rem' }}>
+              <div style={{ padding: '0.75rem', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--color-success-subtle)', color: 'var(--color-success)', fontSize: '0.875rem' }}>
                 {passwordSuccess}
               </div>
             )}
 
             <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', color: 'var(--text-color, #1e293b)' }}>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', color: 'var(--text-color, var(--color-text-primary))' }}>
                 当前密码
               </label>
               <input
@@ -308,12 +308,12 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                 required
                 value={passwordForm.oldPassword}
                 onChange={(e) => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
-                style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid var(--border-color, #e2e8f0)', background: 'var(--bg-color, #ffffff)', color: 'var(--text-color, #1e293b)' }}
+                style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm, 6px)', border: '1px solid var(--border-color, var(--color-border-primary))', background: 'var(--card-bg, var(--color-bg-app))', color: 'var(--text-color, var(--color-text-primary))' }}
               />
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', color: 'var(--text-color, #1e293b)' }}>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', color: 'var(--text-color, var(--color-text-primary))' }}>
                 新密码
               </label>
               <input
@@ -322,12 +322,12 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                 value={passwordForm.newPassword}
                 onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
                 placeholder="不少于6位"
-                style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid var(--border-color, #e2e8f0)', background: 'var(--bg-color, #ffffff)', color: 'var(--text-color, #1e293b)' }}
+                style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm, 6px)', border: '1px solid var(--border-color, var(--color-border-primary))', background: 'var(--card-bg, var(--color-bg-app))', color: 'var(--text-color, var(--color-text-primary))' }}
               />
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', color: 'var(--text-color, #1e293b)' }}>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', color: 'var(--text-color, var(--color-text-primary))' }}>
                 确认新密码
               </label>
               <input
@@ -335,7 +335,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                 required
                 value={passwordForm.confirmPassword}
                 onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid var(--border-color, #e2e8f0)', background: 'var(--bg-color, #ffffff)', color: 'var(--text-color, #1e293b)' }}
+                style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm, 6px)', border: '1px solid var(--border-color, var(--color-border-primary))', background: 'var(--card-bg, var(--color-bg-app))', color: 'var(--text-color, var(--color-text-primary))' }}
               />
             </div>
 
@@ -344,14 +344,14 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                 type="button"
                 onClick={() => setShowPasswordModal(false)}
                 disabled={passwordSubmitting}
-                style={{ padding: '0.5rem 1rem', borderRadius: '6px', border: '1px solid var(--border-color, #e2e8f0)', background: 'transparent', cursor: 'pointer', color: 'var(--text-color, #1e293b)' }}
+                style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-sm, 6px)', border: '1px solid var(--border-color, var(--color-border-primary))', background: 'transparent', cursor: 'pointer', color: 'var(--text-color, var(--color-text-primary))' }}
               >
                 取消
               </button>
               <button
                 type="submit"
                 disabled={passwordSubmitting}
-                style={{ padding: '0.5rem 1rem', borderRadius: '6px', border: 'none', background: 'var(--primary-color, #3b82f6)', color: 'white', cursor: 'pointer', fontWeight: 500 }}
+                style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-sm, 6px)', border: 'none', background: 'var(--primary-color, var(--color-primary))', color: 'var(--color-text-white, #ffffff)', cursor: 'pointer', fontWeight: 500 }}
               >
                 {passwordSubmitting ? '正在提交…' : '确认修改'}
               </button>

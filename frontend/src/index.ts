@@ -1,3 +1,6 @@
+// Styles & Design Tokens
+import './styles/theme.css';
+
 // Types
 export * from './types';
 
@@ -31,5 +34,3 @@ export * from './components/Modal';
 export * from './components/EmptyState';
 export * from './components/StatusTag';
 export * from './components/UserMenu/UserMenu';
-
-
