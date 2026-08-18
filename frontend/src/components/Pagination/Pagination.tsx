@@ -105,7 +105,7 @@ const PaginationRenderer: React.FC<PaginationRendererProps> = ({
       <div style={{ color: 'var(--text-secondary, var(--color-text-secondary))', fontSize: '0.875rem' }}>
         共 {totalItems} 条记录，当前第 {page} / {totalPages} 页
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'nowrap', minWidth: 0, maxWidth: '100%', overflowX: 'auto' }}>
         {/* 首页 */}
         <button
           disabled={page === 1}
@@ -198,9 +198,21 @@ const PaginationRenderer: React.FC<PaginationRendererProps> = ({
           value={pageSize}
           onChange={e => onPageSizeChange(Number(e.target.value))}
           style={{
-            padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-xs, 4px)', border: '1px solid var(--border-color, var(--color-border-primary))',
-            fontSize: '0.825rem', outline: 'none', background: 'var(--card-bg, transparent)', color: 'var(--text-color, var(--color-text-primary))', marginLeft: '0.5rem',
-            cursor: 'pointer'
+            width: 'auto',
+            minWidth: '92px',
+            height: '28px',
+            lineHeight: '26px',
+            padding: '0 0.5rem',
+            borderRadius: 'var(--radius-xs, 4px)',
+            border: '1px solid var(--border-color, var(--color-border-primary))',
+            fontSize: '0.825rem',
+            outline: 'none',
+            background: 'var(--card-bg, transparent)',
+            color: 'var(--text-color, var(--color-text-primary))',
+            marginLeft: '0.5rem',
+            cursor: 'pointer',
+            boxSizing: 'border-box',
+            flexShrink: 0
           }}
         >
           {pageSizeOptions.map(size => (
@@ -279,4 +291,3 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
 
   return <UrlPagination {...props} />;
 };
-
