@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 
-export type ToastType = 'success' | 'error' | 'info';
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 export interface Toast {
   id: number;
@@ -57,6 +57,9 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
           } else if (toast.type === 'error') {
             bg = 'var(--color-danger)';
             icon = '❌';
+          } else if (toast.type === 'warning') {
+            bg = 'var(--color-warning)';
+            icon = '⚠️';
           }
 
           return (
