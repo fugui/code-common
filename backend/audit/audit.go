@@ -10,10 +10,7 @@ import (
 )
 
 // Manager 全局 AuditManager 单例
-var (
-	Manager = &AuditManager{}
-	once    sync.Once
-)
+var Manager = &AuditManager{}
 
 // AuditManager 全局审计日志管理器
 type AuditManager struct {

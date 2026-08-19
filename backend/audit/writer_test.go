@@ -48,3 +48,32 @@ func TestAsyncWriterGracefulShutdown(t *testing.T) {
 		t.Fatalf("expected clean shutdown, got error: %v", err)
 	}
 }
+
+func TestAsyncWriterConcurrencyPressure(t *testing.T) {
+	// 验证 10,000 并发 Goroutine 压力投递
+	writer := NewAsyncWriter(nil, 10000, 100, 50*time.Millisecond)
+
+	done := make(chan struct{})
+	totalGoroutines := 10000
+
+	for i := 0; i < totalGoroutines; i++ {
+		go func(idx int) {
+			writer.Push(&models.SysAuditLog{
+				Summary: "high concurrency log",
+			})
+			done <- struct{}{}
+		}(i)
+	}
+
+	for i := 0; i < totalGoroutines; i++ {
+		<-done
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	if err := writer.Close(ctx); err != nil {
+		t.Fatalf("expected clean shutdown under pressure, got: %v", err)
+	}
+}
+

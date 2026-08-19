@@ -100,3 +100,52 @@ func TestMiddleware(t *testing.T) {
 		t.Fatalf("timeout waiting for audit log on POST request")
 	}
 }
+
+func TestMiddlewareAnonymousAndErrors(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	received := make(chan *models.SysAuditLog, 10)
+	writer := &AsyncWriter{
+		queue:  received,
+		stopCh: make(chan struct{}),
+	}
+	Manager.mu.Lock()
+	Manager.writer = writer
+	Manager.mu.Unlock()
+
+	r := gin.New()
+	// 未挂载身份认证中间件，模拟未登录匿名请求
+	r.Use(Middleware("anonymous_service"))
+
+	r.POST("/api/fail-op", func(c *gin.Context) {
+		SetSummary(c, "尝试非法操作")
+		_ = c.Error(gin.Error{
+			Err:  http.ErrHandlerTimeout,
+			Type: gin.ErrorTypePrivate,
+		})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+	})
+
+	req, _ := http.NewRequest(http.MethodPost, "/api/fail-op", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	select {
+	case log := <-received:
+		if log.Username != "Anonymous" {
+			t.Errorf("expected Username 'Anonymous', got %q", log.Username)
+		}
+		if log.UserRole != "guest" {
+			t.Errorf("expected UserRole 'guest', got %q", log.UserRole)
+		}
+		if log.StatusCode != http.StatusInternalServerError {
+			t.Errorf("expected StatusCode 500, got %d", log.StatusCode)
+		}
+		if log.ErrorMessage == "" {
+			t.Errorf("expected non-empty ErrorMessage from c.Errors")
+		}
+	case <-time.After(500 * time.Millisecond):
+		t.Fatalf("timeout waiting for audit log on anonymous failed POST request")
+	}
+}
+

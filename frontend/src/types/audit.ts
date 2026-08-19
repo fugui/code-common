@@ -2,8 +2,8 @@ export type AuditLevel = 'P0' | 'P1' | 'P2';
 
 export interface FieldDiff {
   field: string;
-  old_val: any;
-  new_val: any;
+  old_val: unknown;
+  new_val: unknown;
   action: 'added' | 'modified' | 'removed';
 }
 
