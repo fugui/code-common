@@ -11,6 +11,7 @@ export * from './utils/routing';
 export * from './utils/apiClient';
 export * from './utils/roleMeta';
 export * from './utils/fetchInterceptor';
+export * from './utils/setupChunkErrorReloader';
 
 // Hooks
 export * from './hooks/useOutsideClick';
@@ -20,6 +21,7 @@ export * from './hooks/useAuthFetch';
 export * from './hooks/usePagination';
 export * from './hooks/usePaginationState';
 export * from './hooks/useCurrentUser';
+export * from './hooks/useVersionCheck';
 
 // Components
 export * from './components/Pagination/Pagination';
@@ -37,3 +39,4 @@ export * from './components/UserMenu/UserMenu';
 export * from './components/AuditDiffDrawer/AuditDiffDrawer';
 export * from './components/AuditStatsCard/AuditStatsCard';
 export * from './components/AuditLogTable/AuditLogTable';
+export * from './components/VersionNotification/VersionNotification';
