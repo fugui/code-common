@@ -34,3 +34,6 @@ export * from './components/Modal';
 export * from './components/EmptyState';
 export * from './components/StatusTag';
 export * from './components/UserMenu/UserMenu';
+export * from './components/AuditDiffDrawer/AuditDiffDrawer';
+export * from './components/AuditStatsCard/AuditStatsCard';
+export * from './components/AuditLogTable/AuditLogTable';
