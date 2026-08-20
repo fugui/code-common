@@ -39,7 +39,15 @@ func Middleware(serviceName string) gin.HandlerFunc {
 		// 执行后续 Handler
 		c.Next()
 
-		// 3. 过滤逻辑：非写操作且未显式指定 audit_module 的请求不记录
+		// 3. 过滤逻辑：
+		// 3.1 显式标记跳过审计（如 Webhook 推送、自动日志上报、网关代理转发等非人工操作）
+		if skipVal, exists := c.Get(ContextAuditSkip); exists {
+			if skip, ok := skipVal.(bool); ok && skip {
+				return
+			}
+		}
+
+		// 3.2 非写操作且未显式指定 audit_module 的请求不记录
 		moduleVal, _ := c.Get(ContextAuditModule)
 		if !isWriteMethod && moduleVal == nil {
 			return

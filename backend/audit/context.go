@@ -16,8 +16,19 @@ const (
 	ContextAuditTargetName = "audit_target_name"
 	ContextAuditBefore     = "audit_before"
 	ContextAuditAfter      = "audit_after"
+	ContextAuditSkip       = "audit_skip"
 	ContextTraceID         = "trace_id"
 )
+
+// Skip 显式跳过当前请求的操作审计记录（适用于非人工操作如 Webhook 推送、自动日志上报等）
+func Skip(c *gin.Context) {
+	c.Set(ContextAuditSkip, true)
+}
+
+// SkipAudit 为 Skip 的别名
+func SkipAudit(c *gin.Context) {
+	c.Set(ContextAuditSkip, true)
+}
 
 // SetModule 设置审计所属模块 (如 user, scheme, pipeline, rule, scan, device...)
 func SetModule(c *gin.Context, module string) {

@@ -76,4 +76,3 @@ func TestAsyncWriterConcurrencyPressure(t *testing.T) {
 		t.Fatalf("expected clean shutdown under pressure, got: %v", err)
 	}
 }
-

@@ -149,3 +149,56 @@ func TestMiddlewareAnonymousAndErrors(t *testing.T) {
 	}
 }
 
+func TestMiddlewareSkip(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	received := make(chan *models.SysAuditLog, 10)
+	writer := &AsyncWriter{
+		queue:  received,
+		stopCh: make(chan struct{}),
+	}
+	Manager.mu.Lock()
+	Manager.writer = writer
+	Manager.mu.Unlock()
+
+	r := gin.New()
+	r.Use(Middleware("test_service"))
+
+	// 1. 测试调用 Skip 的 POST 请求（例如 Webhook 或日志上报）
+	r.POST("/api/webhook", func(c *gin.Context) {
+		Skip(c)
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
+
+	// 2. 测试正常未调 Skip 的 POST 请求
+	r.POST("/api/normal-action", func(c *gin.Context) {
+		SetSummary(c, "正常操作")
+		c.JSON(http.StatusOK, gin.H{"status": "created"})
+	})
+
+	// 发送 Webhook POST 请求
+	reqWebhook, _ := http.NewRequest(http.MethodPost, "/api/webhook", nil)
+	wWebhook := httptest.NewRecorder()
+	r.ServeHTTP(wWebhook, reqWebhook)
+
+	select {
+	case log := <-received:
+		t.Fatalf("unexpected audit log for skipped webhook request: %+v", log)
+	case <-time.After(150 * time.Millisecond):
+		// 预期不产生审计日志
+	}
+
+	// 发送正常 POST 请求
+	reqNormal, _ := http.NewRequest(http.MethodPost, "/api/normal-action", nil)
+	wNormal := httptest.NewRecorder()
+	r.ServeHTTP(wNormal, reqNormal)
+
+	select {
+	case log := <-received:
+		if log.Summary != "正常操作" {
+			t.Errorf("expected Summary '正常操作', got %q", log.Summary)
+		}
+	case <-time.After(500 * time.Millisecond):
+		t.Fatalf("timeout waiting for audit log on normal POST request")
+	}
+}
