@@ -297,6 +297,7 @@ export const Drawer: React.FC<DrawerProps> = ({
         <div
           style={{
             flex: 1,
+            minHeight: 0,
             padding: '24px',
             overflowY: 'auto',
             display: 'flex',
