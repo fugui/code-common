@@ -20,6 +20,12 @@ export interface ModalProps {
   footer?: React.ReactNode;
   /** 弹窗宽度预设或自定义数值 (sm: 440px, md: 580px, lg: 760px, xl: 960px, full: 94vw) */
   width?: ModalWidthPreset | string | number;
+  /** 弹窗高度数值或 CSS 字符串 (如 '75vh', '600px', 500) */
+  height?: string | number;
+  /** 弹窗最小高度数值或 CSS 字符串 */
+  minHeight?: string | number;
+  /** 弹窗面板自定义样式 */
+  style?: React.CSSProperties;
   /** 是否垂直水平居中展示，默认为 true */
   centered?: boolean;
   /** 点击遮罩层是否允许关闭，默认为 true */
@@ -57,6 +63,9 @@ export const Modal: React.FC<ModalProps> = ({
   extra,
   footer,
   width = 'md',
+  height,
+  minHeight,
+  style,
   centered = true,
   maskClosable = true,
   destroyOnClose = false,
@@ -74,6 +83,14 @@ export const Modal: React.FC<ModalProps> = ({
   const resolvedWidth = typeof width === 'number'
     ? `${width}px`
     : (WIDTH_MAP[width as ModalWidthPreset] || width);
+
+  const resolvedHeight = typeof height === 'number'
+    ? `${height}px`
+    : height;
+
+  const resolvedMinHeight = typeof minHeight === 'number'
+    ? `${minHeight}px`
+    : minHeight;
 
   const handleClose = useCallback(() => {
     setAnimateVisible(false);
@@ -162,6 +179,8 @@ export const Modal: React.FC<ModalProps> = ({
           width: resolvedWidth,
           maxWidth: '100%',
           maxHeight: 'calc(100vh - 80px)',
+          height: resolvedHeight,
+          minHeight: resolvedMinHeight,
           background: 'var(--card-bg, var(--bg-secondary, #111827))',
           color: 'var(--text-color, var(--text-main, #f3f4f6))',
           borderRadius: '14px',
@@ -174,6 +193,7 @@ export const Modal: React.FC<ModalProps> = ({
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
+          ...style,
         }}
         onClick={e => e.stopPropagation()}
       >
@@ -281,6 +301,7 @@ export const Modal: React.FC<ModalProps> = ({
         <div
           style={{
             flex: 1,
+            minHeight: 0,
             padding: '24px',
             overflowY: 'auto',
             display: 'flex',
