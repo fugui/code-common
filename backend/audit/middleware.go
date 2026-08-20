@@ -94,12 +94,24 @@ func Middleware(serviceName string) gin.HandlerFunc {
 
 		actStr := getString(actionVal)
 		if actStr == "" {
-			actStr = inferActionFromMethod(c.Request.Method)
+			actStr = inferAction(c.Request.Method, c.Request.URL.Path)
 		}
 
 		sumStr := getString(summaryVal)
 		if sumStr == "" {
-			sumStr = fmt.Sprintf("%s %s %s", username, c.Request.Method, c.Request.URL.Path)
+			if modStr == "auth" && actStr == "login" {
+				if c.Writer.Status() >= 200 && c.Writer.Status() < 300 {
+					sumStr = fmt.Sprintf("用户 [%s] 登录系统成功 (IP: %s)", username, c.ClientIP())
+				} else {
+					sumStr = fmt.Sprintf("用户 [%s] 登录失败 (状态码: %d)", username, c.Writer.Status())
+				}
+			} else if modStr == "auth" && actStr == "sso_login" {
+				sumStr = fmt.Sprintf("用户 [%s] SSO单点登录成功 (IP: %s)", username, c.ClientIP())
+			} else if modStr == "auth" && actStr == "update_password" {
+				sumStr = fmt.Sprintf("用户 [%s] 修改密码成功", username)
+			} else {
+				sumStr = fmt.Sprintf("%s %s %s", username, c.Request.Method, c.Request.URL.Path)
+			}
 		}
 
 		// 6. 数据脱敏与差异计算
@@ -151,7 +163,11 @@ func getString(v any) string {
 }
 
 func inferModuleFromPath(path string) string {
-	parts := strings.Split(strings.Trim(path, "/"), "/")
+	cleanPath := strings.Trim(strings.ToLower(path), "/")
+	if strings.Contains(cleanPath, "login") || strings.Contains(cleanPath, "oauth2") || strings.Contains(cleanPath, "auth") || strings.Contains(cleanPath, "password") {
+		return "auth"
+	}
+	parts := strings.Split(cleanPath, "/")
 	if len(parts) >= 2 {
 		return parts[1]
 	}
@@ -159,6 +175,23 @@ func inferModuleFromPath(path string) string {
 		return parts[0]
 	}
 	return "system"
+}
+
+func inferAction(method, path string) string {
+	lowerPath := strings.ToLower(path)
+	if strings.HasSuffix(lowerPath, "/login") || lowerPath == "login" {
+		return "login"
+	}
+	if strings.HasSuffix(lowerPath, "/logout") || lowerPath == "logout" {
+		return "logout"
+	}
+	if strings.Contains(lowerPath, "password") {
+		return "update_password"
+	}
+	if strings.Contains(lowerPath, "oauth2") {
+		return "sso_login"
+	}
+	return inferActionFromMethod(method)
 }
 
 func inferActionFromMethod(method string) string {
