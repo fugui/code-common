@@ -6,12 +6,3 @@ export interface VersionInfo {
   timestamp: number;
 }
 
-export interface VitePreloadErrorEvent extends Event {
-  payload?: Error;
-}
-
-declare global {
-  interface WindowEventMap {
-    'vite:preloadError': VitePreloadErrorEvent;
-  }
-}
