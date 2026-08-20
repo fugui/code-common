@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"context"
+
 	"code-common/backend/models"
 
 	"github.com/gin-gonic/gin"
@@ -19,7 +21,7 @@ type UserContext struct {
 	User           *models.User // 完整 User 对象 (仅 DB 模式可用)
 }
 
-// SetUserContext 将标准化用户上下文写入 Gin Context
+// SetUserContext 将标准化用户上下文写入 Gin Context 以及底层的 http.Request Context
 func SetUserContext(c *gin.Context, uc *UserContext) {
 	if uc == nil {
 		return
@@ -33,6 +35,21 @@ func SetUserContext(c *gin.Context, uc *UserContext) {
 	c.Set(ContextIsAdmin, hasRole(uc.Roles, RoleSuperAdmin))
 	if uc.User != nil {
 		c.Set(ContextUser, *uc.User)
+	}
+
+	// 同时将关键身份信息注入底层的 http.Request.Context，确保下游直接使用 c.Request.Context() 时能获取到用户信息
+	if c.Request != nil {
+		ctx := c.Request.Context()
+		ctx = context.WithValue(ctx, ContextUserID, uc.UserID)
+		ctx = context.WithValue(ctx, ContextUsername, uc.Username)
+		ctx = context.WithValue(ctx, ContextName, uc.Name)
+		ctx = context.WithValue(ctx, ContextEmail, uc.Email)
+		ctx = context.WithValue(ctx, ContextEmployeeID, uc.EmployeeID)
+		ctx = context.WithValue(ctx, "userID", uc.UserID)
+		ctx = context.WithValue(ctx, "employeeID", uc.EmployeeID)
+		ctx = context.WithValue(ctx, "email", uc.Email)
+		ctx = context.WithValue(ctx, "username", uc.Username)
+		c.Request = c.Request.WithContext(ctx)
 	}
 }
 

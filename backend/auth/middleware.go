@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"net/http"
 	"strings"
 
@@ -51,8 +52,23 @@ func RequireAuth(jwtSecretGetter func() string) gin.HandlerFunc {
 		c.Set(ContextUsername, claims.Username)
 		c.Set(ContextEmail, claims.Email)
 		c.Set(ContextName, claims.Name)
+		c.Set(ContextEmployeeID, claims.EmployeeID)
 		c.Set(ContextIsAdmin, claims.IsAdmin)
 		c.Set(ContextRoles, claims.Roles)
+
+		if c.Request != nil {
+			ctx := c.Request.Context()
+			ctx = context.WithValue(ctx, ContextUserID, claims.UserID)
+			ctx = context.WithValue(ctx, ContextUsername, claims.Username)
+			ctx = context.WithValue(ctx, ContextName, claims.Name)
+			ctx = context.WithValue(ctx, ContextEmail, claims.Email)
+			ctx = context.WithValue(ctx, ContextEmployeeID, claims.EmployeeID)
+			ctx = context.WithValue(ctx, "userID", claims.UserID)
+			ctx = context.WithValue(ctx, "employeeID", claims.EmployeeID)
+			ctx = context.WithValue(ctx, "email", claims.Email)
+			ctx = context.WithValue(ctx, "username", claims.Username)
+			c.Request = c.Request.WithContext(ctx)
+		}
 		c.Next()
 	}
 }

@@ -41,18 +41,24 @@ func ParseToken(tokenString string, jwtSecret string) (*PortalClaims, error) {
 	return claims, nil
 }
 
-// GenerateToken generates a new signed JWT token for a given user
+// GenerateToken generates a new signed JWT token for a given user (backward compatible)
 func GenerateToken(userID uint, username, email, name string, isAdmin bool, roles []string, jwtSecret string, duration time.Duration) (string, error) {
+	return GenerateTokenWithEmployeeID(userID, username, email, name, "", isAdmin, roles, jwtSecret, duration)
+}
+
+// GenerateTokenWithEmployeeID generates a new signed JWT token with employeeID
+func GenerateTokenWithEmployeeID(userID uint, username, email, name, employeeID string, isAdmin bool, roles []string, jwtSecret string, duration time.Duration) (string, error) {
 	if jwtSecret == "" {
 		return "", fmt.Errorf("jwt secret is empty")
 	}
 	claims := PortalClaims{
-		UserID:   userID,
-		Username: username,
-		Email:    email,
-		Name:     name,
-		IsAdmin:  isAdmin,
-		Roles:    roles,
+		UserID:     userID,
+		Username:   username,
+		Email:      email,
+		Name:       name,
+		EmployeeID: employeeID,
+		IsAdmin:    isAdmin,
+		Roles:      roles,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(duration)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
