@@ -12,6 +12,7 @@ export * from './utils/apiClient';
 export * from './utils/roleMeta';
 export * from './utils/fetchInterceptor';
 export * from './utils/setupChunkErrorReloader';
+export * from './utils/overlay';
 
 // Hooks
 export * from './hooks/useOutsideClick';

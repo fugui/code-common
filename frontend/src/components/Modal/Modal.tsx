@@ -1,12 +1,13 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { zIndexManager, escManager, lockBodyScroll, unlockBodyScroll, ZIndexLevels } from '../../utils/overlay';
 
 export type ModalWidthPreset = 'sm' | 'md' | 'lg' | 'xl' | 'full';
 
 export interface ModalProps {
-  /** 控制弹窗打开状态 */
+  /** 控制弹窗打开状态 (标准属性) */
   open?: boolean;
-  /** 兼容 visible 属性 */
+  /** @deprecated 请统一迁移至 open 属性 */
   visible?: boolean;
   /** 关闭回调 */
   onClose: () => void;
@@ -28,8 +29,20 @@ export interface ModalProps {
   style?: React.CSSProperties;
   /** 是否垂直水平居中展示，默认为 true */
   centered?: boolean;
+  /** 是否展示遮罩层，默认为 true */
+  mask?: boolean;
   /** 点击遮罩层是否允许关闭，默认为 true */
   maskClosable?: boolean;
+  /** 自定义遮罩层样式 */
+  maskStyle?: React.CSSProperties;
+  /** 自定义遮罩层类名 */
+  maskClassName?: string;
+  /** 是否支持键盘 ESC 关闭，默认 true */
+  keyboard?: boolean;
+  /** 挂载容器，默认 () => document.body (支持微前端 / 自定义容器) */
+  getContainer?: () => HTMLElement;
+  /** 动画状态变更回调 */
+  afterOpenChange?: (open: boolean) => void;
   /** 关闭时是否销毁子元素，默认为 false */
   destroyOnClose?: boolean;
   /** 是否显示右上角关闭按钮，默认为 true */
@@ -67,7 +80,13 @@ export const Modal: React.FC<ModalProps> = ({
   minHeight,
   style,
   centered = true,
+  mask = true,
   maskClosable = true,
+  maskStyle,
+  maskClassName = '',
+  keyboard = true,
+  getContainer,
+  afterOpenChange,
   destroyOnClose = false,
   showCloseButton = true,
   bodyStyle,
@@ -79,6 +98,8 @@ export const Modal: React.FC<ModalProps> = ({
   const isTargetOpen = open !== undefined ? open : (visible ?? false);
   const [mounted, setMounted] = useState(isTargetOpen);
   const [animateVisible, setAnimateVisible] = useState(false);
+  const [zLevels, setZLevels] = useState<ZIndexLevels | null>(null);
+  const zAcquiredRef = useRef(false);
 
   const resolvedWidth = typeof width === 'number'
     ? `${width}px`
@@ -96,47 +117,75 @@ export const Modal: React.FC<ModalProps> = ({
     setAnimateVisible(false);
     const timer = setTimeout(() => {
       onClose();
+      if (afterOpenChange) afterOpenChange(false);
     }, 280);
     return () => clearTimeout(timer);
-  }, [onClose]);
+  }, [onClose, afterOpenChange]);
 
+  // 处理动画与挂载生命周期
   useEffect(() => {
     if (isTargetOpen) {
+      if (!zAcquiredRef.current) {
+        setZLevels(zIndexManager.acquire());
+        zAcquiredRef.current = true;
+      }
       setMounted(true);
-      const timer = setTimeout(() => setAnimateVisible(true), 15);
+      const timer = setTimeout(() => {
+        setAnimateVisible(true);
+        if (afterOpenChange) afterOpenChange(true);
+      }, 15);
       return () => clearTimeout(timer);
     } else {
       setAnimateVisible(false);
-      const timer = setTimeout(() => setMounted(false), 280);
+      const timer = setTimeout(() => {
+        setMounted(false);
+        if (zAcquiredRef.current) {
+          zIndexManager.release();
+          zAcquiredRef.current = false;
+          setZLevels(null);
+        }
+      }, 280);
       return () => clearTimeout(timer);
     }
-  }, [isTargetOpen]);
+  }, [isTargetOpen, afterOpenChange]);
 
-  // 监听 ESC 键
+  // 组件卸载时释放 Z-Index 栈
   useEffect(() => {
-    if (!mounted || !animateVisible) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.stopPropagation();
-        handleClose();
+    return () => {
+      if (zAcquiredRef.current) {
+        zIndexManager.release();
+        zAcquiredRef.current = false;
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [mounted, animateVisible, handleClose]);
+  }, []);
 
-  // 锁定宿主 body 滚动
+  // 全局 LIFO ESC 监听栈管理
   useEffect(() => {
-    if (!mounted) return;
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    if (!mounted || !animateVisible || !keyboard) return;
+    escManager.push(handleClose);
     return () => {
-      document.body.style.overflow = originalOverflow;
+      escManager.pop(handleClose);
     };
-  }, [mounted]);
+  }, [mounted, animateVisible, keyboard, handleClose]);
+
+  // 锁定宿主 body 滚动（带 Scrollbar 跳动补偿）
+  useEffect(() => {
+    if (!mounted || !mask) return;
+    lockBodyScroll();
+    return () => {
+      unlockBodyScroll();
+    };
+  }, [mounted, mask]);
 
   if (!mounted && destroyOnClose) return null;
   if (!mounted && !isTargetOpen) return null;
+
+  const containerTarget = (getContainer ? getContainer() : null) || (typeof document !== 'undefined' ? document.body : null);
+  if (!containerTarget) return null;
+
+  const containerZIndex = zLevels ? zLevels.container : 99900;
+  const maskZIndex = zLevels ? zLevels.mask : 99901;
+  const panelZIndex = zLevels ? zLevels.panel : 99905;
 
   return createPortal(
     <div
@@ -144,7 +193,7 @@ export const Modal: React.FC<ModalProps> = ({
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 99990,
+        zIndex: containerZIndex,
         pointerEvents: animateVisible ? 'auto' : 'none',
         display: 'flex',
         alignItems: centered ? 'center' : 'flex-start',
@@ -153,22 +202,26 @@ export const Modal: React.FC<ModalProps> = ({
         overflowY: 'auto',
       }}
     >
-      {/* 1. Backdrop 遮罩层 */}
-      <div
-        onClick={maskClosable ? handleClose : undefined}
-        style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0, 0, 0, 0.55)',
-          backdropFilter: 'blur(5px)',
-          WebkitBackdropFilter: 'blur(5px)',
-          zIndex: 99991,
-          opacity: animateVisible ? 1 : 0,
-          transition: 'opacity 260ms cubic-bezier(0.16, 1, 0.3, 1)',
-          cursor: maskClosable ? 'pointer' : 'default',
-        }}
-        title={maskClosable ? '点击背景区域关闭' : undefined}
-      />
+      {/* 1. Backdrop 遮罩层 (与 Design Tokens 联动) */}
+      {mask && (
+        <div
+          className={maskClassName}
+          onClick={maskClosable ? handleClose : undefined}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'var(--color-bg-overlay, rgba(15, 23, 42, 0.65))',
+            backdropFilter: 'blur(4px)',
+            WebkitBackdropFilter: 'blur(4px)',
+            zIndex: maskZIndex,
+            opacity: animateVisible ? 1 : 0,
+            transition: 'opacity 260ms cubic-bezier(0.16, 1, 0.3, 1)',
+            cursor: maskClosable ? 'pointer' : 'default',
+            ...maskStyle,
+          }}
+          title={maskClosable ? '点击背景区域关闭' : undefined}
+        />
+      )}
 
       {/* 2. Modal 对话框面板 */}
       <div
@@ -186,7 +239,7 @@ export const Modal: React.FC<ModalProps> = ({
           borderRadius: '14px',
           border: '1px solid var(--border-color, rgba(255, 255, 255, 0.1))',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05)',
-          zIndex: 99995,
+          zIndex: panelZIndex,
           opacity: animateVisible ? 1 : 0,
           transform: animateVisible ? 'scale(1) translateY(0)' : 'scale(0.94) translateY(12px)',
           transition: 'transform 280ms cubic-bezier(0.16, 1, 0.3, 1), opacity 260ms cubic-bezier(0.16, 1, 0.3, 1)',
@@ -333,6 +386,6 @@ export const Modal: React.FC<ModalProps> = ({
         )}
       </div>
     </div>,
-    document.body
+    containerTarget
   );
 };

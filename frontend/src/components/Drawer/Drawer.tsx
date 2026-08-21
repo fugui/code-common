@@ -1,11 +1,13 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { zIndexManager, escManager, lockBodyScroll, unlockBodyScroll, ZIndexLevels } from '../../utils/overlay';
 
 export type DrawerWidthPreset = 'sm' | 'md' | 'lg' | 'xl' | 'full';
 
 export interface DrawerProps {
-  /** 控制抽屉是否可见 (支持 open 或 visible) */
+  /** 控制抽屉是否可见 (标准属性) */
   open?: boolean;
+  /** @deprecated 请统一迁移至 open 属性 */
   visible?: boolean;
   /** 关闭回调 */
   onClose: () => void;
@@ -22,8 +24,22 @@ export interface DrawerProps {
   width?: DrawerWidthPreset | number | string;
   /** 抽屉滑出方向，默认 'right' */
   placement?: 'right' | 'left';
+  /** 是否展示遮罩层，默认 true */
+  mask?: boolean;
   /** 点击遮罩是否允许关闭，默认 true */
   maskClosable?: boolean;
+  /** 自定义遮罩层样式 */
+  maskStyle?: React.CSSProperties;
+  /** 自定义遮罩层类名 */
+  maskClassName?: string;
+  /** 是否支持键盘 ESC 键快捷关闭，默认 true */
+  keyboard?: boolean;
+  /** 是否展示顶部科技感渐变条，默认 true */
+  headerDecorator?: boolean;
+  /** 挂载容器，默认 () => document.body (支持微前端 ShadowDOM / 自定义挂载节点) */
+  getContainer?: () => HTMLElement;
+  /** 动画状态变更回调 */
+  afterOpenChange?: (open: boolean) => void;
   /** 是否在关闭后销毁子内容，默认 false */
   destroyOnClose?: boolean;
   /** 是否展示右上角关闭按钮，默认 true */
@@ -59,7 +75,14 @@ export const Drawer: React.FC<DrawerProps> = ({
   footer,
   width = 'min(840px, 92vw)',
   placement = 'right',
+  mask = true,
   maskClosable = true,
+  maskStyle,
+  maskClassName = '',
+  keyboard = true,
+  headerDecorator = true,
+  getContainer,
+  afterOpenChange,
   destroyOnClose = false,
   showCloseButton = true,
   className = '',
@@ -71,6 +94,8 @@ export const Drawer: React.FC<DrawerProps> = ({
   const isTargetOpen = open !== undefined ? open : (visible ?? false);
   const [mounted, setMounted] = useState(isTargetOpen);
   const [animateVisible, setAnimateVisible] = useState(false);
+  const [zLevels, setZLevels] = useState<ZIndexLevels | null>(null);
+  const zAcquiredRef = useRef(false);
 
   // 解析宽度
   const resolvedWidth = useMemo(() => {
@@ -81,58 +106,83 @@ export const Drawer: React.FC<DrawerProps> = ({
     return width;
   }, [width]);
 
-  // 处理动画与挂载状态
+  // 关闭流程动画处理
+  const handleClose = useCallback(() => {
+    setAnimateVisible(false);
+    const timer = window.setTimeout(() => {
+      onClose();
+      if (afterOpenChange) afterOpenChange(false);
+    }, 280);
+    return () => window.clearTimeout(timer);
+  }, [onClose, afterOpenChange]);
+
+  // 处理动画与挂载生命周期
   useEffect(() => {
     if (isTargetOpen) {
+      if (!zAcquiredRef.current) {
+        setZLevels(zIndexManager.acquire());
+        zAcquiredRef.current = true;
+      }
       setMounted(true);
       const timer = window.setTimeout(() => {
         setAnimateVisible(true);
+        if (afterOpenChange) afterOpenChange(true);
       }, 16);
       return () => window.clearTimeout(timer);
     } else {
       setAnimateVisible(false);
       const timer = window.setTimeout(() => {
         setMounted(false);
+        if (zAcquiredRef.current) {
+          zIndexManager.release();
+          zAcquiredRef.current = false;
+          setZLevels(null);
+        }
       }, 300);
       return () => window.clearTimeout(timer);
     }
-  }, [isTargetOpen]);
+  }, [isTargetOpen, afterOpenChange]);
 
-  // 关闭流程动画处理
-  const handleClose = useCallback(() => {
-    setAnimateVisible(false);
-    window.setTimeout(() => {
-      onClose();
-    }, 280);
-  }, [onClose]);
-
-  // 键盘 ESC 监听
+  // 组件卸载时释放 Z-Index 栈
   useEffect(() => {
-    if (!mounted || !animateVisible) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        handleClose();
+    return () => {
+      if (zAcquiredRef.current) {
+        zIndexManager.release();
+        zAcquiredRef.current = false;
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [mounted, animateVisible, handleClose]);
+  }, []);
 
-  // 锁定宿主 body 滚动
+  // 全局 LIFO ESC 监听栈管理
   useEffect(() => {
-    if (!mounted) return;
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    if (!mounted || !animateVisible || !keyboard) return;
+    escManager.push(handleClose);
     return () => {
-      document.body.style.overflow = originalOverflow;
+      escManager.pop(handleClose);
     };
-  }, [mounted]);
+  }, [mounted, animateVisible, keyboard, handleClose]);
+
+  // 锁定宿主 body 滚动（包含 Scrollbar 宽度补偿）
+  useEffect(() => {
+    if (!mounted || !mask) return;
+    lockBodyScroll();
+    return () => {
+      unlockBodyScroll();
+    };
+  }, [mounted, mask]);
 
   if (!mounted && destroyOnClose) return null;
   if (!mounted && !isTargetOpen) return null;
 
   const actualExtra = extra || extraHeader;
   const isLeft = placement === 'left';
+  const containerTarget = (getContainer ? getContainer() : null) || (typeof document !== 'undefined' ? document.body : null);
+
+  if (!containerTarget) return null;
+
+  const containerZIndex = zLevels ? zLevels.container : 99900;
+  const maskZIndex = zLevels ? zLevels.mask : 99901;
+  const panelZIndex = zLevels ? zLevels.panel : 99905;
 
   return createPortal(
     <div
@@ -140,27 +190,31 @@ export const Drawer: React.FC<DrawerProps> = ({
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 99990,
+        zIndex: containerZIndex,
         pointerEvents: animateVisible ? 'auto' : 'none',
         display: 'flex',
       }}
     >
-      {/* 1. Backdrop 遮罩层 */}
-      <div
-        onClick={maskClosable ? handleClose : undefined}
-        style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0, 0, 0, 0.45)',
-          backdropFilter: 'blur(4px)',
-          WebkitBackdropFilter: 'blur(4px)',
-          zIndex: 99991,
-          opacity: animateVisible ? 1 : 0,
-          transition: 'opacity 280ms cubic-bezier(0.16, 1, 0.3, 1)',
-          cursor: maskClosable ? 'pointer' : 'default',
-        }}
-        title={maskClosable ? '点击遮罩区域关闭' : undefined}
-      />
+      {/* 1. Backdrop 遮罩层 (与 Design Tokens 联动) */}
+      {mask && (
+        <div
+          className={maskClassName}
+          onClick={maskClosable ? handleClose : undefined}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'var(--color-bg-overlay, rgba(15, 23, 42, 0.65))',
+            backdropFilter: 'blur(4px)',
+            WebkitBackdropFilter: 'blur(4px)',
+            zIndex: maskZIndex,
+            opacity: animateVisible ? 1 : 0,
+            transition: 'opacity 280ms cubic-bezier(0.16, 1, 0.3, 1)',
+            cursor: maskClosable ? 'pointer' : 'default',
+            ...maskStyle,
+          }}
+          title={maskClosable ? '点击遮罩区域关闭' : undefined}
+        />
+      )}
 
       {/* 2. Drawer Panel 滑出面板 */}
       <div
@@ -181,7 +235,7 @@ export const Drawer: React.FC<DrawerProps> = ({
           boxShadow: isLeft
             ? '12px 0 36px rgba(0, 0, 0, 0.35)'
             : '-12px 0 36px rgba(0, 0, 0, 0.35)',
-          zIndex: 99995,
+          zIndex: panelZIndex,
           transform: animateVisible
             ? 'translateX(0)'
             : `translateX(${isLeft ? '-100%' : '100%'})`,
@@ -193,18 +247,20 @@ export const Drawer: React.FC<DrawerProps> = ({
         onClick={e => e.stopPropagation()}
       >
         {/* 顶部渐变装饰条 */}
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 3,
-            background: 'linear-gradient(90deg, var(--color-primary), var(--color-info), var(--color-primary))',
-            backgroundSize: '200% 100%',
-            zIndex: 10,
-          }}
-        />
+        {headerDecorator && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 3,
+              background: 'linear-gradient(90deg, var(--color-primary), var(--color-info), var(--color-primary))',
+              backgroundSize: '200% 100%',
+              zIndex: 10,
+            }}
+          />
+        )}
 
         {/* 头部 Header */}
         {(title || subtitle || actualExtra || showCloseButton) && (
@@ -329,6 +385,6 @@ export const Drawer: React.FC<DrawerProps> = ({
         )}
       </div>
     </div>,
-    document.body
+    containerTarget
   );
 };

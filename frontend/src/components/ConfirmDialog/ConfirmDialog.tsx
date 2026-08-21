@@ -1,83 +1,98 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { zIndexManager, escManager, lockBodyScroll, unlockBodyScroll, ZIndexLevels } from '../../utils/overlay';
 
 export type ConfirmType = 'danger' | 'warning' | 'info';
 
-export interface ConfirmOptions {
+export interface ConfirmDialogProps {
+  /** 控制弹窗打开 */
+  open: boolean;
+  /** 关闭回调 */
+  onClose: () => void;
+  /** 确认回调 (支持异步 Promise) */
+  onConfirm?: () => void | Promise<any>;
   /** 弹窗标题 */
-  title?: React.ReactNode;
-  /** 弹窗正文内容或说明 */
-  content?: React.ReactNode;
-  /** 危险等级：danger (红) | warning (黄) | info (蓝) */
-  type?: ConfirmType;
+  title: string;
+  /** 详细提示内容 */
+  content: React.ReactNode;
   /** 确认按钮文字，默认 "确认" */
   confirmText?: string;
   /** 取消按钮文字，默认 "取消" */
   cancelText?: string;
-  /** 是否展示取消按钮，默认 true */
-  showCancel?: boolean;
-  /** 点击确认时的异步/同步回调 (若为 Promise 会自动进入 loading 态) */
-  onConfirm?: () => void | Promise<unknown>;
-}
-
-export interface ConfirmDialogProps extends ConfirmOptions {
-  /** 控制弹窗显隐 */
-  open: boolean;
-  /** 关闭/取消回调 */
-  onClose: () => void;
-  /** 手动指定的 loading 状态 */
+  /** 类型：'danger' (危险操作/红色) | 'warning' (警告/橙色) | 'info' (普通确认/蓝色) */
+  type?: ConfirmType;
+  /** 加载状态 */
   loading?: boolean;
 }
 
 export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   open,
   onClose,
-  title = '请确认操作',
+  onConfirm,
+  title,
   content,
-  type = 'warning',
   confirmText = '确认',
   cancelText = '取消',
-  showCancel = true,
-  loading: externalLoading,
-  onConfirm,
+  type = 'warning',
+  loading = false,
 }) => {
-  const [internalLoading, setInternalLoading] = useState(false);
-  const isLoading = externalLoading !== undefined ? externalLoading : internalLoading;
-
   const [mounted, setMounted] = useState(open);
   const [animateVisible, setAnimateVisible] = useState(false);
+  const [internalLoading, setInternalLoading] = useState(false);
+  const [zLevels, setZLevels] = useState<ZIndexLevels | null>(null);
+  const zAcquiredRef = useRef(false);
 
+  const isLoading = loading || internalLoading;
+
+  // 动画与挂载控制
   useEffect(() => {
     if (open) {
+      if (!zAcquiredRef.current) {
+        setZLevels(zIndexManager.acquire());
+        zAcquiredRef.current = true;
+      }
       setMounted(true);
-      const timer = window.setTimeout(() => setAnimateVisible(true), 16);
-      return () => window.clearTimeout(timer);
+      const timer = setTimeout(() => setAnimateVisible(true), 15);
+      return () => clearTimeout(timer);
     } else {
       setAnimateVisible(false);
-      const timer = window.setTimeout(() => setMounted(false), 240);
-      return () => window.clearTimeout(timer);
+      const timer = setTimeout(() => {
+        setMounted(false);
+        if (zAcquiredRef.current) {
+          zIndexManager.release();
+          zAcquiredRef.current = false;
+          setZLevels(null);
+        }
+      }, 220);
+      return () => clearTimeout(timer);
     }
   }, [open]);
 
-  // ESC 键退出
+  // 组件卸载时释放 Z-Index 栈
   useEffect(() => {
-    if (!mounted || !animateVisible || isLoading) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
+    return () => {
+      if (zAcquiredRef.current) {
+        zIndexManager.release();
+        zAcquiredRef.current = false;
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // 全局 LIFO ESC 键监听
+  useEffect(() => {
+    if (!mounted || !animateVisible || isLoading) return;
+    escManager.push(onClose);
+    return () => {
+      escManager.pop(onClose);
+    };
   }, [mounted, animateVisible, isLoading, onClose]);
 
-  // 滚动锁定
+  // 滚动锁定（带 Scrollbar 跳动补偿）
   useEffect(() => {
     if (!mounted) return;
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    lockBodyScroll();
     return () => {
-      document.body.style.overflow = originalOverflow;
+      unlockBodyScroll();
     };
   }, [mounted]);
 
@@ -142,12 +157,16 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     },
   }[type];
 
+  const containerZIndex = zLevels ? zLevels.container : 99990;
+  const maskZIndex = zLevels ? zLevels.mask : 99991;
+  const panelZIndex = zLevels ? zLevels.panel : 99995;
+
   return createPortal(
     <div
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 99999,
+        zIndex: containerZIndex,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -161,9 +180,10 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         style={{
           position: 'fixed',
           inset: 0,
-          background: 'rgba(0, 0, 0, 0.55)',
-          backdropFilter: 'blur(5px)',
-          WebkitBackdropFilter: 'blur(5px)',
+          background: 'var(--color-bg-overlay, rgba(15, 23, 42, 0.65))',
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)',
+          zIndex: maskZIndex,
           opacity: animateVisible ? 1 : 0,
           transition: 'opacity 220ms ease',
         }}
@@ -186,7 +206,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           display: 'flex',
           flexDirection: 'column',
           gap: '16px',
-          zIndex: 100000,
+          zIndex: panelZIndex,
           transform: animateVisible ? 'scale(1)' : 'scale(0.95)',
           opacity: animateVisible ? 1 : 0,
           transition: 'transform 220ms cubic-bezier(0.16, 1, 0.3, 1), opacity 220ms ease',
@@ -210,60 +230,69 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             {typeConfig.icon}
           </div>
 
-          {/* 标题与描述 */}
-          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-color, #f3f4f6)' }}>
+          {/* 右侧文本区 */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, minWidth: 0 }}>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-color, #f3f4f6)' }}>
               {title}
-            </h4>
-            {content && (
-              <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary, #94a3b8)', lineHeight: 1.5, wordBreak: 'break-word' }}>
-                {content}
-              </div>
-            )}
+            </h3>
+            <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary, #94a3b8)', lineHeight: 1.5, wordBreak: 'break-word' }}>
+              {content}
+            </div>
           </div>
         </div>
 
         {/* 底部按钮栏 */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' }}>
-          {showCancel && (
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={onClose}
-              style={{
-                padding: '0.5rem 1rem',
-                fontSize: '0.875rem',
-                fontWeight: 500,
-                borderRadius: '6px',
-                border: '1px solid var(--border-color, rgba(255, 255, 255, 0.12))',
-                background: 'var(--bg-secondary, transparent)',
-                color: 'var(--text-color, #cbd5e1)',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                opacity: isLoading ? 0.6 : 1,
-                transition: 'all 0.15s ease',
-              }}
-            >
-              {cancelText}
-            </button>
-          )}
+          <button
+            type="button"
+            disabled={isLoading}
+            onClick={onClose}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '8px',
+              border: '1px solid var(--border-color, rgba(255, 255, 255, 0.12))',
+              background: 'transparent',
+              color: 'var(--text-secondary, #94a3b8)',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+              opacity: isLoading ? 0.6 : 1,
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={e => {
+              if (!isLoading) {
+                e.currentTarget.style.color = 'var(--text-color, #f3f4f6)';
+                e.currentTarget.style.borderColor = 'var(--border-hover, rgba(255, 255, 255, 0.25))';
+              }
+            }}
+            onMouseLeave={e => {
+              if (!isLoading) {
+                e.currentTarget.style.color = 'var(--text-secondary, #94a3b8)';
+                e.currentTarget.style.borderColor = 'var(--border-color, rgba(255, 255, 255, 0.12))';
+              }
+            }}
+          >
+            {cancelText}
+          </button>
+
           <button
             type="button"
             disabled={isLoading}
             onClick={handleConfirmClick}
             style={{
-              padding: '0.5rem 1.25rem',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              borderRadius: '6px',
+              padding: '8px 18px',
+              borderRadius: '8px',
               border: 'none',
               background: typeConfig.btnBg,
               color: '#ffffff',
+              fontSize: '0.875rem',
+              fontWeight: 500,
               cursor: isLoading ? 'not-allowed' : 'pointer',
-              opacity: isLoading ? 0.8 : 1,
+              opacity: isLoading ? 0.6 : 1,
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              transition: 'background 0.15s ease',
+              transition: 'all 0.2s ease',
             }}
           >
             {isLoading && (
@@ -271,67 +300,45 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                 width="14"
                 height="14"
                 viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
                 style={{ animation: 'spin 1s linear infinite' }}
               >
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" opacity="0.25" />
-                <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                <circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12" />
               </svg>
             )}
-            {confirmText}
+            <span>{confirmText}</span>
           </button>
         </div>
       </div>
-      <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>,
     document.body
   );
 };
 
-// ==================== Context & Hook 封装 ====================
-
-type ConfirmResolver = (result: boolean) => void;
-
-interface ConfirmContextType {
-  confirm: (options: ConfirmOptions) => Promise<boolean>;
+// Hook & Context 便捷调用支持
+interface ConfirmOptions {
+  title: string;
+  content: React.ReactNode;
+  confirmText?: string;
+  cancelText?: string;
+  type?: ConfirmType;
 }
 
-const ConfirmContext = createContext<ConfirmContextType | null>(null);
+type ConfirmFunction = (options: ConfirmOptions) => Promise<boolean>;
 
-export const useConfirm = () => {
-  const ctx = useContext(ConfirmContext);
-  if (!ctx) {
-    // 降级兜底：未包裹 Provider 时自动退回到 window.confirm
-    return async (options: ConfirmOptions) => {
-      const msg = typeof options.content === 'string'
-        ? `${options.title}\n\n${options.content}`
-        : `${options.title || '确认操作？'}`;
-      const ok = window.confirm(msg);
-      if (ok && options.onConfirm) {
-        await options.onConfirm();
-      }
-      return ok;
-    };
-  }
-  return ctx.confirm;
-};
+const ConfirmContext = createContext<ConfirmFunction | null>(null);
 
 export const ConfirmProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [dialogState, setDialogState] = useState<{
     open: boolean;
     options: ConfirmOptions;
-    resolve?: ConfirmResolver;
-  }>({
-    open: false,
-    options: {},
-  });
+    resolve: (value: boolean) => void;
+  } | null>(null);
 
-  const confirm = useCallback((options: ConfirmOptions): Promise<boolean> => {
-    return new Promise(resolve => {
+  const confirm = useCallback<ConfirmFunction>((options) => {
+    return new Promise<boolean>((resolve) => {
       setDialogState({
         open: true,
         options,
@@ -340,34 +347,43 @@ export const ConfirmProvider: React.FC<{ children: React.ReactNode }> = ({ child
     });
   }, []);
 
-  const handleClose = useCallback(() => {
-    if (dialogState.resolve) {
+  const handleClose = () => {
+    if (dialogState) {
       dialogState.resolve(false);
+      setDialogState(prev => prev ? { ...prev, open: false } : null);
     }
-    setDialogState(prev => ({ ...prev, open: false }));
-  }, [dialogState]);
+  };
 
-  const handleConfirm = useCallback(async () => {
-    if (dialogState.options.onConfirm) {
-      await dialogState.options.onConfirm();
-    }
-    if (dialogState.resolve) {
+  const handleConfirm = () => {
+    if (dialogState) {
       dialogState.resolve(true);
+      setDialogState(prev => prev ? { ...prev, open: false } : null);
     }
-    setDialogState(prev => ({ ...prev, open: false }));
-  }, [dialogState]);
+  };
 
   return (
-    <ConfirmContext.Provider value={{ confirm }}>
+    <ConfirmContext.Provider value={confirm}>
       {children}
-      {dialogState.open && (
+      {dialogState && (
         <ConfirmDialog
           open={dialogState.open}
-          {...dialogState.options}
           onClose={handleClose}
           onConfirm={handleConfirm}
+          title={dialogState.options.title}
+          content={dialogState.options.content}
+          confirmText={dialogState.options.confirmText}
+          cancelText={dialogState.options.cancelText}
+          type={dialogState.options.type}
         />
       )}
     </ConfirmContext.Provider>
   );
+};
+
+export const useConfirm = () => {
+  const context = useContext(ConfirmContext);
+  if (!context) {
+    throw new Error('useConfirm must be used within a ConfirmProvider');
+  }
+  return context;
 };

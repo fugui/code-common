@@ -143,3 +143,13 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 12px 30px rgba(0, 0, 0, 0.12);
 }
+
+/* ===== 动效无障碍支持 (Accessibility: Reduced Motion) ===== */
+@media (prefers-reduced-motion: reduce) {
+  .drawer-root-wrapper *,
+  .modal-root-wrapper * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
