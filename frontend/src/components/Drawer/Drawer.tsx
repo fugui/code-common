@@ -209,9 +209,9 @@ export const Drawer: React.FC<DrawerProps> = ({
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'var(--color-bg-overlay, rgba(15, 23, 42, 0.65))',
-            backdropFilter: 'blur(4px)',
-            WebkitBackdropFilter: 'blur(4px)',
+            background: 'var(--color-bg-overlay, rgba(15, 23, 42, 0.38))',
+            backdropFilter: 'blur(3px)',
+            WebkitBackdropFilter: 'blur(3px)',
             zIndex: maskZIndex,
             opacity: animateVisible ? 1 : 0,
             transition: 'opacity 280ms cubic-bezier(0.16, 1, 0.3, 1)',
@@ -240,8 +240,8 @@ export const Drawer: React.FC<DrawerProps> = ({
           borderLeft: isLeft ? 'none' : '1px solid var(--border-color, rgba(255, 255, 255, 0.08))',
           borderRight: isLeft ? '1px solid var(--border-color, rgba(255, 255, 255, 0.08))' : 'none',
           boxShadow: isLeft
-            ? '12px 0 36px rgba(0, 0, 0, 0.35)'
-            : '-12px 0 36px rgba(0, 0, 0, 0.35)',
+            ? '8px 0 32px rgba(0, 0, 0, 0.22)'
+            : '-8px 0 32px rgba(0, 0, 0, 0.22)',
           zIndex: panelZIndex,
           transform: animateVisible
             ? 'translateX(0)'

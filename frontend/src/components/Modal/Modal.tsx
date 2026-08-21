@@ -217,9 +217,9 @@ export const Modal: React.FC<ModalProps> = ({
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'var(--color-bg-overlay, rgba(15, 23, 42, 0.65))',
-            backdropFilter: 'blur(4px)',
-            WebkitBackdropFilter: 'blur(4px)',
+            background: 'var(--color-bg-overlay, rgba(15, 23, 42, 0.38))',
+            backdropFilter: 'blur(3px)',
+            WebkitBackdropFilter: 'blur(3px)',
             zIndex: maskZIndex,
             opacity: animateVisible ? 1 : 0,
             transition: 'opacity 260ms cubic-bezier(0.16, 1, 0.3, 1)',
