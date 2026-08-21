@@ -383,7 +383,14 @@ export const ConfirmProvider: React.FC<{ children: React.ReactNode }> = ({ child
 export const useConfirm = () => {
   const context = useContext(ConfirmContext);
   if (!context) {
-    throw new Error('useConfirm must be used within a ConfirmProvider');
+    console.warn('[ConfirmDialog] useConfirm was called outside of a ConfirmProvider. Falling back to native confirm.');
+    return useCallback((options: ConfirmOptions) => {
+      const msg = typeof options.content === 'string'
+        ? `${options.title}\n\n${options.content}`
+        : options.title;
+      const ok = typeof window !== 'undefined' ? window.confirm(msg) : true;
+      return Promise.resolve(ok);
+    }, []);
   }
   return context;
 };
