@@ -182,6 +182,8 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         justifyContent: 'center',
         padding: '16px',
         pointerEvents: animateVisible ? 'auto' : 'none',
+        background: 'transparent',
+        backgroundColor: 'transparent',
       }}
     >
       {/* 遮罩 */}

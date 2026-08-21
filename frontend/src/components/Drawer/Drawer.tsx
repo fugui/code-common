@@ -199,6 +199,8 @@ export const Drawer: React.FC<DrawerProps> = ({
         zIndex: containerZIndex,
         pointerEvents: (!mask && animateVisible) ? 'none' : (animateVisible ? 'auto' : 'none'),
         display: 'flex',
+        background: 'transparent',
+        backgroundColor: 'transparent',
       }}
     >
       {/* 1. Backdrop 遮罩层 (与 Design Tokens 联动) */}

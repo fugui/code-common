@@ -144,6 +144,14 @@
   --shadow-lg: 0 12px 30px rgba(0, 0, 0, 0.12);
 }
 
+/* ===== 浮层根容器全局纯透明保护 (Portal Root Wrappers) ===== */
+.drawer-root-wrapper,
+.modal-root-wrapper,
+.confirm-dialog-root-wrapper {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
 /* ===== 动效无障碍支持 (Accessibility: Reduced Motion) ===== */
 @media (prefers-reduced-motion: reduce) {
   .drawer-root-wrapper *,

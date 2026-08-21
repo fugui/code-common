@@ -207,6 +207,8 @@ export const Modal: React.FC<ModalProps> = ({
         justifyContent: 'center',
         padding: centered ? '24px' : '64px 24px 24px 24px',
         overflowY: 'auto',
+        background: 'transparent',
+        backgroundColor: 'transparent',
       }}
     >
       {/* 1. Backdrop 遮罩层 (与 Design Tokens 联动) */}
