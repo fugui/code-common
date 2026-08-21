@@ -148,7 +148,7 @@ func Run(opts Options) error {
 
 	readTimeout := opts.ReadTimeout
 	if readTimeout == 0 {
-		readTimeout = 15 * time.Second
+		readTimeout = 120 * time.Second
 	}
 	readHeaderTimeout := opts.ReadHeaderTimeout
 	if readHeaderTimeout == 0 {
@@ -156,11 +156,11 @@ func Run(opts Options) error {
 	}
 	writeTimeout := opts.WriteTimeout
 	if writeTimeout == 0 {
-		writeTimeout = 15 * time.Second
+		writeTimeout = 120 * time.Second
 	}
 	idleTimeout := opts.IdleTimeout
 	if idleTimeout == 0 {
-		idleTimeout = 60 * time.Second
+		idleTimeout = 180 * time.Second
 	}
 	maxHeaderBytes := opts.MaxHeaderBytes
 	if maxHeaderBytes == 0 {

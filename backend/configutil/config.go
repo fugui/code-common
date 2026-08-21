@@ -34,16 +34,16 @@ func ApplyServerDefaults(s *ServerConfig, defaultPort string) {
 		}
 	}
 	if s.ReadTimeout == 0 {
-		s.ReadTimeout = 15 * time.Second
+		s.ReadTimeout = 120 * time.Second
 	}
 	if s.ReadHeaderTimeout == 0 {
 		s.ReadHeaderTimeout = 10 * time.Second
 	}
 	if s.WriteTimeout == 0 {
-		s.WriteTimeout = 15 * time.Second
+		s.WriteTimeout = 120 * time.Second
 	}
 	if s.IdleTimeout == 0 {
-		s.IdleTimeout = 60 * time.Second
+		s.IdleTimeout = 180 * time.Second
 	}
 	if s.MaxHeaderBytes == 0 {
 		s.MaxHeaderBytes = 1 << 20 // 1MB
