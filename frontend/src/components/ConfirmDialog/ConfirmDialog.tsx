@@ -23,6 +23,10 @@ export interface ConfirmDialogProps {
   type?: ConfirmType;
   /** 加载状态 */
   loading?: boolean;
+  /** 挂载容器，默认 () => document.body (支持微前端 / 自定义容器) */
+  getContainer?: () => HTMLElement;
+  /** 自定义根类名 */
+  className?: string;
 }
 
 export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
@@ -35,6 +39,8 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   cancelText = '取消',
   type = 'warning',
   loading = false,
+  getContainer,
+  className = '',
 }) => {
   const [mounted, setMounted] = useState(open);
   const [animateVisible, setAnimateVisible] = useState(false);
@@ -161,8 +167,12 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   const maskZIndex = zLevels ? zLevels.mask : 99991;
   const panelZIndex = zLevels ? zLevels.panel : 99995;
 
+  const containerTarget = (getContainer ? getContainer() : null) || (typeof document !== 'undefined' ? document.body : null);
+  if (!containerTarget) return null;
+
   return createPortal(
     <div
+      className={`confirm-dialog-root-wrapper modal-root-wrapper ${className}`.trim()}
       style={{
         position: 'fixed',
         inset: 0,
@@ -199,86 +209,97 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           maxWidth: '460px',
           background: 'var(--card-bg, #111827)',
           color: 'var(--text-color, #f3f4f6)',
-          borderRadius: '12px',
+          borderRadius: '14px',
           border: '1px solid var(--border-color, rgba(255, 255, 255, 0.1))',
-          boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.5)',
-          padding: '24px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '16px',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05)',
           zIndex: panelZIndex,
-          transform: animateVisible ? 'scale(1)' : 'scale(0.95)',
           opacity: animateVisible ? 1 : 0,
-          transition: 'transform 220ms cubic-bezier(0.16, 1, 0.3, 1), opacity 220ms ease',
+          transform: animateVisible ? 'scale(1) translateY(0)' : 'scale(0.95) translateY(8px)',
+          transition: 'transform 240ms cubic-bezier(0.16, 1, 0.3, 1), opacity 220ms cubic-bezier(0.16, 1, 0.3, 1)',
+          overflow: 'hidden',
         }}
-        onClick={e => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-          {/* 左侧图标 */}
-          <div
-            style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: '10px',
-              background: typeConfig.bgColor,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-            }}
-          >
-            {typeConfig.icon}
-          </div>
+        {/* 顶部彩色装饰条 */}
+        <div style={{ height: '3px', background: typeConfig.color, width: '100%' }} />
 
-          {/* 右侧文本区 */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, minWidth: 0 }}>
-            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-color, #f3f4f6)' }}>
-              {title}
-            </h3>
-            <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary, #94a3b8)', lineHeight: 1.5, wordBreak: 'break-word' }}>
-              {content}
+        <div style={{ padding: '24px' }}>
+          {/* 图标与标题 */}
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+            <div
+              style={{
+                width: '44px',
+                height: '44px',
+                borderRadius: '12px',
+                background: typeConfig.bgColor,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              {typeConfig.icon}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <h3
+                style={{
+                  margin: 0,
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  color: 'var(--text-color, #f3f4f6)',
+                  lineHeight: '1.4',
+                }}
+              >
+                {title}
+              </h3>
+              {content && (
+                <div
+                  style={{
+                    marginTop: '8px',
+                    fontSize: '0.9rem',
+                    color: 'var(--text-secondary, #94a3b8)',
+                    lineHeight: '1.5',
+                  }}
+                >
+                  {content}
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* 底部按钮栏 */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' }}>
+        <div
+          style={{
+            padding: '12px 24px 20px',
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: '10px',
+          }}
+        >
           <button
             type="button"
-            disabled={isLoading}
             onClick={onClose}
+            disabled={isLoading}
             style={{
               padding: '8px 16px',
               borderRadius: '8px',
               border: '1px solid var(--border-color, rgba(255, 255, 255, 0.12))',
-              background: 'transparent',
-              color: 'var(--text-secondary, #94a3b8)',
+              background: 'var(--bg-secondary, rgba(255, 255, 255, 0.05))',
+              color: 'var(--text-color, #f3f4f6)',
               fontSize: '0.875rem',
               fontWeight: 500,
               cursor: isLoading ? 'not-allowed' : 'pointer',
               opacity: isLoading ? 0.6 : 1,
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={e => {
-              if (!isLoading) {
-                e.currentTarget.style.color = 'var(--text-color, #f3f4f6)';
-                e.currentTarget.style.borderColor = 'var(--border-hover, rgba(255, 255, 255, 0.25))';
-              }
-            }}
-            onMouseLeave={e => {
-              if (!isLoading) {
-                e.currentTarget.style.color = 'var(--text-secondary, #94a3b8)';
-                e.currentTarget.style.borderColor = 'var(--border-color, rgba(255, 255, 255, 0.12))';
-              }
+              transition: 'all 0.15s ease',
             }}
           >
             {cancelText}
           </button>
-
           <button
             type="button"
-            disabled={isLoading}
             onClick={handleConfirmClick}
+            disabled={isLoading}
             style={{
               padding: '8px 18px',
               borderRadius: '8px',
@@ -286,13 +307,13 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
               background: typeConfig.btnBg,
               color: '#ffffff',
               fontSize: '0.875rem',
-              fontWeight: 500,
+              fontWeight: 600,
               cursor: isLoading ? 'not-allowed' : 'pointer',
-              opacity: isLoading ? 0.6 : 1,
+              opacity: isLoading ? 0.75 : 1,
+              transition: 'all 0.15s ease',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              transition: 'all 0.2s ease',
             }}
           >
             {isLoading && (
@@ -313,7 +334,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         </div>
       </div>
     </div>,
-    document.body
+    containerTarget
   );
 };
 
@@ -324,13 +345,15 @@ interface ConfirmOptions {
   confirmText?: string;
   cancelText?: string;
   type?: ConfirmType;
+  getContainer?: () => HTMLElement;
+  className?: string;
 }
 
 type ConfirmFunction = (options: ConfirmOptions) => Promise<boolean>;
 
 const ConfirmContext = createContext<ConfirmFunction | null>(null);
 
-export const ConfirmProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ConfirmProvider: React.FC<{ children: React.ReactNode; getContainer?: () => HTMLElement }> = ({ children, getContainer }) => {
   const [dialogState, setDialogState] = useState<{
     open: boolean;
     options: ConfirmOptions;
@@ -374,6 +397,8 @@ export const ConfirmProvider: React.FC<{ children: React.ReactNode }> = ({ child
           confirmText={dialogState.options.confirmText}
           cancelText={dialogState.options.cancelText}
           type={dialogState.options.type}
+          getContainer={dialogState.options.getContainer || getContainer}
+          className={dialogState.options.className}
         />
       )}
     </ConfirmContext.Provider>

@@ -147,7 +147,8 @@
 /* ===== 动效无障碍支持 (Accessibility: Reduced Motion) ===== */
 @media (prefers-reduced-motion: reduce) {
   .drawer-root-wrapper *,
-  .modal-root-wrapper * {
+  .modal-root-wrapper *,
+  .confirm-dialog-root-wrapper * {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }

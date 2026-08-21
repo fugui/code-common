@@ -100,6 +100,7 @@ export const Modal: React.FC<ModalProps> = ({
   const [animateVisible, setAnimateVisible] = useState(false);
   const [zLevels, setZLevels] = useState<ZIndexLevels | null>(null);
   const zAcquiredRef = useRef(false);
+  const closeTimerRef = useRef<number>();
 
   const resolvedWidth = typeof width === 'number'
     ? `${width}px`
@@ -113,13 +114,15 @@ export const Modal: React.FC<ModalProps> = ({
     ? `${minHeight}px`
     : minHeight;
 
+  // 关闭流程动画处理（防重入与Timer管理）
   const handleClose = useCallback(() => {
+    if (closeTimerRef.current) return;
     setAnimateVisible(false);
-    const timer = setTimeout(() => {
+    closeTimerRef.current = window.setTimeout(() => {
+      closeTimerRef.current = undefined;
       onClose();
       if (afterOpenChange) afterOpenChange(false);
     }, 280);
-    return () => clearTimeout(timer);
   }, [onClose, afterOpenChange]);
 
   // 处理动画与挂载生命周期
@@ -130,14 +133,14 @@ export const Modal: React.FC<ModalProps> = ({
         zAcquiredRef.current = true;
       }
       setMounted(true);
-      const timer = setTimeout(() => {
+      const timer = window.setTimeout(() => {
         setAnimateVisible(true);
         if (afterOpenChange) afterOpenChange(true);
       }, 15);
-      return () => clearTimeout(timer);
+      return () => window.clearTimeout(timer);
     } else {
       setAnimateVisible(false);
-      const timer = setTimeout(() => {
+      const timer = window.setTimeout(() => {
         setMounted(false);
         if (zAcquiredRef.current) {
           zIndexManager.release();
@@ -145,13 +148,17 @@ export const Modal: React.FC<ModalProps> = ({
           setZLevels(null);
         }
       }, 280);
-      return () => clearTimeout(timer);
+      return () => window.clearTimeout(timer);
     }
   }, [isTargetOpen, afterOpenChange]);
 
-  // 组件卸载时释放 Z-Index 栈
+  // 组件卸载时释放 Z-Index 栈并清理定时器
   useEffect(() => {
     return () => {
+      if (closeTimerRef.current) {
+        window.clearTimeout(closeTimerRef.current);
+        closeTimerRef.current = undefined;
+      }
       if (zAcquiredRef.current) {
         zIndexManager.release();
         zAcquiredRef.current = false;
@@ -194,7 +201,7 @@ export const Modal: React.FC<ModalProps> = ({
         position: 'fixed',
         inset: 0,
         zIndex: containerZIndex,
-        pointerEvents: animateVisible ? 'auto' : 'none',
+        pointerEvents: (!mask && animateVisible) ? 'none' : (animateVisible ? 'auto' : 'none'),
         display: 'flex',
         alignItems: centered ? 'center' : 'flex-start',
         justifyContent: 'center',
@@ -234,6 +241,7 @@ export const Modal: React.FC<ModalProps> = ({
           maxHeight: 'calc(100vh - 80px)',
           height: resolvedHeight,
           minHeight: resolvedMinHeight,
+          pointerEvents: animateVisible ? 'auto' : 'none',
           background: 'var(--card-bg, var(--bg-secondary, #111827))',
           color: 'var(--text-color, var(--text-main, #f3f4f6))',
           borderRadius: '14px',
@@ -258,7 +266,7 @@ export const Modal: React.FC<ModalProps> = ({
             left: 0,
             right: 0,
             height: 3,
-            background: 'linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899)',
+            background: 'linear-gradient(90deg, var(--color-primary, #3b82f6), var(--color-primary-hover, #6366f1), var(--color-accent, #ec4899))',
             zIndex: 10,
           }}
         />
@@ -321,8 +329,8 @@ export const Modal: React.FC<ModalProps> = ({
                     transition: 'all 0.2s ease',
                   }}
                   onMouseEnter={e => {
-                    e.currentTarget.style.color = '#ef4444';
-                    e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)';
+                    e.currentTarget.style.color = 'var(--color-danger, #ef4444)';
+                    e.currentTarget.style.background = 'var(--color-danger-bg, rgba(239, 68, 68, 0.12))';
                   }}
                   onMouseLeave={e => {
                     e.currentTarget.style.color = 'var(--text-secondary, #94a3b8)';

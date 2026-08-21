@@ -96,6 +96,7 @@ export const Drawer: React.FC<DrawerProps> = ({
   const [animateVisible, setAnimateVisible] = useState(false);
   const [zLevels, setZLevels] = useState<ZIndexLevels | null>(null);
   const zAcquiredRef = useRef(false);
+  const closeTimerRef = useRef<number>();
 
   // 解析宽度
   const resolvedWidth = useMemo(() => {
@@ -106,14 +107,15 @@ export const Drawer: React.FC<DrawerProps> = ({
     return width;
   }, [width]);
 
-  // 关闭流程动画处理
+  // 关闭流程动画处理（防重入与Timer管理）
   const handleClose = useCallback(() => {
+    if (closeTimerRef.current) return;
     setAnimateVisible(false);
-    const timer = window.setTimeout(() => {
+    closeTimerRef.current = window.setTimeout(() => {
+      closeTimerRef.current = undefined;
       onClose();
       if (afterOpenChange) afterOpenChange(false);
     }, 280);
-    return () => window.clearTimeout(timer);
   }, [onClose, afterOpenChange]);
 
   // 处理动画与挂载生命周期
@@ -143,9 +145,13 @@ export const Drawer: React.FC<DrawerProps> = ({
     }
   }, [isTargetOpen, afterOpenChange]);
 
-  // 组件卸载时释放 Z-Index 栈
+  // 组件卸载时释放 Z-Index 栈并清理定时器
   useEffect(() => {
     return () => {
+      if (closeTimerRef.current) {
+        window.clearTimeout(closeTimerRef.current);
+        closeTimerRef.current = undefined;
+      }
       if (zAcquiredRef.current) {
         zIndexManager.release();
         zAcquiredRef.current = false;
@@ -191,7 +197,7 @@ export const Drawer: React.FC<DrawerProps> = ({
         position: 'fixed',
         inset: 0,
         zIndex: containerZIndex,
-        pointerEvents: animateVisible ? 'auto' : 'none',
+        pointerEvents: (!mask && animateVisible) ? 'none' : (animateVisible ? 'auto' : 'none'),
         display: 'flex',
       }}
     >
@@ -228,6 +234,7 @@ export const Drawer: React.FC<DrawerProps> = ({
           width: resolvedWidth,
           maxWidth: '100vw',
           height: '100vh',
+          pointerEvents: animateVisible ? 'auto' : 'none',
           background: 'var(--card-bg, var(--bg-secondary, #111827))',
           color: 'var(--text-color, var(--text-main, #f3f4f6))',
           borderLeft: isLeft ? 'none' : '1px solid var(--border-color, rgba(255, 255, 255, 0.08))',
