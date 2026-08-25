@@ -24,12 +24,14 @@ export function usePagination(options: UsePaginationOptions = {}) {
   const pageSize = isNaN(pageSizeParam) || pageSizeParam < 1 ? defaultPageSize : pageSizeParam;
 
   const updateParams = useCallback((newParams: Record<string, string | number>) => {
-    const nextParams = new URLSearchParams(searchParams);
-    Object.keys(newParams).forEach(key => {
-      nextParams.set(key, String(newParams[key]));
+    setSearchParams(prev => {
+      const nextParams = new URLSearchParams(prev);
+      Object.keys(newParams).forEach(key => {
+        nextParams.set(key, String(newParams[key]));
+      });
+      return nextParams;
     });
-    setSearchParams(nextParams);
-  }, [searchParams, setSearchParams]);
+  }, [setSearchParams]);
 
   const setPage = useCallback((newPage: number) => {
     updateParams({ [pageKey]: newPage });
