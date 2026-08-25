@@ -11,12 +11,14 @@ export interface MultiMemberSearchSelectProps {
   searchEndpoint?: string;
 }
 
+const defaultFetchFn = (url: string, options?: RequestInit) => window.fetch(url, options);
+
 export const MultiMemberSearchSelect: React.FC<MultiMemberSearchSelectProps> = ({
   value = [],
   onChange,
   style,
   maxSelections = 20,
-  fetchFn = window.fetch.bind(window),
+  fetchFn = defaultFetchFn,
   searchEndpoint = '/api/users'
 }) => {
   const [query, setQuery] = useState('');

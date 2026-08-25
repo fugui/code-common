@@ -11,11 +11,15 @@ export interface MemberSearchSelectProps {
   meEndpoint?: string;
 }
 
+const defaultFetchFn = (url: string, options?: RequestInit) => window.fetch(url, options);
+let cachedMeUser: User | null = null;
+const userDisplayCache = new Map<string, string>();
+
 export const MemberSearchSelect: React.FC<MemberSearchSelectProps> = ({
   value,
   onChange,
   style,
-  fetchFn = window.fetch.bind(window),
+  fetchFn = defaultFetchFn,
   searchEndpoint = '/api/users',
   meEndpoint = '/api/me'
 }) => {
@@ -27,48 +31,61 @@ export const MemberSearchSelect: React.FC<MemberSearchSelectProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<number | null>(null);
 
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(cachedMeUser);
 
   useOutsideClick(containerRef, () => setShowDropdown(false));
 
   // Fetch current user info for quick selection
   useEffect(() => {
     if (!meEndpoint) return;
+    if (cachedMeUser) {
+      setCurrentUser(cachedMeUser);
+      return;
+    }
     fetchFn(meEndpoint)
       .then(res => (res.ok ? res.json() : null))
       .then(data => {
         if (data && data.id) {
-          setCurrentUser({
+          const u: User = {
             id: data.id,
             name: data.name,
             employee_id: data.employee_id || ''
-          });
+          };
+          cachedMeUser = u;
+          setCurrentUser(u);
         }
       })
       .catch(() => {});
-  }, [fetchFn]);
+  }, [fetchFn, meEndpoint]);
 
   const lastValueRef = useRef(value);
   // When value changes externally, resolve the display name
   useEffect(() => {
     lastValueRef.current = value;
     if (value !== undefined && value !== null && value !== '') {
-      const isIdOnly = /^\d+$/.test(value.toString());
-      const queryParam = isIdOnly ? `id=${value}` : `search=${encodeURIComponent(value.toString())}`;
+      const strVal = value.toString();
+      if (userDisplayCache.has(strVal)) {
+        setDisplayText(userDisplayCache.get(strVal)!);
+        return;
+      }
+      const isIdOnly = /^\d+$/.test(strVal);
+      const queryParam = isIdOnly ? `id=${value}` : `search=${encodeURIComponent(strVal)}`;
       const sep = searchEndpoint.includes('?') ? '&' : '?';
       fetchFn(`${searchEndpoint}${sep}${queryParam}&pageSize=5`)
         .then(res => res.json())
         .then(data => {
           if (lastValueRef.current !== value) return;
           const list: User[] = data.items || [];
-          const match = list.find((m: User) => m.id === Number(value) || m.employee_id === value.toString());
+          const match = list.find((m: User) => m.id === Number(value) || m.employee_id === strVal);
           if (match) {
-            setDisplayText(`${match.name} (${match.employee_id || match.id})`);
+            const text = `${match.name} (${match.employee_id || match.id})`;
+            userDisplayCache.set(strVal, text);
+            setDisplayText(text);
           } else {
-            setDisplayText(value.toString());
+            setDisplayText(strVal);
           }
         })
-        .catch(() => setDisplayText(value.toString()));
+        .catch(() => setDisplayText(strVal));
     } else {
       setDisplayText('');
     }
