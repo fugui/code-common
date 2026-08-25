@@ -40,25 +40,26 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
       <div 
         style={{
           position: 'fixed',
-          top: '20px',
-          right: '20px',
-          zIndex: 9999,
+          top: '24px',
+          right: '24px',
+          zIndex: 999999,
           display: 'flex',
           flexDirection: 'column',
-          gap: '10px'
+          gap: '10px',
+          pointerEvents: 'none'
         }}
       >
         {toasts.map(toast => {
-          let bg = 'var(--color-info)'; // info / default
+          let bg = 'var(--color-info, #2563eb)'; // info / default
           let icon = 'ℹ️';
           if (toast.type === 'success') {
-            bg = 'var(--color-success)';
+            bg = 'var(--color-success, #10b981)';
             icon = '✅';
           } else if (toast.type === 'error') {
-            bg = 'var(--color-danger)';
+            bg = 'var(--color-danger, #ef4444)';
             icon = '❌';
           } else if (toast.type === 'warning') {
-            bg = 'var(--color-warning)';
+            bg = 'var(--color-warning, #f59e0b)';
             icon = '⚠️';
           }
 
