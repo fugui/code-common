@@ -162,7 +162,89 @@
   background-color: transparent !important;
 }
 
-/* ===== 动效无障碍支持 (Accessibility: Reduced Motion) ===== */
+/* ===== 通用全局工具类 (Global Utility Classes) ===== */
+/* 常用弹性布局 */
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.flex-col { display: flex; flex-direction: column; }
+.flex-wrap { display: flex; flex-wrap: wrap; }
+.flex-1 { flex: 1; min-width: 0; }
+
+.gap-xs { gap: var(--space-xs, 4px); }
+.gap-sm { gap: var(--space-sm, 8px); }
+.gap-md { gap: var(--space-md, 16px); }
+.gap-lg { gap: var(--space-lg, 24px); }
+
+/* 卡片与容器 */
+.code-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-fast);
+}
+
+.code-card-glass {
+  background: var(--color-bg-surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg, 12px);
+}
+
+/* 文本截断与对齐 */
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.text-primary { color: var(--color-text-primary); }
+.text-secondary { color: var(--color-text-secondary); }
+.text-muted { color: var(--color-text-muted); }
+
+/* 标准通用输入框 */
+.code-input {
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-bg-input);
+  color: var(--color-text-primary);
+  outline: none;
+  font-size: 0.875rem;
+  transition: var(--transition-fast);
+}
+
+.code-input:hover {
+  border-color: var(--color-border-hover);
+}
+
+.code-input:focus {
+  border-color: var(--color-primary);
+}
+
+/* 标准通用下拉框 */
+.code-select {
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-bg-input);
+  color: var(--color-text-primary);
+  outline: none;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.code-select:hover {
+  border-color: var(--color-border-hover);
+}
+
+.code-select:focus {
+  border-color: var(--color-primary);
+}
+
+/* 动效无障碍支持 (Accessibility: Reduced Motion) */
 @media (prefers-reduced-motion: reduce) {
   .code-drawer-root *,
   .code-modal-root *,
@@ -174,4 +256,5 @@
     animation-duration: 0.01ms !important;
   }
 }
+
 
