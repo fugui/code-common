@@ -82,6 +82,8 @@
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
   --shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.35);
+  --shadow-drawer-left: 8px 0 32px rgba(0, 0, 0, 0.25);
+  --shadow-drawer-right: -8px 0 32px rgba(0, 0, 0, 0.25);
 
   /* ===== 8. 动效系统 (Transitions & Animations) ===== */
   --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
@@ -107,9 +109,12 @@
   --primary-color: var(--color-primary);
   --primary-hover: var(--color-primary-hover);
   --bg-color: var(--color-bg-app);
+  --bg-primary: var(--color-bg-app);
+  --bg-card: var(--color-bg-surface);
   --card-bg: var(--color-bg-surface);
   --border-color: var(--color-border-primary);
   --text-color: var(--color-text-primary);
+  --text-main: var(--color-text-primary);
   --text-secondary: var(--color-text-secondary);
   --text-muted: var(--color-text-muted);
   --success-color: var(--color-success);
@@ -142,9 +147,14 @@
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 12px 30px rgba(0, 0, 0, 0.12);
+  --shadow-drawer-left: 8px 0 32px rgba(0, 0, 0, 0.08);
+  --shadow-drawer-right: -8px 0 32px rgba(0, 0, 0, 0.08);
 }
 
 /* ===== 浮层根容器全局纯透明保护 (Portal Root Wrappers) ===== */
+.code-drawer-root,
+.code-modal-root,
+.code-confirm-dialog-root,
 .drawer-root-wrapper,
 .modal-root-wrapper,
 .confirm-dialog-root-wrapper {
@@ -154,6 +164,9 @@
 
 /* ===== 动效无障碍支持 (Accessibility: Reduced Motion) ===== */
 @media (prefers-reduced-motion: reduce) {
+  .code-drawer-root *,
+  .code-modal-root *,
+  .code-confirm-dialog-root *,
   .drawer-root-wrapper *,
   .modal-root-wrapper *,
   .confirm-dialog-root-wrapper * {
