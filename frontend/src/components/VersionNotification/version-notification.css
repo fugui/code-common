@@ -1,0 +1,87 @@
+/* ==========================================================================
+   Code Platform - VersionNotification Component Styles
+   Namespace: .code-version-notification
+   ========================================================================== */
+
+.code-version-notification {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 99999;
+  width: 320px;
+  background-color: var(--color-bg-surface);
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid var(--color-border-subtle);
+  box-shadow: var(--shadow-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-family: inherit;
+}
+
+.code-version-notification-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.code-version-notification-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.code-version-notification-title {
+  font-size: 14px;
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.code-version-notification-body {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.code-version-notification-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.code-version-notification-btn-dismiss {
+  padding: 6px 12px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--color-border-subtle);
+  background-color: transparent;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-version-notification-btn-dismiss:hover {
+    background-color: var(--color-bg-hover);
+    color: var(--color-text-primary);
+  }
+}
+
+.code-version-notification-btn-reload {
+  padding: 6px 14px;
+  border-radius: var(--radius-sm, 6px);
+  border: none;
+  background-color: var(--color-primary);
+  font-size: 12px;
+  color: var(--color-text-white, #ffffff);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-version-notification-btn-reload:hover {
+    background-color: var(--color-primary-hover);
+  }
+}

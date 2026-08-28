@@ -1,0 +1,88 @@
+/* ==========================================================================
+   Code Platform - AuditStatsCard Component Styles
+   Namespace: .code-audit-stats
+   ========================================================================== */
+
+.code-audit-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* 骨架屏加载卡片 */
+.code-audit-stats-card--skeleton {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg, 10px);
+  padding: 1.25rem;
+  height: 80px;
+  opacity: 0.6;
+}
+
+.code-audit-stats-skeleton-line {
+  background: var(--color-border-subtle);
+  border-radius: var(--radius-xs, 4px);
+}
+
+.code-audit-stats-skeleton-line--title {
+  width: 40%;
+  height: 14px;
+  margin-bottom: 8px;
+}
+
+.code-audit-stats-skeleton-line--val {
+  width: 60%;
+  height: 24px;
+}
+
+/* 数据卡片 */
+.code-audit-stats-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg, 10px);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-fast);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-audit-stats-card:hover {
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.code-audit-stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.code-audit-stats-title {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.code-audit-stats-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.code-audit-stats-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.code-audit-stats-sub {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import type { User } from '../../types/user';
 import { ROLE_REGISTRY } from '../../utils/roleMeta';
 import { Modal } from '../Modal';
+import './user-menu.css';
 
 export interface UserMenuProps {
   user: User | null;
@@ -116,45 +117,23 @@ export const UserMenu: React.FC<UserMenuProps> = ({
   };
 
   return (
-    <div ref={menuRef} style={{ position: 'relative', display: 'inline-block' }}>
+    <div ref={menuRef} className="code-user-menu-wrapper">
       <button
+        type="button"
         onClick={() => setShowDropdown(!showDropdown)}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
-          background: 'transparent',
-          border: 'none',
-          cursor: 'pointer',
-          padding: '0.5rem',
-          borderRadius: '8px',
-          transition: 'background-color 0.2s',
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--bg-color, rgba(0,0,0,0.05))')}
-        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+        className="code-user-menu-trigger"
+        aria-expanded={showDropdown}
+        aria-haspopup="true"
       >
-        <div
-          style={{
-            width: '36px',
-            height: '36px',
-            borderRadius: '50%',
-            background: 'var(--primary-color, #3b82f6)',
-            color: 'white',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 600,
-            fontSize: '1rem',
-          }}
-        >
+        <div className="code-user-menu-avatar">
           {initialChar}
         </div>
-        <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
-          <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-color, #1e293b)' }}>
+        <div className="code-user-menu-info">
+          <span className="code-user-menu-name">
             {displayName}
           </span>
           {isSuperAdmin ? (
-            <span style={{ fontSize: '0.75rem', color: 'var(--color-danger)', fontWeight: 600 }}>超级管理员</span>
+            <span className="code-user-menu-superadmin">超级管理员</span>
           ) : (
             (() => {
               const matchedRoles = roles
@@ -162,29 +141,25 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                 .filter(Boolean);
               if (matchedRoles.length > 0) {
                 return (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginTop: '2px' }}>
+                  <div className="code-user-menu-roles-row">
                     {matchedRoles.map((item, idx) => (
                       <span
                         key={idx}
+                        className="code-user-menu-role-tag"
                         style={{
                           background: item.badgeBg,
                           color: item.badgeColor,
-                          padding: '0 4px',
-                          borderRadius: 'var(--radius-xs, 3px)',
-                          fontSize: '0.65rem',
-                          fontWeight: 700,
-                          lineHeight: '1.2',
                         }}
                       >
                         {item.shortName}
                       </span>
                     ))}
-                    <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary, var(--color-text-secondary))', marginLeft: '1px' }}>管理员</span>
+                    <span className="code-user-menu-admin-suffix">管理员</span>
                   </div>
                 );
               }
               return (
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary, var(--color-text-secondary))' }}>
+                <span className="code-user-menu-dept">
                   {deptName || '普通成员'}
                 </span>
               );
@@ -194,32 +169,19 @@ export const UserMenu: React.FC<UserMenuProps> = ({
       </button>
 
       {showDropdown && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '100%',
-            right: 0,
-            marginTop: '0.5rem',
-            width: '220px',
-            backgroundColor: 'var(--card-bg, var(--color-bg-surface))',
-            borderRadius: 'var(--radius-md, 8px)',
-            boxShadow: 'var(--shadow-md, 0 10px 25px -5px rgba(0, 0, 0, 0.1))',
-            border: '1px solid var(--border-color, var(--color-border-primary))',
-            zIndex: 1000,
-            overflow: 'hidden',
-          }}
-        >
-          <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-color, var(--color-border-primary))' }}>
-            <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-color, var(--color-text-primary))' }}>{displayName}</div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, var(--color-text-secondary))', marginTop: '0.25rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div className="code-user-menu-dropdown">
+          <div className="code-user-menu-dropdown-header">
+            <div className="code-user-menu-dropdown-name">{displayName}</div>
+            <div className="code-user-menu-dropdown-email">
               {user.email || user.employee_id || ''}
             </div>
           </div>
 
-          <div style={{ padding: '0.5rem 0' }}>
+          <div className="code-user-menu-dropdown-items">
             {extraDropdownItems}
 
             <button
+              type="button"
               onClick={() => {
                 setShowDropdown(false);
                 setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
@@ -227,21 +189,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                 setPasswordSuccess('');
                 setShowPasswordModal(true);
               }}
-              style={{
-                width: '100%',
-                textAlign: 'left',
-                padding: '0.625rem 1rem',
-                fontSize: '0.875rem',
-                color: 'var(--text-color, var(--color-text-primary))',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-bg-hover)')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+              className="code-user-menu-item"
             >
               <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
@@ -250,25 +198,12 @@ export const UserMenu: React.FC<UserMenuProps> = ({
             </button>
 
             <button
+              type="button"
               onClick={() => {
                 setShowDropdown(false);
                 onLogout();
               }}
-              style={{
-                width: '100%',
-                textAlign: 'left',
-                padding: '0.625rem 1rem',
-                fontSize: '0.875rem',
-                color: 'var(--color-danger)',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-danger-subtle)')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+              className="code-user-menu-item code-user-menu-item--danger"
             >
               <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -287,20 +222,20 @@ export const UserMenu: React.FC<UserMenuProps> = ({
         width="sm"
       >
         <form onSubmit={handlePasswordSubmit}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '0.5rem 0' }}>
+          <div className="code-user-menu-form">
             {passwordError && (
-              <div style={{ padding: '0.75rem', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--color-danger-subtle)', color: 'var(--color-danger)', fontSize: '0.875rem' }}>
+              <div className="code-user-menu-form-alert code-user-menu-form-alert--error">
                 {passwordError}
               </div>
             )}
             {passwordSuccess && (
-              <div style={{ padding: '0.75rem', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--color-success-subtle)', color: 'var(--color-success)', fontSize: '0.875rem' }}>
+              <div className="code-user-menu-form-alert code-user-menu-form-alert--success">
                 {passwordSuccess}
               </div>
             )}
 
-            <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', color: 'var(--text-color, var(--color-text-primary))' }}>
+            <div className="code-user-menu-form-group">
+              <label className="code-user-menu-form-label">
                 当前密码
               </label>
               <input
@@ -308,12 +243,12 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                 required
                 value={passwordForm.oldPassword}
                 onChange={(e) => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
-                style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm, 6px)', border: '1px solid var(--border-color, var(--color-border-primary))', background: 'var(--card-bg, var(--color-bg-app))', color: 'var(--text-color, var(--color-text-primary))' }}
+                className="code-user-menu-form-input"
               />
             </div>
 
-            <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', color: 'var(--text-color, var(--color-text-primary))' }}>
+            <div className="code-user-menu-form-group">
+              <label className="code-user-menu-form-label">
                 新密码
               </label>
               <input
@@ -322,12 +257,12 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                 value={passwordForm.newPassword}
                 onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
                 placeholder="不少于6位"
-                style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm, 6px)', border: '1px solid var(--border-color, var(--color-border-primary))', background: 'var(--card-bg, var(--color-bg-app))', color: 'var(--text-color, var(--color-text-primary))' }}
+                className="code-user-menu-form-input"
               />
             </div>
 
-            <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', color: 'var(--text-color, var(--color-text-primary))' }}>
+            <div className="code-user-menu-form-group">
+              <label className="code-user-menu-form-label">
                 确认新密码
               </label>
               <input
@@ -335,23 +270,23 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                 required
                 value={passwordForm.confirmPassword}
                 onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm, 6px)', border: '1px solid var(--border-color, var(--color-border-primary))', background: 'var(--card-bg, var(--color-bg-app))', color: 'var(--text-color, var(--color-text-primary))' }}
+                className="code-user-menu-form-input"
               />
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
+            <div className="code-user-menu-form-actions">
               <button
                 type="button"
                 onClick={() => setShowPasswordModal(false)}
                 disabled={passwordSubmitting}
-                style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-sm, 6px)', border: '1px solid var(--border-color, var(--color-border-primary))', background: 'transparent', cursor: 'pointer', color: 'var(--text-color, var(--color-text-primary))' }}
+                className="code-user-menu-btn-cancel"
               >
                 取消
               </button>
               <button
                 type="submit"
                 disabled={passwordSubmitting}
-                style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-sm, 6px)', border: 'none', background: 'var(--primary-color, var(--color-primary))', color: 'var(--color-text-white, #ffffff)', cursor: 'pointer', fontWeight: 500 }}
+                className="code-user-menu-btn-submit"
               >
                 {passwordSubmitting ? '正在提交…' : '确认修改'}
               </button>

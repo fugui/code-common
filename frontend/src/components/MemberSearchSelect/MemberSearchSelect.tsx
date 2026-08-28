@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { User } from '../../types/user';
 import { useOutsideClick } from '../../hooks/useOutsideClick';
+import './member-search-select.css';
 
 export interface MemberSearchSelectProps {
   value: number | string | '';
   onChange: (userId: number | '', selectedUser?: User) => void;
   style?: React.CSSProperties;
+  className?: string;
   fetchFn?: (url: string, options?: RequestInit) => Promise<Response>;
   searchEndpoint?: string;
   meEndpoint?: string;
@@ -19,6 +21,7 @@ export const MemberSearchSelect: React.FC<MemberSearchSelectProps> = ({
   value,
   onChange,
   style,
+  className = '',
   fetchFn = defaultFetchFn,
   searchEndpoint = '/api/users',
   meEndpoint = '/api/me'
@@ -139,20 +142,15 @@ export const MemberSearchSelect: React.FC<MemberSearchSelectProps> = ({
   };
 
   return (
-    <div ref={containerRef} style={{ position: 'relative', ...style }}>
-      <div style={{ position: 'relative' }}>
+    <div ref={containerRef} className={`code-member-select-wrapper ${className}`.trim()} style={style}>
+      <div className="code-member-select-input-box">
         <input
           type="text"
           value={showDropdown ? (query || displayText) : (displayText || query)}
           onChange={handleInputChange}
           onFocus={handleFocus}
           placeholder={displayText || '输入姓名或工号搜索...'}
-          style={{
-            width: '100%', padding: '0.625rem 2rem 0.625rem 0.75rem', borderRadius: '6px',
-            border: '1px solid var(--border-color)', background: 'var(--bg-color)',
-            color: 'var(--text-color)', boxSizing: 'border-box', fontSize: '0.875rem',
-            transition: 'border-color 0.2s', outline: 'none'
-          }}
+          className="code-member-select-input"
           onKeyDown={e => {
             if (e.key === 'Escape') setShowDropdown(false);
           }}
@@ -161,81 +159,58 @@ export const MemberSearchSelect: React.FC<MemberSearchSelectProps> = ({
           <button
             type="button"
             onClick={handleClear}
-            style={{
-              position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)',
-              background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px',
-              color: '#94a3b8', display: 'flex', alignItems: 'center'
-            }}
+            className="code-member-select-clear-btn"
+            title="清空"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           </button>
         ) : (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="code-member-select-icon">
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
         )}
       </div>
 
       {showDropdown && (
-        <div style={{
-          position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '4px',
-          background: 'var(--card-bg)', border: '1px solid var(--border-color)',
-          borderRadius: '8px', boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-          maxHeight: '240px', overflowY: 'auto', zIndex: 100
-        }}>
+        <div className="code-member-select-dropdown">
           {currentUser && (!query || currentUser.name.includes(query) || (currentUser.employee_id && currentUser.employee_id.includes(query))) && (
             <div
               onClick={() => handleSelect(currentUser)}
-              style={{
-                padding: '0.5rem 0.75rem', cursor: 'pointer', fontSize: '0.875rem',
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                borderBottom: '1px dashed var(--border-color)',
-                background: currentUser.id === Number(value) ? 'rgba(37,99,235,0.12)' : 'rgba(59,130,246,0.04)',
-                color: 'var(--text-color)'
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(59,130,246,0.1)'}
-              onMouseLeave={e => e.currentTarget.style.background = currentUser.id === Number(value) ? 'rgba(37,99,235,0.12)' : 'rgba(59,130,246,0.04)'}
+              className="code-member-select-me-item"
             >
               <span>
-                <span style={{ fontWeight: 600, color: '#3b82f6' }}>⭐ 我 (当前账号: {currentUser.name})</span>
-                <span style={{ color: '#94a3b8', marginLeft: '0.4rem', fontSize: '0.8rem' }}>({currentUser.employee_id || currentUser.id})</span>
+                <span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>⭐ 我 (当前账号: {currentUser.name})</span>
+                <span style={{ color: 'var(--color-text-muted)', marginLeft: '0.4rem', fontSize: '0.8rem' }}>({currentUser.employee_id || currentUser.id})</span>
               </span>
-              <span style={{ fontSize: '0.75rem', padding: '0.1rem 0.4rem', borderRadius: '4px', background: 'rgba(59,130,246,0.1)', color: '#3b82f6', fontWeight: 500 }}>
+              <span className="code-member-select-me-tag">
                 快捷指派
               </span>
             </div>
           )}
           {loading ? (
-            <div style={{ padding: '1rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.8rem' }}>搜索中...</div>
+            <div className="code-member-select-status-tip">搜索中...</div>
           ) : results.length === 0 && !currentUser ? (
-            <div style={{ padding: '1rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.8rem' }}>
+            <div className="code-member-select-status-tip">
               {query ? '未找到匹配的人员' : '输入关键字开始搜索'}
             </div>
           ) : (
             results.filter(m => !currentUser || m.id !== currentUser.id).map(m => {
               const deptName = typeof m.department === 'string' ? m.department : (m.department && typeof m.department === 'object' ? m.department.name : '');
+              const isSelected = m.id === Number(value);
               return (
                 <div
                   key={m.id}
                   onClick={() => handleSelect(m)}
-                  style={{
-                    padding: '0.5rem 0.75rem', cursor: 'pointer', fontSize: '0.875rem',
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    transition: 'background 0.15s',
-                    background: m.id === Number(value) ? 'rgba(37,99,235,0.08)' : 'transparent',
-                    color: 'var(--text-color)'
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-color)'}
-                  onMouseLeave={e => e.currentTarget.style.background = m.id === Number(value) ? 'rgba(37,99,235,0.08)' : 'transparent'}
+                  className={`code-member-select-item ${isSelected ? 'code-member-select-item--selected' : ''}`}
                 >
                   <span>
                     <span style={{ fontWeight: 500 }}>{m.name}</span>
-                    <span style={{ color: '#94a3b8', marginLeft: '0.4rem', fontSize: '0.8rem' }}>({m.employee_id || m.id})</span>
+                    <span style={{ color: 'var(--color-text-muted)', marginLeft: '0.4rem', fontSize: '0.8rem' }}>({m.employee_id || m.id})</span>
                   </span>
                   {deptName && (
-                    <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>{deptName}</span>
+                    <span style={{ color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>{deptName}</span>
                   )}
                 </div>
               );

@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { User } from '../../types/user';
 import { useOutsideClick } from '../../hooks/useOutsideClick';
+import '../MemberSearchSelect/member-search-select.css';
 
 export interface MultiMemberSearchSelectProps {
   value: string[]; // array of member IDs as strings
   onChange: (memberIds: string[]) => void;
   style?: React.CSSProperties;
+  className?: string;
   maxSelections?: number;
   fetchFn?: (url: string, options?: RequestInit) => Promise<Response>;
   searchEndpoint?: string;
@@ -17,6 +19,7 @@ export const MultiMemberSearchSelect: React.FC<MultiMemberSearchSelectProps> = (
   value = [],
   onChange,
   style,
+  className = '',
   maxSelections = 20,
   fetchFn = defaultFetchFn,
   searchEndpoint = '/api/users'
@@ -119,14 +122,9 @@ export const MultiMemberSearchSelect: React.FC<MultiMemberSearchSelectProps> = (
   };
 
   return (
-    <div ref={containerRef} style={{ position: 'relative', ...style }}>
+    <div ref={containerRef} className={`code-member-select-wrapper ${className}`.trim()} style={style}>
       <div 
-        style={{ 
-          display: 'flex', flexWrap: 'wrap', gap: '0.25rem', alignItems: 'center',
-          minHeight: '40px', padding: '0.3rem 0.5rem', borderRadius: '6px',
-          border: '1px solid var(--border-color)', background: 'var(--bg-color)',
-          transition: 'border-color 0.2s', boxSizing: 'border-box'
-        }}
+        className="code-member-select-multi-box"
         onClick={() => setShowDropdown(true)}
       >
         {selectedMembers.filter(m => value.includes(m.id.toString()) || value.includes(m.employee_id)).map(m => {
@@ -134,15 +132,13 @@ export const MultiMemberSearchSelect: React.FC<MultiMemberSearchSelectProps> = (
           return (
             <span 
               key={mKey} 
-              style={{ 
-                display: 'inline-flex', alignItems: 'center', background: 'var(--primary-color)', 
-                color: 'white', borderRadius: '4px', padding: '2px 6px', fontSize: '0.75rem' 
-              }}
+              className="code-member-select-tag"
             >
               {m.name}
               <span 
                 onClick={(e) => handleRemove(m, e)}
-                style={{ marginLeft: '4px', cursor: 'pointer', opacity: 0.8 }}
+                className="code-member-select-tag-remove"
+                title="移除"
               >
                 ×
               </span>
@@ -155,11 +151,7 @@ export const MultiMemberSearchSelect: React.FC<MultiMemberSearchSelectProps> = (
           onChange={handleInputChange}
           onFocus={handleFocus}
           placeholder={value.length === 0 ? "输入姓名或工号搜索相关人员..." : ""}
-          style={{
-            flex: 1, minWidth: '120px', border: 'none', background: 'transparent',
-            outline: 'none', color: 'var(--text-color)', fontSize: '0.875rem',
-            padding: '2px'
-          }}
+          className="code-member-select-multi-input"
           onKeyDown={e => {
             if (e.key === 'Escape') setShowDropdown(false);
           }}
@@ -167,16 +159,11 @@ export const MultiMemberSearchSelect: React.FC<MultiMemberSearchSelectProps> = (
       </div>
 
       {showDropdown && (
-        <div style={{
-          position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '4px',
-          background: 'var(--card-bg)', border: '1px solid var(--border-color)',
-          borderRadius: '8px', boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-          maxHeight: '240px', overflowY: 'auto', zIndex: 100
-        }}>
+        <div className="code-member-select-dropdown">
           {loading ? (
-            <div style={{ padding: '1rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.8rem' }}>搜索中...</div>
+            <div className="code-member-select-status-tip">搜索中...</div>
           ) : results.length === 0 ? (
-            <div style={{ padding: '1rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.8rem' }}>
+            <div className="code-member-select-status-tip">
               {query ? '未找到匹配的人员' : '输入关键字开始搜索'}
             </div>
           ) : (
@@ -186,24 +173,15 @@ export const MultiMemberSearchSelect: React.FC<MultiMemberSearchSelectProps> = (
               return (
                 <div
                   key={m.id}
-                  onClick={() => handleSelect(m)}
-                  style={{
-                    padding: '0.5rem 0.75rem', cursor: isSelected ? 'default' : 'pointer', fontSize: '0.875rem',
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    transition: 'background 0.15s',
-                    background: isSelected ? 'rgba(37,99,235,0.08)' : 'transparent',
-                    color: isSelected ? '#94a3b8' : 'var(--text-color)',
-                    opacity: isSelected ? 0.6 : 1
-                  }}
-                  onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'var(--bg-color)' }}
-                  onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}
+                  onClick={() => !isSelected && handleSelect(m)}
+                  className={`code-member-select-item ${isSelected ? 'code-member-select-item--selected code-member-select-item--disabled' : ''}`}
                 >
                   <span>
                     <span style={{ fontWeight: 500 }}>{m.name}</span>
-                    <span style={{ marginLeft: '0.4rem', fontSize: '0.8rem' }}>({m.employee_id || m.id})</span>
+                    <span style={{ marginLeft: '0.4rem', fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>({m.employee_id || m.id})</span>
                   </span>
                   {deptName && (
-                    <span style={{ fontSize: '0.75rem' }}>{deptName}</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{deptName}</span>
                   )}
                 </div>
               );

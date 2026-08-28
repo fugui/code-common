@@ -1,0 +1,252 @@
+/* ==========================================================================
+   Code Platform - UserMenu Component Styles
+   Namespace: .code-user-menu
+   ========================================================================== */
+
+.code-user-menu-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+/* 触发按钮 */
+.code-user-menu-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: var(--radius-md, 8px);
+  transition: var(--transition-fast);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-user-menu-trigger:hover {
+    background-color: var(--color-bg-hover);
+  }
+}
+
+/* 头像圆形 */
+.code-user-menu-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-text-white, #ffffff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* 信息文字列 */
+.code-user-menu-info {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.code-user-menu-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.code-user-menu-superadmin {
+  font-size: 0.75rem;
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.code-user-menu-roles-row {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 2px;
+}
+
+.code-user-menu-role-tag {
+  padding: 0 4px;
+  border-radius: var(--radius-xs, 3px);
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.code-user-menu-admin-suffix {
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  margin-left: 1px;
+}
+
+.code-user-menu-dept {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+/* 下拉菜单面板 */
+.code-user-menu-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  width: 220px;
+  background-color: var(--color-bg-surface);
+  border-radius: var(--radius-md, 8px);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-border-subtle);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.code-user-menu-dropdown-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.code-user-menu-dropdown-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+}
+
+.code-user-menu-dropdown-email {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  margin-top: 0.25rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.code-user-menu-dropdown-items {
+  padding: 0.5rem 0;
+}
+
+.code-user-menu-item {
+  width: 100%;
+  text-align: left;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: var(--transition-fast);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-user-menu-item:hover {
+    background-color: var(--color-bg-hover);
+  }
+}
+
+.code-user-menu-item--danger {
+  color: var(--color-danger);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-user-menu-item--danger:hover {
+    background-color: var(--color-danger-subtle);
+  }
+}
+
+/* 密码表单 */
+.code-user-menu-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+.code-user-menu-form-alert {
+  padding: 0.75rem;
+  border-radius: var(--radius-sm, 6px);
+  font-size: 0.875rem;
+}
+
+.code-user-menu-form-alert--error {
+  background: var(--color-danger-subtle);
+  color: var(--color-danger);
+}
+
+.code-user-menu-form-alert--success {
+  background: var(--color-success-subtle);
+  color: var(--color-success);
+}
+
+.code-user-menu-form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.code-user-menu-form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  color: var(--color-text-primary);
+}
+
+.code-user-menu-form-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-bg-input);
+  color: var(--color-text-primary);
+  outline: none;
+  transition: var(--transition-fast);
+  box-sizing: border-box;
+}
+
+.code-user-menu-form-input:focus {
+  border-color: var(--color-primary);
+}
+
+.code-user-menu-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.code-user-menu-btn-cancel {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--color-border-subtle);
+  background: transparent;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  transition: var(--transition-fast);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-user-menu-btn-cancel:hover:not(:disabled) {
+    background: var(--color-bg-hover);
+  }
+}
+
+.code-user-menu-btn-submit {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm, 6px);
+  border: none;
+  background: var(--color-primary);
+  color: var(--color-text-white, #ffffff);
+  cursor: pointer;
+  font-weight: 500;
+  transition: var(--transition-fast);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-user-menu-btn-submit:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+  }
+}

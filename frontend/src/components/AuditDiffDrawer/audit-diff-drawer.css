@@ -1,0 +1,193 @@
+/* ==========================================================================
+   Code Platform - AuditDiffDrawer Component Styles
+   Namespace: .code-audit-diff
+   ========================================================================== */
+
+.code-audit-diff-header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.code-audit-diff-title-text {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.code-audit-diff-header-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+
+.code-audit-diff-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* 1. 核心元数据卡片 (5W1H) */
+.code-audit-diff-meta-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg, 10px);
+  padding: 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+.code-audit-diff-field-label {
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  margin-bottom: 4px;
+}
+
+.code-audit-diff-field-val {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  word-break: break-word;
+}
+
+.code-audit-diff-ip {
+  color: var(--color-text-primary);
+  font-family: var(--font-family-mono, monospace);
+  font-size: 0.8rem;
+}
+
+/* 错误卡片 */
+.code-audit-diff-error-card {
+  background: var(--color-danger-subtle);
+  border: 1px solid var(--color-danger-border);
+  border-radius: var(--radius-md, 8px);
+  padding: 0.875rem 1rem;
+  color: var(--color-danger);
+  font-size: 0.85rem;
+}
+
+.code-audit-diff-error-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.code-audit-diff-error-pre {
+  margin: 0;
+  white-space: pre-wrap;
+  font-family: var(--font-family-mono, monospace);
+  font-size: 0.8rem;
+}
+
+/* 二级执行明细卡片 */
+.code-audit-diff-batch-card {
+  background: var(--color-primary-subtle);
+  border: 1px solid var(--color-primary-border);
+  border-radius: var(--radius-lg, 10px);
+  padding: 1.25rem;
+}
+
+.code-audit-diff-batch-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.code-audit-diff-batch-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.code-audit-diff-batch-stats {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 1rem;
+}
+
+.code-audit-diff-batch-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.code-audit-diff-batch-item {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm, 6px);
+  padding: 0.6rem 0.875rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+/* Diff Tab 卡片 */
+.code-audit-diff-tabs-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg, 10px);
+  overflow: hidden;
+}
+
+.code-audit-diff-tabs-bar {
+  display: flex;
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: var(--color-bg-muted);
+  padding: 0 0.5rem;
+}
+
+.code-audit-diff-tab-btn {
+  padding: 0.75rem 1rem;
+  border: none;
+  background: transparent;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.code-audit-diff-tab-btn--active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-audit-diff-tab-btn:hover:not(.code-audit-diff-tab-btn--active) {
+    color: var(--color-text-primary);
+  }
+}
+
+.code-audit-diff-tab-content {
+  padding: 1.25rem;
+}
+
+/* 原始快照 Pre 代码块 */
+.code-audit-diff-raw-pre {
+  margin: 0;
+  padding: 1rem;
+  border-radius: var(--radius-sm, 6px);
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border-subtle);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-mono, monospace);
+  font-size: 0.8rem;
+  overflow-x: auto;
+  max-height: 400px;
+}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AUTH_TOKEN_KEY } from '../../utils/constants';
+import './unified-login.css';
 
 export interface AuthFeatureItem {
   icon: string;
@@ -134,194 +135,54 @@ export const UnifiedLogin: React.FC<UnifiedLoginProps> = ({
   };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        background: '#0b1120',
-        width: '100vw',
-        overflow: 'hidden',
-        position: 'relative',
-        fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-      }}
-    >
-      <style>{`
-        @keyframes float1 {
-          0%, 100% { transform: translate(0, 0) rotate(0deg); }
-          50% { transform: translate(-20px, -60px) rotate(-3deg); }
-        }
-        @keyframes float2 {
-          0%, 100% { transform: translate(0, 0) rotate(0deg); }
-          50% { transform: translate(30px, -40px) rotate(4deg); }
-        }
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .login-input:focus {
-          border-color: #3b82f6 !important;
-          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18) !important;
-        }
-        .login-btn:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 8px 25px rgba(59, 130, 246, 0.45) !important;
-        }
-        .login-btn:active {
-          transform: translateY(0);
-        }
-        .feature-item:hover {
-          background: rgba(255,255,255,0.08) !important;
-          transform: translateX(4px);
-        }
-      `}</style>
-
+    <div className="code-unified-login-page">
       {/* Main Card Container */}
-      <div
-        style={{
-          display: 'flex',
-          width: '100%',
-          maxWidth: '1100px',
-          minHeight: '640px',
-          maxHeight: '90vh',
-          borderRadius: '16px',
-          overflow: 'hidden',
-          boxShadow: '0 25px 60px rgba(0,0,0,0.5)',
-          border: '1px solid rgba(255,255,255,0.06)',
-          position: 'relative',
-        }}
-      >
+      <div className="code-unified-login-card">
         {/* Left Branding Panel */}
-        <div
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            padding: '3rem',
-            position: 'relative',
-            overflow: 'hidden',
-            background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
-            borderRadius: '16px 0 0 16px',
-          }}
-        >
+        <div className="code-unified-login-brand-panel">
           {/* Animated Orbs */}
-          <div
-            style={{
-              position: 'absolute',
-              top: '10%',
-              left: '15%',
-              width: '280px',
-              height: '280px',
-              borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%)',
-              animation: 'float1 18s ease-in-out infinite',
-              pointerEvents: 'none',
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '15%',
-              right: '10%',
-              width: '240px',
-              height: '240px',
-              borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%)',
-              animation: 'float2 22s ease-in-out infinite',
-              pointerEvents: 'none',
-            }}
-          />
+          <div className="code-unified-login-orb-1" />
+          <div className="code-unified-login-orb-2" />
 
-          <div style={{ position: 'relative', zIndex: 1, maxWidth: '520px', animation: 'fadeInUp 0.8s ease' }}>
+          <div className="code-unified-login-brand-content">
             {/* Logo and System Name */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
+            <div className="code-unified-login-logo-row">
               {logo ? (
                 logo
               ) : (
-                <div
-                  style={{
-                    width: '44px',
-                    height: '44px',
-                    borderRadius: '10px',
-                    background: 'linear-gradient(135deg, #3b82f6 0%, #a855f7 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontWeight: 700,
-                    fontSize: '1.25rem',
-                    boxShadow: '0 4px 10px rgba(59, 130, 246, 0.3)',
-                  }}
-                >
+                <div className="code-unified-login-default-logo">
                   {systemName.slice(0, 2).toUpperCase()}
                 </div>
               )}
               <div>
-                <h1 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 700, color: '#f1f5f9', letterSpacing: '0.5px' }}>
+                <h1 className="code-unified-login-system-title">
                   {systemName}
                 </h1>
-                <span style={{ fontSize: '0.75rem', color: '#64748b', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                <span className="code-unified-login-system-sub">
                   {systemSubtitle}
                 </span>
               </div>
             </div>
 
-            <h2
-              style={{
-                fontSize: '2rem',
-                fontWeight: 700,
-                lineHeight: 1.3,
-                margin: '0 0 1rem',
-                background: 'linear-gradient(135deg, #f1f5f9 0%, #94a3b8 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}
-            >
+            <h2 className="code-unified-login-brand-slogan">
               安全 · 可靠 · 敏捷<br />一站式研发基础设施
             </h2>
 
-            <p style={{ color: '#64748b', fontSize: '0.95rem', lineHeight: 1.6, margin: '0 0 2rem' }}>
+            <p className="code-unified-login-brand-desc">
               {systemDesc}
             </p>
 
             {/* Feature Badges */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <div className="code-unified-login-features-list">
               {defaultFeatures.map((feat, idx) => (
-                <div
-                  key={idx}
-                  className="feature-item"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    padding: '0.75rem 1rem',
-                    borderRadius: '10px',
-                    background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    backdropFilter: 'blur(8px)',
-                    transition: 'all 0.25s ease',
-                  }}
-                >
-                  <div
-                    style={{
-                      width: '36px',
-                      height: '36px',
-                      borderRadius: '8px',
-                      background: 'rgba(59,130,246,0.12)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0,
-                    }}
-                  >
+                <div key={idx} className="code-unified-login-feature-item">
+                  <div className="code-unified-login-feature-icon-box">
                     <svg
                       width="18"
                       height="18"
                       viewBox="0 0 24 24"
                       fill="none"
-                      stroke="#3b82f6"
+                      stroke="var(--color-primary, #3b82f6)"
                       strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -330,8 +191,8 @@ export const UnifiedLogin: React.FC<UnifiedLoginProps> = ({
                     </svg>
                   </div>
                   <div>
-                    <div style={{ color: '#e2e8f0', fontSize: '0.88rem', fontWeight: 600 }}>{feat.title}</div>
-                    <div style={{ color: '#64748b', fontSize: '0.78rem', marginTop: '2px' }}>{feat.desc}</div>
+                    <div className="code-unified-login-feature-title">{feat.title}</div>
+                    <div className="code-unified-login-feature-desc">{feat.desc}</div>
                   </div>
                 </div>
               ))}
@@ -340,42 +201,18 @@ export const UnifiedLogin: React.FC<UnifiedLoginProps> = ({
         </div>
 
         {/* Right Login Form Panel */}
-        <div
-          style={{
-            flex: '0 0 440px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            padding: '3rem 2.5rem',
-            background: 'rgba(15, 23, 42, 0.95)',
-            backdropFilter: 'blur(20px)',
-            position: 'relative',
-          }}
-        >
-          <div style={{ marginBottom: '2rem' }}>
-            <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.4rem', fontWeight: 700, color: '#f8fafc' }}>
+        <div className="code-unified-login-form-panel">
+          <div className="code-unified-login-form-header">
+            <h3 className="code-unified-login-form-title">
               账号登录
             </h3>
-            <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
+            <p className="code-unified-login-form-subtitle">
               请使用企业 SSO 账号或系统分配账号进入系统
             </p>
           </div>
 
           {error && (
-            <div
-              style={{
-                marginBottom: '1.5rem',
-                padding: '0.75rem 1rem',
-                borderRadius: '8px',
-                background: 'rgba(239, 68, 68, 0.1)',
-                border: '1px solid rgba(239, 68, 68, 0.25)',
-                color: '#f87171',
-                fontSize: '0.85rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-              }}
-            >
+            <div className="code-unified-login-alert-error">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="8" x2="12" y2="12" />
@@ -391,24 +228,7 @@ export const UnifiedLogin: React.FC<UnifiedLoginProps> = ({
               <button
                 type="button"
                 onClick={handleSSOLogin}
-                className="login-btn"
-                style={{
-                  width: '100%',
-                  padding: '0.85rem',
-                  borderRadius: '10px',
-                  background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                  color: 'white',
-                  border: 'none',
-                  fontSize: '0.95rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.6rem',
-                  boxShadow: '0 4px 15px rgba(37, 99, 235, 0.35)',
-                  transition: 'all 0.2s ease',
-                }}
+                className="code-unified-login-sso-btn"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
@@ -422,114 +242,61 @@ export const UnifiedLogin: React.FC<UnifiedLoginProps> = ({
 
           {/* Divider if both enabled */}
           {authConfig?.oauth2_enabled && authConfig?.password_login_enabled && (
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem',
-                margin: '1rem 0 1.5rem',
-                color: '#475569',
-                fontSize: '0.8rem',
-              }}
-            >
-              <div style={{ flex: 1, height: '1px', background: '#334155' }} />
+            <div className="code-unified-login-divider-row">
+              <div className="code-unified-login-divider-line" />
               <button
                 type="button"
                 onClick={() => setShowPasswordForm(!showPasswordForm)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#94a3b8',
-                  fontSize: '0.8rem',
-                  cursor: 'pointer',
-                  padding: '4px 8px',
-                }}
+                className="code-unified-login-toggle-btn"
               >
                 {showPasswordForm ? '收起密码登录' : '使用账号密码登录'}
               </button>
-              <div style={{ flex: 1, height: '1px', background: '#334155' }} />
+              <div className="code-unified-login-divider-line" />
             </div>
           )}
 
           {/* Password Login Form */}
           {authConfig?.password_login_enabled && showPasswordForm && (
             <form onSubmit={handleSubmit}>
-              <div style={{ marginBottom: '1.25rem' }}>
-                <label style={{ display: 'block', color: '#cbd5e1', fontSize: '0.85rem', marginBottom: '0.5rem', fontWeight: 500 }}>
+              <div className="code-unified-login-form-group">
+                <label className="code-unified-login-label">
                   邮箱 / 账号
                 </label>
                 <input
-                  className="login-input"
                   required
                   type="text"
                   placeholder="如: admin@code-shield.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem 1rem',
-                    borderRadius: '8px',
-                    background: '#1e293b',
-                    border: '1px solid #334155',
-                    color: '#f8fafc',
-                    fontSize: '0.9rem',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                    transition: 'all 0.2s ease',
-                  }}
+                  className="code-unified-login-input"
                 />
               </div>
 
-              <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', color: '#cbd5e1', fontSize: '0.85rem', marginBottom: '0.5rem', fontWeight: 500 }}>
+              <div className="code-unified-login-form-group" style={{ marginBottom: '1.5rem' }}>
+                <label className="code-unified-login-label">
                   密码
                 </label>
                 <input
-                  className="login-input"
                   required
                   type="password"
                   placeholder="请输入登录密码"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem 1rem',
-                    borderRadius: '8px',
-                    background: '#1e293b',
-                    border: '1px solid #334155',
-                    color: '#f8fafc',
-                    fontSize: '0.9rem',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                    transition: 'all 0.2s ease',
-                  }}
+                  className="code-unified-login-input"
                 />
               </div>
 
               <button
                 type="submit"
-                className="login-btn"
                 disabled={loading}
-                style={{
-                  width: '100%',
-                  padding: '0.85rem',
-                  borderRadius: '10px',
-                  background: loading ? '#475569' : '#3b82f6',
-                  color: 'white',
-                  border: 'none',
-                  fontSize: '0.95rem',
-                  fontWeight: 600,
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  boxShadow: '0 4px 15px rgba(59, 130, 246, 0.3)',
-                  transition: 'all 0.2s ease',
-                }}
+                className="code-unified-login-submit-btn"
               >
                 {loading ? '正在验证...' : '登 录'}
               </button>
             </form>
           )}
 
-          <div style={{ marginTop: '2rem', textAlign: 'center', color: '#475569', fontSize: '0.75rem' }}>
+          <div className="code-unified-login-footer-copy">
             © {new Date().getFullYear()} Code Platform. 保留所有权利.
           </div>
         </div>
