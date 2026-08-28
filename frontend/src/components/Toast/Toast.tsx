@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo, ReactNode } from 'react';
 import './toast.css';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
@@ -26,14 +26,14 @@ export const useToast = () => {
 export const ToastProvider = ({ children }: { children: ReactNode }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const showToast = (message: string, type: ToastType = 'info') => {
-    const id = Date.now();
+  const showToast = useCallback((message: string, type: ToastType = 'info') => {
+    const id = Date.now() + Math.random();
     setToasts(prev => [...prev, { id, message, type }]);
 
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
-    }, 3000); // Auto-dismiss after 3 seconds
-  };
+    }, 3000); // 3秒后自动消失
+  }, []);
 
   const getToastIcon = (type: ToastType) => {
     switch (type) {
@@ -49,8 +49,10 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const contextValue = useMemo(() => ({ showToast }), [showToast]);
+
   return (
-    <ToastContext.Provider value={{ showToast }}>
+    <ToastContext.Provider value={contextValue}>
       {children}
       <div className="code-toast-container">
         {toasts.map(toast => (
