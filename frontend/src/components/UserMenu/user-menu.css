@@ -33,7 +33,7 @@
   height: 36px;
   border-radius: 50%;
   background: var(--color-primary);
-  color: var(--color-text-white, #ffffff);
+  color: var(--color-text-white);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -239,7 +239,7 @@
   border-radius: var(--radius-sm, 6px);
   border: none;
   background: var(--color-primary);
-  color: var(--color-text-white, #ffffff);
+  color: var(--color-text-white);
   cursor: pointer;
   font-weight: 500;
   transition: var(--transition-fast);

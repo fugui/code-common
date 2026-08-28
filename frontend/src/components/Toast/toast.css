@@ -15,7 +15,7 @@
 }
 
 .code-toast-item {
-  color: var(--color-text-white, #ffffff);
+  color: var(--color-text-white);
   padding: 12px 20px;
   border-radius: var(--radius-md, 8px);
   box-shadow: var(--shadow-lg);

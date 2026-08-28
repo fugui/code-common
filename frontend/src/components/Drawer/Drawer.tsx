@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { zIndexManager, escManager, lockBodyScroll, unlockBodyScroll, ZIndexLevels } from '../../utils/overlay';
 import './drawer.css';
@@ -195,18 +195,21 @@ export const Drawer: React.FC<DrawerProps> = ({
     ? 'code-drawer-root--pointer-none'
     : (animateVisible ? 'code-drawer-root--pointer-auto' : 'code-drawer-root--pointer-none');
 
+  const uniqueTitleId = useId();
+  const hasStringTitle = typeof title === 'string';
+
   return createPortal(
     <div
       className={`code-drawer-root drawer-root-wrapper ${pointerClass} ${className}`.trim()}
       style={{ zIndex: containerZIndex }}
     >
-      {/* 1. Backdrop 遮罩层 */}
+      {/* 1. 遮罩层 (Mask) */}
       {mask && (
         <div
           className={`code-drawer-mask ${animateVisible ? 'code-drawer-mask--visible' : ''} ${!maskClosable ? 'code-drawer-mask--unclosable' : ''} ${maskClassName}`.trim()}
           onClick={maskClosable ? handleClose : undefined}
           style={{ zIndex: maskZIndex, ...maskStyle }}
-          title={maskClosable ? '点击遮罩区域关闭' : undefined}
+          title={maskClosable ? '点击背景区域关闭' : undefined}
         />
       )}
 
@@ -214,7 +217,7 @@ export const Drawer: React.FC<DrawerProps> = ({
       <div
         role="dialog"
         aria-modal="true"
-        aria-labelledby={typeof title === 'string' ? 'code-drawer-title' : undefined}
+        aria-labelledby={hasStringTitle ? uniqueTitleId : undefined}
         className={`code-drawer-panel ${isLeft ? 'code-drawer-panel--left' : 'code-drawer-panel--right'} ${animateVisible ? 'code-drawer-panel--visible' : 'code-drawer-panel--hidden'}`}
         style={{
           width: resolvedWidth,
@@ -229,8 +232,8 @@ export const Drawer: React.FC<DrawerProps> = ({
         {(title || subtitle || actualExtra || showCloseButton) && (
           <div className="code-drawer-header" style={headerStyle}>
             <div className="code-drawer-header-content">
-              {typeof title === 'string' ? (
-                <h3 id="code-drawer-title" className="code-drawer-title">
+              {hasStringTitle ? (
+                <h3 id={uniqueTitleId} className="code-drawer-title">
                   {title}
                 </h3>
               ) : (

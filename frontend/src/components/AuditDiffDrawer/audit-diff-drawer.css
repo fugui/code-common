@@ -55,10 +55,86 @@
   word-break: break-word;
 }
 
+.code-audit-diff-action-highlight {
+  color: var(--color-primary);
+}
+
+.code-audit-diff-target-type {
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  margin-left: 4px;
+}
+
+.code-audit-diff-val-placeholder {
+  color: var(--color-text-secondary);
+}
+
+.code-audit-diff-result-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.code-audit-diff-status-tag {
+  padding: 2px 6px;
+  border-radius: var(--radius-xs, 4px);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.code-audit-diff-status-tag--success {
+  background: var(--color-success-subtle);
+  color: var(--color-success);
+}
+
+.code-audit-diff-status-tag--danger {
+  background: var(--color-danger-subtle);
+  color: var(--color-danger);
+}
+
+.code-audit-diff-duration {
+  color: var(--color-text-secondary);
+}
+
 .code-audit-diff-ip {
   color: var(--color-text-primary);
   font-family: var(--font-family-mono, monospace);
   font-size: 0.8rem;
+}
+
+.code-audit-diff-trace-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.code-audit-diff-trace-code {
+  font-size: 0.75rem;
+  color: var(--color-primary);
+  word-break: break-all;
+  font-family: var(--font-family-mono, monospace);
+}
+
+.code-audit-diff-copy-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  padding: 2px 6px;
+  border-radius: var(--radius-xs, 4px);
+  font-size: 0.75rem;
+  transition: var(--transition-fast);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-audit-diff-copy-btn:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+  }
+}
+
+.code-audit-diff-copy-btn--copied {
+  color: var(--color-success) !important;
 }
 
 /* 错误卡片 */
@@ -108,6 +184,18 @@
   gap: 6px;
 }
 
+.code-audit-diff-batch-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-primary);
+}
+
+.code-audit-diff-loading-text {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
 .code-audit-diff-batch-stats {
   display: flex;
   gap: 1.5rem;
@@ -115,6 +203,18 @@
   font-size: 0.85rem;
   color: var(--color-text-secondary);
   margin-bottom: 1rem;
+}
+
+.code-audit-diff-stat-val-primary {
+  color: var(--color-text-primary);
+}
+
+.code-audit-diff-stat-val-success {
+  color: var(--color-success);
+}
+
+.code-audit-diff-stat-val-warning {
+  color: var(--color-warning);
 }
 
 .code-audit-diff-batch-list {
@@ -133,6 +233,50 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-size: 0.85rem;
+}
+
+.code-audit-diff-batch-repo-name {
+  color: var(--color-text-primary);
+}
+
+.code-audit-diff-batch-repo-branch {
+  color: var(--color-text-secondary);
+  margin-left: 8px;
+  font-size: 0.75rem;
+}
+
+.code-audit-diff-batch-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.code-audit-diff-batch-score {
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.code-audit-diff-batch-status-badge {
+  padding: 2px 6px;
+  border-radius: var(--radius-xs, 4px);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.code-audit-diff-batch-status-badge--completed {
+  background: var(--color-success-subtle);
+  color: var(--color-success);
+}
+
+.code-audit-diff-batch-status-badge--running {
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+}
+
+.code-audit-diff-batch-empty {
+  color: var(--color-text-secondary);
   font-size: 0.85rem;
 }
 
@@ -176,6 +320,104 @@
 
 .code-audit-diff-tab-content {
   padding: 1.25rem;
+}
+
+/* 结构化 Diff 表格 */
+.code-audit-diff-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.code-audit-diff-thead-tr {
+  border-bottom: 1px solid var(--color-border-subtle);
+  color: var(--color-text-secondary);
+  text-align: left;
+}
+
+.code-audit-diff-th {
+  padding: 0.6rem 0.75rem;
+  font-weight: 600;
+}
+
+.code-audit-diff-th--field { width: 22%; }
+.code-audit-diff-th--type { width: 12%; }
+.code-audit-diff-th--before { width: 33%; }
+.code-audit-diff-th--after { width: 33%; }
+
+.code-audit-diff-tr {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.code-audit-diff-td {
+  padding: 0.75rem;
+}
+
+.code-audit-diff-td-field {
+  padding: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-mono, monospace);
+}
+
+.code-audit-diff-action-tag {
+  padding: 2px 6px;
+  border-radius: var(--radius-xs, 4px);
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.code-audit-diff-action-tag--added {
+  background: var(--color-success-subtle);
+  color: var(--color-success);
+}
+
+.code-audit-diff-action-tag--modified {
+  background: var(--color-warning-subtle);
+  color: var(--color-warning);
+}
+
+.code-audit-diff-action-tag--removed {
+  background: var(--color-danger-subtle);
+  color: var(--color-danger);
+}
+
+.code-audit-diff-action-tag--default {
+  background: var(--color-bg-muted);
+  color: var(--color-text-secondary);
+}
+
+.code-audit-diff-val-code {
+  font-family: var(--font-family-mono, monospace);
+  word-break: break-all;
+}
+
+.code-audit-diff-val-before {
+  color: var(--color-text-secondary);
+}
+
+.code-audit-diff-val-before--removed {
+  color: var(--color-danger);
+}
+
+.code-audit-diff-val-after {
+  color: var(--color-text-primary);
+}
+
+.code-audit-diff-val-after--added {
+  color: var(--color-success);
+}
+
+.code-audit-diff-val-null {
+  opacity: 0.4;
+}
+
+.code-audit-diff-empty-msg {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
 }
 
 /* 原始快照 Pre 代码块 */

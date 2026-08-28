@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { zIndexManager, escManager, lockBodyScroll, unlockBodyScroll, ZIndexLevels } from '../../utils/overlay';
 import './confirm-dialog.css';
@@ -151,6 +151,8 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
   const pointerClass = animateVisible ? 'code-confirm-dialog-root--pointer-auto' : 'code-confirm-dialog-root--pointer-none';
 
+  const uniqueTitleId = useId();
+
   return createPortal(
     <div
       className={`code-confirm-dialog-root confirm-dialog-root-wrapper modal-root-wrapper ${pointerClass} ${className}`.trim()}
@@ -167,7 +169,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       <div
         role="alertdialog"
         aria-modal="true"
-        aria-labelledby="code-confirm-dialog-title"
+        aria-labelledby={uniqueTitleId}
         className={`code-confirm-dialog-panel ${animateVisible ? 'code-confirm-dialog-panel--visible' : 'code-confirm-dialog-panel--hidden'}`}
         style={{ zIndex: panelZIndex }}
         onClick={(e) => e.stopPropagation()}
@@ -181,7 +183,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             {typeIcon}
           </div>
           <div className="code-confirm-dialog-text">
-            <h3 id="code-confirm-dialog-title" className="code-confirm-dialog-title">
+            <h3 id={uniqueTitleId} className="code-confirm-dialog-title">
               {title}
             </h3>
             {content && (

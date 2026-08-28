@@ -156,33 +156,29 @@ export const AuditDiffDrawer: React.FC<AuditDiffDrawerProps> = ({ open, onClose,
           <div>
             <div className="code-audit-diff-field-label">业务模块与动作 (Module / Action)</div>
             <div className="code-audit-diff-field-val">
-              <code>{log.module}</code> / <code style={{ color: 'var(--color-primary)' }}>{log.action}</code>
+              <code>{log.module}</code> / <code className="code-audit-diff-action-highlight">{log.action}</code>
             </div>
           </div>
           <div>
             <div className="code-audit-diff-field-label">目标对象 (Target)</div>
             <div className="code-audit-diff-field-val">
               {log.target_name || log.target_id ? (
-                <span>{log.target_name || log.target_id} <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.75rem' }}>({log.target_type || 'object'})</span></span>
+                <span>
+                  {log.target_name || log.target_id}
+                  <span className="code-audit-diff-target-type">({log.target_type || 'object'})</span>
+                </span>
               ) : (
-                <span style={{ color: 'var(--color-text-secondary)' }}>-</span>
+                <span className="code-audit-diff-val-placeholder">-</span>
               )}
             </div>
           </div>
           <div>
             <div className="code-audit-diff-field-label">执行结果与耗时 (Result)</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{
-                padding: '2px 6px',
-                borderRadius: '4px',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                background: isSuccess ? 'var(--color-success-subtle)' : 'var(--color-danger-subtle)',
-                color: isSuccess ? 'var(--color-success)' : 'var(--color-danger)',
-              }}>
+            <div className="code-audit-diff-result-row">
+              <span className={`code-audit-diff-status-tag ${isSuccess ? 'code-audit-diff-status-tag--success' : 'code-audit-diff-status-tag--danger'}`}>
                 HTTP {log.status_code}
               </span>
-              <span style={{ color: 'var(--color-text-secondary)' }}>{log.duration_ms} ms</span>
+              <span className="code-audit-diff-duration">{log.duration_ms} ms</span>
             </div>
           </div>
           <div>
@@ -193,22 +189,15 @@ export const AuditDiffDrawer: React.FC<AuditDiffDrawerProps> = ({ open, onClose,
           </div>
           <div>
             <div className="code-audit-diff-field-label">全链路追踪 ID (Trace ID)</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <code style={{ fontSize: '0.75rem', color: 'var(--color-primary)', wordBreak: 'break-all' }}>
+            <div className="code-audit-diff-trace-row">
+              <code className="code-audit-diff-trace-code">
                 {log.trace_id || '-'}
               </code>
               {log.trace_id && (
                 <button
                   type="button"
                   onClick={handleCopyTrace}
-                  style={{
-                    border: 'none',
-                    background: 'transparent',
-                    cursor: 'pointer',
-                    color: copiedTrace ? 'var(--color-success)' : 'var(--color-text-secondary)',
-                    padding: '2px',
-                    fontSize: '0.75rem'
-                  }}
+                  className={`code-audit-diff-copy-btn ${copiedTrace ? 'code-audit-diff-copy-btn--copied' : ''}`}
                   title="复制 Trace ID"
                 >
                   {copiedTrace ? '已复制' : '复制'}
@@ -231,19 +220,19 @@ export const AuditDiffDrawer: React.FC<AuditDiffDrawerProps> = ({ open, onClose,
           <div className="code-audit-diff-batch-card">
             <div className="code-audit-diff-batch-header">
               <h4 className="code-audit-diff-batch-title">
-                <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-primary)' }} />
+                <span className="code-audit-diff-batch-dot" />
                 关联扫描批次二级执行明细 (Task Trigger Log #{log.target_id})
               </h4>
-              {loadingTrigger && <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>正在拉取明细...</span>}
+              {loadingTrigger && <span className="code-audit-diff-loading-text">正在拉取明细...</span>}
             </div>
 
             {triggerDetail ? (
               <div>
                 <div className="code-audit-diff-batch-stats">
-                  <span>批次号: <strong style={{ color: 'var(--color-text-primary)' }}>{triggerDetail.trigger_log?.trigger_batch}</strong></span>
-                  <span>总代码仓: <strong style={{ color: 'var(--color-text-primary)' }}>{triggerDetail.trigger_log?.total_repos || 0}</strong></span>
-                  <span>成功扫描: <strong style={{ color: 'var(--color-success)' }}>{triggerDetail.trigger_log?.success_count || 0}</strong></span>
-                  <span>跳过/排队: <strong style={{ color: 'var(--color-warning)' }}>{triggerDetail.trigger_log?.skip_count || 0}</strong></span>
+                  <span>批次号: <strong className="code-audit-diff-stat-val-primary">{triggerDetail.trigger_log?.trigger_batch}</strong></span>
+                  <span>总代码仓: <strong className="code-audit-diff-stat-val-primary">{triggerDetail.trigger_log?.total_repos || 0}</strong></span>
+                  <span>成功扫描: <strong className="code-audit-diff-stat-val-success">{triggerDetail.trigger_log?.success_count || 0}</strong></span>
+                  <span>跳过/排队: <strong className="code-audit-diff-stat-val-warning">{triggerDetail.trigger_log?.skip_count || 0}</strong></span>
                 </div>
 
                 {triggerDetail.execution_logs && triggerDetail.execution_logs.length > 0 ? (
@@ -251,23 +240,16 @@ export const AuditDiffDrawer: React.FC<AuditDiffDrawerProps> = ({ open, onClose,
                     {triggerDetail.execution_logs.map(exec => (
                       <div key={exec.id} className="code-audit-diff-batch-item">
                         <div>
-                          <strong style={{ color: 'var(--color-text-primary)' }}>{exec.repo?.name || '未知仓库'}</strong>
-                          <span style={{ color: 'var(--color-text-secondary)', marginLeft: '8px', fontSize: '0.75rem' }}>分支: {exec.repo?.branch || 'master'}</span>
+                          <strong className="code-audit-diff-batch-repo-name">{exec.repo?.name || '未知仓库'}</strong>
+                          <span className="code-audit-diff-batch-repo-branch">分支: {exec.repo?.branch || 'master'}</span>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div className="code-audit-diff-batch-right">
                           {exec.task_report && (
-                            <span style={{ color: 'var(--color-primary)', fontWeight: 600, fontSize: '0.8rem' }}>
+                            <span className="code-audit-diff-batch-score">
                               得分: {exec.task_report.score}
                             </span>
                           )}
-                          <span style={{
-                            padding: '2px 6px',
-                            borderRadius: '4px',
-                            fontSize: '0.75rem',
-                            fontWeight: 500,
-                            background: exec.status === 'completed' ? 'var(--color-success-subtle)' : 'var(--color-primary-subtle)',
-                            color: exec.status === 'completed' ? 'var(--color-success)' : 'var(--color-primary)',
-                          }}>
+                          <span className={`code-audit-diff-batch-status-badge ${exec.status === 'completed' ? 'code-audit-diff-batch-status-badge--completed' : 'code-audit-diff-batch-status-badge--running'}`}>
                             {exec.status}
                           </span>
                         </div>
@@ -275,11 +257,11 @@ export const AuditDiffDrawer: React.FC<AuditDiffDrawerProps> = ({ open, onClose,
                     ))}
                   </div>
                 ) : (
-                  <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>该批次暂无二级执行仓库记录</div>
+                  <div className="code-audit-diff-batch-empty">该批次暂无二级执行仓库记录</div>
                 )}
               </div>
             ) : !loadingTrigger ? (
-              <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>未获取到二级扫描批次详情</div>
+              <div className="code-audit-diff-batch-empty">未获取到二级扫描批次详情</div>
             ) : null}
           </div>
         )}
@@ -315,52 +297,45 @@ export const AuditDiffDrawer: React.FC<AuditDiffDrawerProps> = ({ open, onClose,
             {activeTab === 'diff' && (
               <div>
                 {diffs.length > 0 ? (
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+                  <table className="code-audit-diff-table">
                     <thead>
-                      <tr style={{ borderBottom: '1px solid var(--color-border-subtle)', color: 'var(--color-text-secondary)', textAlign: 'left' }}>
-                        <th style={{ padding: '0.6rem 0.75rem', width: '22%' }}>变更字段</th>
-                        <th style={{ padding: '0.6rem 0.75rem', width: '12%' }}>变动类型</th>
-                        <th style={{ padding: '0.6rem 0.75rem', width: '33%' }}>变更前 (Before)</th>
-                        <th style={{ padding: '0.6rem 0.75rem', width: '33%' }}>变更后 (After)</th>
+                      <tr className="code-audit-diff-thead-tr">
+                        <th className="code-audit-diff-th code-audit-diff-th--field">变更字段</th>
+                        <th className="code-audit-diff-th code-audit-diff-th--type">变动类型</th>
+                        <th className="code-audit-diff-th code-audit-diff-th--before">变更前 (Before)</th>
+                        <th className="code-audit-diff-th code-audit-diff-th--after">变更后 (After)</th>
                       </tr>
                     </thead>
                     <tbody>
                       {diffs.map((d, idx) => {
-                        const actionStyle = {
-                          added: { bg: 'var(--color-success-subtle)', text: 'var(--color-success)', label: '新增 (Added)' },
-                          modified: { bg: 'var(--color-warning-subtle)', text: 'var(--color-warning)', label: '修改 (Modified)' },
-                          removed: { bg: 'var(--color-danger-subtle)', text: 'var(--color-danger)', label: '删除 (Removed)' },
-                        }[d.action] || { bg: 'var(--color-bg-muted)', text: 'var(--color-text-secondary)', label: d.action };
+                        const actionConfig = {
+                          added: { className: 'code-audit-diff-action-tag--added', label: '新增 (Added)' },
+                          modified: { className: 'code-audit-diff-action-tag--modified', label: '修改 (Modified)' },
+                          removed: { className: 'code-audit-diff-action-tag--removed', label: '删除 (Removed)' },
+                        }[d.action] || { className: 'code-audit-diff-action-tag--default', label: d.action };
 
                         return (
-                          <tr key={idx} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-                            <td style={{ padding: '0.75rem', fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font-family-mono, monospace)' }}>
+                          <tr key={idx} className="code-audit-diff-tr">
+                            <td className="code-audit-diff-td-field">
                               {d.field}
                             </td>
-                            <td style={{ padding: '0.75rem' }}>
-                              <span style={{
-                                padding: '2px 6px',
-                                borderRadius: '4px',
-                                fontSize: '0.75rem',
-                                fontWeight: 600,
-                                background: actionStyle.bg,
-                                color: actionStyle.text,
-                              }}>
-                                {actionStyle.label}
+                            <td className="code-audit-diff-td">
+                              <span className={`code-audit-diff-action-tag ${actionConfig.className}`}>
+                                {actionConfig.label}
                               </span>
                             </td>
-                            <td style={{ padding: '0.75rem', color: d.action === 'removed' ? 'var(--color-danger)' : 'var(--color-text-secondary)', fontFamily: 'var(--font-family-mono, monospace)', wordBreak: 'break-all' }}>
+                            <td className={`code-audit-diff-td code-audit-diff-val-code ${d.action === 'removed' ? 'code-audit-diff-val-before--removed' : 'code-audit-diff-val-before'}`}>
                               {d.old_val !== null && d.old_val !== undefined ? (
                                 typeof d.old_val === 'object' ? JSON.stringify(d.old_val) : String(d.old_val)
                               ) : (
-                                <span style={{ opacity: 0.4 }}>null</span>
+                                <span className="code-audit-diff-val-null">null</span>
                               )}
                             </td>
-                            <td style={{ padding: '0.75rem', color: d.action === 'added' ? 'var(--color-success)' : 'var(--color-text-primary)', fontFamily: 'var(--font-family-mono, monospace)', wordBreak: 'break-all' }}>
+                            <td className={`code-audit-diff-td code-audit-diff-val-code ${d.action === 'added' ? 'code-audit-diff-val-after--added' : 'code-audit-diff-val-after'}`}>
                               {d.new_val !== null && d.new_val !== undefined ? (
                                 typeof d.new_val === 'object' ? JSON.stringify(d.new_val) : String(d.new_val)
                               ) : (
-                                <span style={{ opacity: 0.4 }}>null</span>
+                                <span className="code-audit-diff-val-null">null</span>
                               )}
                             </td>
                           </tr>
@@ -369,7 +344,7 @@ export const AuditDiffDrawer: React.FC<AuditDiffDrawerProps> = ({ open, onClose,
                     </tbody>
                   </table>
                 ) : (
-                  <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
+                  <div className="code-audit-diff-empty-msg">
                     {log.before_data || log.after_data ? '未产生结构化键值变化（或快照为同等值）' : '无快照对比数据'}
                   </div>
                 )}
@@ -383,7 +358,7 @@ export const AuditDiffDrawer: React.FC<AuditDiffDrawerProps> = ({ open, onClose,
                     {formattedBefore}
                   </pre>
                 ) : (
-                  <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-secondary)' }}>无变更前快照数据</div>
+                  <div className="code-audit-diff-empty-msg">无变更前快照数据</div>
                 )}
               </div>
             )}
@@ -395,7 +370,7 @@ export const AuditDiffDrawer: React.FC<AuditDiffDrawerProps> = ({ open, onClose,
                     {formattedAfter}
                   </pre>
                 ) : (
-                  <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-secondary)' }}>无变更后快照数据</div>
+                  <div className="code-audit-diff-empty-msg">无变更后快照数据</div>
                 )}
               </div>
             )}

@@ -44,7 +44,7 @@
 }
 .code-status-tag--success.code-status-tag--solid {
   background: var(--color-success);
-  color: var(--color-text-white, #ffffff);
+  color: var(--color-text-white);
   border: 1px solid transparent;
 }
 .code-status-tag--success.code-status-tag--outline {
@@ -61,7 +61,7 @@
 }
 .code-status-tag--running.code-status-tag--solid {
   background: var(--color-primary);
-  color: var(--color-text-white, #ffffff);
+  color: var(--color-text-white);
   border: 1px solid transparent;
 }
 .code-status-tag--running.code-status-tag--outline {
@@ -80,7 +80,7 @@
 .code-status-tag--failed.code-status-tag--solid,
 .code-status-tag--error.code-status-tag--solid {
   background: var(--color-danger);
-  color: var(--color-text-white, #ffffff);
+  color: var(--color-text-white);
   border: 1px solid transparent;
 }
 .code-status-tag--failed.code-status-tag--outline,
@@ -98,7 +98,7 @@
 }
 .code-status-tag--warning.code-status-tag--solid {
   background: var(--color-warning);
-  color: var(--color-text-white, #ffffff);
+  color: var(--color-text-white);
   border: 1px solid transparent;
 }
 .code-status-tag--warning.code-status-tag--outline {
@@ -117,7 +117,7 @@
 .code-status-tag--pending.code-status-tag--solid,
 .code-status-tag--queued.code-status-tag--solid {
   background: var(--color-info);
-  color: var(--color-text-white, #ffffff);
+  color: var(--color-text-white);
   border: 1px solid transparent;
 }
 .code-status-tag--pending.code-status-tag--outline,
@@ -135,7 +135,7 @@
 }
 .code-status-tag--neutral.code-status-tag--solid {
   background: var(--color-text-muted);
-  color: var(--color-text-white, #ffffff);
+  color: var(--color-text-white);
   border: 1px solid transparent;
 }
 .code-status-tag--neutral.code-status-tag--outline {
@@ -187,7 +187,11 @@
 .code-status-tag--pending .code-status-tag-dot,
 .code-status-tag--queued .code-status-tag-dot { background-color: var(--color-info); }
 .code-status-tag--neutral .code-status-tag-dot { background-color: var(--color-text-secondary); }
-.code-status-tag--solid .code-status-tag-dot { background-color: var(--color-text-white, #ffffff) !important; }
+
+/* Solid 模式下圆点保持白色，通过提升选择器特异性替代 !important */
+.code-status-tag.code-status-tag--solid .code-status-tag-dot {
+  background-color: var(--color-text-white);
+}
 
 /* 呼吸动画 */
 .code-status-tag-pulse {

@@ -207,23 +207,23 @@ export const AuditLogTable: React.FC<AuditLogTableProps> = ({
           <table className="code-audit-table">
             <thead>
               <tr className="code-audit-thead-tr">
-                <th className="code-audit-th" style={{ width: '160px' }}>操作时间</th>
-                <th className="code-audit-th" style={{ width: '140px' }}>操作人</th>
-                <th className="code-audit-th" style={{ width: '90px' }}>服务</th>
-                <th className="code-audit-th" style={{ width: '130px' }}>模块 / 动作</th>
-                <th className="code-audit-th" style={{ width: '80px' }}>风险等级</th>
+                <th className="code-audit-th code-audit-th--time">操作时间</th>
+                <th className="code-audit-th code-audit-th--user">操作人</th>
+                <th className="code-audit-th code-audit-th--service">服务</th>
+                <th className="code-audit-th code-audit-th--action">模块 / 动作</th>
+                <th className="code-audit-th code-audit-th--level">风险等级</th>
                 <th className="code-audit-th">操作摘要</th>
-                <th className="code-audit-th" style={{ width: '150px' }}>目标对象</th>
-                <th className="code-audit-th" style={{ width: '110px' }}>状态 / 耗时</th>
-                <th className="code-audit-th" style={{ width: '110px', textAlign: 'right' }}>操作</th>
+                <th className="code-audit-th code-audit-th--target">目标对象</th>
+                <th className="code-audit-th code-audit-th--duration">状态 / 耗时</th>
+                <th className="code-audit-th code-audit-th--ops">操作</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={9} style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-secondary)' }}>
-                    <div style={{ display: 'inline-block', width: 24, height: 24, borderRadius: '50%', border: '2px solid var(--color-primary-subtle)', borderTop: '2px solid var(--color-primary)', animation: 'spin 0.8s linear infinite' }} />
-                    <div style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>正在加载全局操作审计日志...</div>
+                  <td colSpan={9} className="code-audit-loading-cell">
+                    <div className="code-audit-spinner" />
+                    <div className="code-audit-loading-text">正在加载全局操作审计日志...</div>
                   </td>
                 </tr>
               ) : logs.length === 0 ? (
@@ -245,7 +245,7 @@ export const AuditLogTable: React.FC<AuditLogTableProps> = ({
                     >
                       {/* 时间与 TraceID */}
                       <td className="code-audit-td">
-                        <div style={{ fontWeight: 500, color: 'var(--color-text-primary)', fontSize: '0.85rem' }}>
+                        <div className="code-audit-time-val">
                           {item.created_at ? new Date(item.created_at).toLocaleString('zh-CN', { hour12: false }) : '-'}
                         </div>
                         {item.trace_id && (
@@ -262,8 +262,8 @@ export const AuditLogTable: React.FC<AuditLogTableProps> = ({
 
                       {/* 操作人 */}
                       <td className="code-audit-td">
-                        <div style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>{item.username || 'Anonymous'}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                        <div className="code-audit-user-name">{item.username || 'Anonymous'}</div>
+                        <div className="code-audit-user-sub">
                           {item.department_name || item.user_role || 'guest'}
                         </div>
                       </td>
@@ -275,10 +275,10 @@ export const AuditLogTable: React.FC<AuditLogTableProps> = ({
 
                       {/* 模块 / 动作 */}
                       <td className="code-audit-td">
-                        <div style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font-family-mono, monospace)', fontSize: '0.8rem' }}>
+                        <div className="code-audit-module-name">
                           {item.module}
                         </div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                        <div className="code-audit-action-sub">
                           {item.action}
                         </div>
                       </td>
@@ -290,13 +290,7 @@ export const AuditLogTable: React.FC<AuditLogTableProps> = ({
 
                       {/* 操作摘要 */}
                       <td className="code-audit-td">
-                        <div style={{
-                          color: 'var(--color-text-primary)',
-                          fontWeight: 500,
-                          wordBreak: 'break-word',
-                          lineHeight: 1.4,
-                          maxWidth: '380px'
-                        }}>
+                        <div className="code-audit-summary-text">
                           {item.summary}
                         </div>
                       </td>
@@ -305,39 +299,32 @@ export const AuditLogTable: React.FC<AuditLogTableProps> = ({
                       <td className="code-audit-td">
                         {item.target_name || item.target_id ? (
                           <div>
-                            <div style={{ fontWeight: 500, color: 'var(--color-text-primary)', fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '140px' }} title={item.target_name || item.target_id}>
+                            <div className="code-audit-target-title" title={item.target_name || item.target_id}>
                               {item.target_name || item.target_id}
                             </div>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>
+                            <div className="code-audit-target-sub">
                               {item.target_type || 'object'}
                             </div>
                           </div>
                         ) : (
-                          <span style={{ color: 'var(--color-text-secondary)' }}>-</span>
+                          <span className="code-audit-target-sub">-</span>
                         )}
                       </td>
 
                       {/* 状态码与耗时 */}
                       <td className="code-audit-td">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <span style={{
-                            padding: '1px 5px',
-                            borderRadius: '3px',
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
-                            background: isSuccess ? 'var(--color-success-subtle)' : 'var(--color-danger-subtle)',
-                            color: isSuccess ? 'var(--color-success)' : 'var(--color-danger)',
-                          }}>
+                        <div className="code-audit-status-row">
+                          <span className={`code-audit-status-badge ${isSuccess ? 'code-audit-status-badge--success' : 'code-audit-status-badge--danger'}`}>
                             {item.status_code}
                           </span>
-                          <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                          <span className="code-audit-duration-text">
                             {item.duration_ms}ms
                           </span>
                         </div>
                       </td>
 
                       {/* 操作列 */}
-                      <td className="code-audit-td" style={{ textAlign: 'right' }}>
+                      <td className="code-audit-td code-audit-td--ops">
                         <button
                           type="button"
                           onClick={(e) => {

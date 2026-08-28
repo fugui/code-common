@@ -87,7 +87,7 @@
 .code-pagination-btn--num.code-pagination-btn--active {
   background: var(--color-primary);
   border-color: var(--color-primary);
-  color: var(--color-text-white, #ffffff);
+  color: var(--color-text-white);
   font-weight: 600;
   cursor: default;
 }

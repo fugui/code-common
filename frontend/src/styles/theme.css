@@ -41,6 +41,20 @@
   --color-info-subtle: rgba(14, 165, 233, 0.12);
   --color-info-border: rgba(14, 165, 233, 0.25);
 
+  /* 紫色 (Purple / Pipeline) */
+  --color-purple: #a855f7;
+  --color-purple-hover: #9333ea;
+  --color-purple-active: #7e22ce;
+  --color-purple-subtle: rgba(168, 85, 247, 0.12);
+  --color-purple-border: rgba(168, 85, 247, 0.25);
+
+  /* 橙色 (Orange / PDM) */
+  --color-orange: #f97316;
+  --color-orange-hover: #ea580c;
+  --color-orange-active: #c2410c;
+  --color-orange-subtle: rgba(249, 115, 22, 0.12);
+  --color-orange-border: rgba(249, 115, 22, 0.25);
+
   /* ===== 3. 背景与表面层 (Surfaces & Backgrounds - Dark Default) ===== */
   --color-bg-app: #0f172a;
   --color-bg-surface: #1e293b;
@@ -344,10 +358,127 @@
   border: 1px solid var(--color-danger-border);
 }
 
+.code-badge--purple {
+  background: var(--color-purple-subtle);
+  color: var(--color-purple);
+  border: 1px solid var(--color-purple-border);
+}
+
+.code-badge--orange {
+  background: var(--color-orange-subtle);
+  color: var(--color-orange);
+  border: 1px solid var(--color-orange-border);
+}
+
 .code-badge--muted {
   background: var(--color-bg-muted);
   color: var(--color-text-secondary);
   border: 1px solid var(--color-border-subtle);
+}
+
+/* ===== 通用标准按钮系统 (Standard Code Buttons) ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm, 6px);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  border: 1px solid transparent;
+  color: var(--color-text-white);
+  box-sizing: border-box;
+  font-family: inherit;
+  white-space: nowrap;
+  user-select: none;
+  text-decoration: none;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: var(--color-text-white);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-primary:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+    border-color: var(--color-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--color-border-primary);
+  color: var(--color-text-primary);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--color-bg-hover);
+    border-color: var(--color-border-hover);
+  }
+}
+
+.btn-danger {
+  background: var(--color-danger);
+  color: var(--color-text-white);
+  border-color: var(--color-danger);
+  box-shadow: var(--shadow-sm);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-danger:hover:not(:disabled) {
+    background: var(--color-danger-hover);
+    border-color: var(--color-danger-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--color-border-primary);
+  color: var(--color-text-primary);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-outline:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+}
+
+.btn-text {
+  background: transparent;
+  border: none;
+  color: var(--color-primary);
+  padding: 0.25rem 0.5rem;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-text:hover:not(:disabled) {
+    background: var(--color-primary-subtle);
+  }
+}
+
+.btn-small {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  border-radius: var(--radius-xs, 4px);
 }
 
 /* 通用统计卡片 (Metric / Stat Box) */

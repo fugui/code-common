@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { zIndexManager, escManager, lockBodyScroll, unlockBodyScroll, ZIndexLevels } from '../../utils/overlay';
 import './modal.css';
@@ -200,6 +200,8 @@ export const Modal: React.FC<ModalProps> = ({
     : (animateVisible ? 'code-modal-root--pointer-auto' : 'code-modal-root--pointer-none');
 
   const alignClass = centered ? 'code-modal-root--centered' : 'code-modal-root--top';
+  const uniqueTitleId = useId();
+  const hasStringTitle = typeof title === 'string';
 
   return createPortal(
     <div
@@ -220,7 +222,7 @@ export const Modal: React.FC<ModalProps> = ({
       <div
         role="dialog"
         aria-modal="true"
-        aria-labelledby={typeof title === 'string' ? 'code-modal-title' : undefined}
+        aria-labelledby={hasStringTitle ? uniqueTitleId : undefined}
         className={`code-modal-panel ${animateVisible ? 'code-modal-panel--visible' : 'code-modal-panel--hidden'}`}
         style={{
           width: resolvedWidth,
@@ -238,8 +240,8 @@ export const Modal: React.FC<ModalProps> = ({
         {(title || subtitle || extra || showCloseButton) && (
           <div className="code-modal-header" style={headerStyle}>
             <div className="code-modal-header-content">
-              {typeof title === 'string' ? (
-                <h3 id="code-modal-title" className="code-modal-title">
+              {hasStringTitle ? (
+                <h3 id={uniqueTitleId} className="code-modal-title">
                   {title}
                 </h3>
               ) : (
