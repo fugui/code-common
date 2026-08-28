@@ -1,0 +1,210 @@
+/* ==========================================================================
+   Code Platform - StatusTag Component Styles
+   Namespace: .code-status-tag
+   ========================================================================== */
+
+.code-status-tag {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+  line-height: 1.25;
+  width: fit-content;
+  white-space: nowrap;
+  user-select: none;
+  transition: var(--transition-fast);
+}
+
+/* 尺寸变体 */
+.code-status-tag--sm {
+  gap: 4px;
+  padding: 1px 7px;
+  font-size: 0.725rem;
+}
+
+.code-status-tag--md {
+  gap: 6px;
+  padding: 3px 10px;
+  font-size: 0.8rem;
+}
+
+/* 形状变体 */
+.code-status-tag--pill {
+  border-radius: var(--radius-full, 9999px);
+}
+
+.code-status-tag--rounded {
+  border-radius: var(--radius-sm, 6px);
+}
+
+/* 状态色与风格: success */
+.code-status-tag--success.code-status-tag--subtle {
+  background: var(--color-success-subtle);
+  color: var(--color-success);
+  border: 1px solid var(--color-success-border);
+}
+.code-status-tag--success.code-status-tag--solid {
+  background: var(--color-success);
+  color: var(--color-text-white, #ffffff);
+  border: 1px solid transparent;
+}
+.code-status-tag--success.code-status-tag--outline {
+  background: transparent;
+  color: var(--color-success);
+  border: 1px solid var(--color-success-border);
+}
+
+/* 状态色与风格: running */
+.code-status-tag--running.code-status-tag--subtle {
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary-border);
+}
+.code-status-tag--running.code-status-tag--solid {
+  background: var(--color-primary);
+  color: var(--color-text-white, #ffffff);
+  border: 1px solid transparent;
+}
+.code-status-tag--running.code-status-tag--outline {
+  background: transparent;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary-border);
+}
+
+/* 状态色与风格: failed / error */
+.code-status-tag--failed.code-status-tag--subtle,
+.code-status-tag--error.code-status-tag--subtle {
+  background: var(--color-danger-subtle);
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger-border);
+}
+.code-status-tag--failed.code-status-tag--solid,
+.code-status-tag--error.code-status-tag--solid {
+  background: var(--color-danger);
+  color: var(--color-text-white, #ffffff);
+  border: 1px solid transparent;
+}
+.code-status-tag--failed.code-status-tag--outline,
+.code-status-tag--error.code-status-tag--outline {
+  background: transparent;
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger-border);
+}
+
+/* 状态色与风格: warning */
+.code-status-tag--warning.code-status-tag--subtle {
+  background: var(--color-warning-subtle);
+  color: var(--color-warning);
+  border: 1px solid var(--color-warning-border);
+}
+.code-status-tag--warning.code-status-tag--solid {
+  background: var(--color-warning);
+  color: var(--color-text-white, #ffffff);
+  border: 1px solid transparent;
+}
+.code-status-tag--warning.code-status-tag--outline {
+  background: transparent;
+  color: var(--color-warning);
+  border: 1px solid var(--color-warning-border);
+}
+
+/* 状态色与风格: pending / queued */
+.code-status-tag--pending.code-status-tag--subtle,
+.code-status-tag--queued.code-status-tag--subtle {
+  background: var(--color-info-subtle);
+  color: var(--color-info);
+  border: 1px solid var(--color-info-border);
+}
+.code-status-tag--pending.code-status-tag--solid,
+.code-status-tag--queued.code-status-tag--solid {
+  background: var(--color-info);
+  color: var(--color-text-white, #ffffff);
+  border: 1px solid transparent;
+}
+.code-status-tag--pending.code-status-tag--outline,
+.code-status-tag--queued.code-status-tag--outline {
+  background: transparent;
+  color: var(--color-info);
+  border: 1px solid var(--color-info-border);
+}
+
+/* 状态色与风格: neutral */
+.code-status-tag--neutral.code-status-tag--subtle {
+  background: var(--color-bg-muted);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-subtle);
+}
+.code-status-tag--neutral.code-status-tag--solid {
+  background: var(--color-text-muted);
+  color: var(--color-text-white, #ffffff);
+  border: 1px solid transparent;
+}
+.code-status-tag--neutral.code-status-tag--outline {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-subtle);
+}
+
+/* 圆点结构 */
+.code-status-tag-dot-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.code-status-tag-dot-wrapper--sm {
+  width: 6px;
+  height: 6px;
+}
+
+.code-status-tag-dot-wrapper--md {
+  width: 8px;
+  height: 8px;
+}
+
+.code-status-tag-dot {
+  position: relative;
+  display: inline-block;
+  border-radius: 50%;
+}
+
+.code-status-tag-dot--sm {
+  width: 5px;
+  height: 5px;
+}
+
+.code-status-tag-dot--md {
+  width: 6px;
+  height: 6px;
+}
+
+/* 各状态圆点颜色 */
+.code-status-tag--success .code-status-tag-dot { background-color: var(--color-success); }
+.code-status-tag--running .code-status-tag-dot { background-color: var(--color-primary); }
+.code-status-tag--failed .code-status-tag-dot,
+.code-status-tag--error .code-status-tag-dot { background-color: var(--color-danger); }
+.code-status-tag--warning .code-status-tag-dot { background-color: var(--color-warning); }
+.code-status-tag--pending .code-status-tag-dot,
+.code-status-tag--queued .code-status-tag-dot { background-color: var(--color-info); }
+.code-status-tag--neutral .code-status-tag-dot { background-color: var(--color-text-secondary); }
+.code-status-tag--solid .code-status-tag-dot { background-color: var(--color-text-white, #ffffff) !important; }
+
+/* 呼吸动画 */
+.code-status-tag-pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  opacity: 0.75;
+  animation: codeStatusTagPing 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.code-status-tag--running .code-status-tag-pulse {
+  background-color: var(--color-primary);
+}
+
+@keyframes codeStatusTagPing {
+  75%, 100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}

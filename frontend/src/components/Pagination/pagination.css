@@ -1,0 +1,126 @@
+/* ==========================================================================
+   Code Platform - Pagination Component Styles
+   Namespace: .code-pagination
+   ========================================================================== */
+
+.code-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm, 6px);
+}
+
+.code-pagination-info {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
+
+.code-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: nowrap;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* 通用分页按钮 */
+.code-pagination-btn {
+  border: 1px solid var(--color-border-subtle);
+  background: transparent;
+  border-radius: var(--radius-xs, 4px);
+  color: var(--color-text-primary);
+  font-size: 0.825rem;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+/* 导航按钮 (首页 / 上一页 / 下一页 / 末页) */
+.code-pagination-btn--nav {
+  padding: 0.3rem 0.6rem;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-pagination-btn--nav:hover:not(:disabled) {
+    background: var(--color-bg-hover);
+    border-color: var(--color-border-hover);
+  }
+}
+
+.code-pagination-btn--nav:active:not(:disabled) {
+  background: var(--color-bg-active);
+}
+
+.code-pagination-btn--nav:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  color: var(--color-text-secondary);
+}
+
+/* 数字按钮 */
+.code-pagination-btn--num {
+  min-width: 28px;
+  height: 28px;
+  padding: 0 0.3rem;
+  font-weight: 400;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-pagination-btn--num:hover:not(.code-pagination-btn--active) {
+    background: var(--color-primary-subtle);
+    border-color: var(--color-primary-border);
+    color: var(--color-primary);
+  }
+}
+
+.code-pagination-btn--num.code-pagination-btn--active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-white, #ffffff);
+  font-weight: 600;
+  cursor: default;
+}
+
+.code-pagination-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+/* 每页条数下拉选择框 */
+.code-pagination-select {
+  width: auto;
+  min-width: 92px;
+  height: 28px;
+  line-height: 26px;
+  padding: 0 0.5rem;
+  border-radius: var(--radius-xs, 4px);
+  border: 1px solid var(--color-border-subtle);
+  font-size: 0.825rem;
+  outline: none;
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  margin-left: 0.5rem;
+  cursor: pointer;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  transition: var(--transition-fast);
+}
+
+.code-pagination-select:hover {
+  border-color: var(--color-border-hover);
+}
+
+.code-pagination-select:focus {
+  border-color: var(--color-primary);
+}

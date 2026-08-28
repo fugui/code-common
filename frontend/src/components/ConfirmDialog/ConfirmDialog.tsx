@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { zIndexManager, escManager, lockBodyScroll, unlockBodyScroll, ZIndexLevels } from '../../utils/overlay';
+import './confirm-dialog.css';
 
 export type ConfirmType = 'danger' | 'warning' | 'info';
 
@@ -102,65 +103,43 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     };
   }, [mounted]);
 
-  if (!mounted && !open) return null;
-
   const handleConfirmClick = async () => {
-    if (isLoading) return;
-    if (onConfirm) {
-      try {
-        const result = onConfirm();
-        if (result instanceof Promise) {
-          setInternalLoading(true);
-          await result;
-        }
-      } finally {
-        setInternalLoading(false);
-      }
+    if (!onConfirm || isLoading) return;
+    try {
+      setInternalLoading(true);
+      await onConfirm();
+      onClose();
+    } catch (e) {
+      console.error('[ConfirmDialog] onConfirm failed:', e);
+    } finally {
+      setInternalLoading(false);
     }
-    onClose();
   };
 
-  // 类型图标与颜色
-  const typeConfig = {
-    danger: {
-      color: 'var(--color-danger)',
-      bgColor: 'var(--color-danger-subtle)',
-      btnBg: 'var(--color-danger)',
-      btnHover: 'var(--color-danger-hover)',
-      icon: (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-danger)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <line x1="12" y1="8" x2="12" y2="12" />
-          <line x1="12" y1="16" x2="12.01" y2="16" />
-        </svg>
-      ),
-    },
-    warning: {
-      color: 'var(--color-warning)',
-      bgColor: 'var(--color-warning-subtle)',
-      btnBg: 'var(--color-warning)',
-      btnHover: 'var(--color-warning-hover)',
-      icon: (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-warning)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-          <line x1="12" y1="9" x2="12" y2="13" />
-          <line x1="12" y1="17" x2="12.01" y2="17" />
-        </svg>
-      ),
-    },
-    info: {
-      color: 'var(--color-info)',
-      bgColor: 'var(--color-info-subtle)',
-      btnBg: 'var(--color-primary)',
-      btnHover: 'var(--color-primary-hover)',
-      icon: (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-info)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <line x1="12" y1="16" x2="12" y2="12" />
-          <line x1="12" y1="8" x2="12.01" y2="8" />
-        </svg>
-      ),
-    },
+  if (!mounted && !open) return null;
+
+  const typeIcon = {
+    danger: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="15" y1="9" x2="9" y2="15" />
+        <line x1="9" y1="9" x2="15" y2="15" />
+      </svg>
+    ),
+    warning: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+        <line x1="12" y1="9" x2="12" y2="13" />
+        <line x1="12" y1="17" x2="12.01" y2="17" />
+      </svg>
+    ),
+    info: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="16" x2="12" y2="12" />
+        <line x1="12" y1="8" x2="12.01" y2="8" />
+      </svg>
+    ),
   }[type];
 
   const containerZIndex = zLevels ? zLevels.container : 99990;
@@ -170,131 +149,56 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   const containerTarget = (getContainer ? getContainer() : null) || (typeof document !== 'undefined' ? document.body : null);
   if (!containerTarget) return null;
 
+  const pointerClass = animateVisible ? 'code-confirm-dialog-root--pointer-auto' : 'code-confirm-dialog-root--pointer-none';
+
   return createPortal(
     <div
-      className={`confirm-dialog-root-wrapper modal-root-wrapper ${className}`.trim()}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: containerZIndex,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '16px',
-        pointerEvents: animateVisible ? 'auto' : 'none',
-        background: 'transparent',
-        backgroundColor: 'transparent',
-      }}
+      className={`code-confirm-dialog-root confirm-dialog-root-wrapper modal-root-wrapper ${pointerClass} ${className}`.trim()}
+      style={{ zIndex: containerZIndex }}
     >
       {/* 遮罩 */}
       <div
+        className={`code-confirm-dialog-mask ${animateVisible ? 'code-confirm-dialog-mask--visible' : ''}`}
         onClick={isLoading ? undefined : onClose}
-        style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'var(--color-bg-overlay, rgba(15, 23, 42, 0.38))',
-          backdropFilter: 'blur(3px)',
-          WebkitBackdropFilter: 'blur(3px)',
-          zIndex: maskZIndex,
-          opacity: animateVisible ? 1 : 0,
-          transition: 'opacity 220ms ease',
-        }}
+        style={{ zIndex: maskZIndex }}
       />
 
       {/* 对话框面板 */}
       <div
         role="alertdialog"
         aria-modal="true"
-        style={{
-          position: 'relative',
-          width: '100%',
-          maxWidth: '460px',
-          background: 'var(--card-bg, #111827)',
-          color: 'var(--text-color, #f3f4f6)',
-          borderRadius: '14px',
-          border: '1px solid var(--border-color, rgba(255, 255, 255, 0.1))',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05)',
-          zIndex: panelZIndex,
-          opacity: animateVisible ? 1 : 0,
-          transform: animateVisible ? 'scale(1) translateY(0)' : 'scale(0.95) translateY(8px)',
-          transition: 'transform 240ms cubic-bezier(0.16, 1, 0.3, 1), opacity 220ms cubic-bezier(0.16, 1, 0.3, 1)',
-          overflow: 'hidden',
-        }}
+        aria-labelledby="code-confirm-dialog-title"
+        className={`code-confirm-dialog-panel ${animateVisible ? 'code-confirm-dialog-panel--visible' : 'code-confirm-dialog-panel--hidden'}`}
+        style={{ zIndex: panelZIndex }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* 顶部彩色装饰条 */}
-        <div style={{ height: '3px', background: typeConfig.color, width: '100%' }} />
+        <div className={`code-confirm-dialog-decorator code-confirm-dialog-decorator--${type}`} />
 
-        <div style={{ padding: '24px' }}>
+        <div className="code-confirm-dialog-body">
           {/* 图标与标题 */}
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-            <div
-              style={{
-                width: '44px',
-                height: '44px',
-                borderRadius: '12px',
-                background: typeConfig.bgColor,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
-              {typeConfig.icon}
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <h3
-                style={{
-                  margin: 0,
-                  fontSize: '1.1rem',
-                  fontWeight: 600,
-                  color: 'var(--text-color, #f3f4f6)',
-                  lineHeight: '1.4',
-                }}
-              >
-                {title}
-              </h3>
-              {content && (
-                <div
-                  style={{
-                    marginTop: '8px',
-                    fontSize: '0.9rem',
-                    color: 'var(--text-secondary, #94a3b8)',
-                    lineHeight: '1.5',
-                  }}
-                >
-                  {content}
-                </div>
-              )}
-            </div>
+          <div className={`code-confirm-dialog-icon code-confirm-dialog-icon--${type}`}>
+            {typeIcon}
+          </div>
+          <div className="code-confirm-dialog-text">
+            <h3 id="code-confirm-dialog-title" className="code-confirm-dialog-title">
+              {title}
+            </h3>
+            {content && (
+              <div className="code-confirm-dialog-content">
+                {content}
+              </div>
+            )}
           </div>
         </div>
 
         {/* 底部按钮栏 */}
-        <div
-          style={{
-            padding: '12px 24px 20px',
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: '10px',
-          }}
-        >
+        <div className="code-confirm-dialog-footer">
           <button
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '8px',
-              border: '1px solid var(--border-color, rgba(255, 255, 255, 0.12))',
-              background: 'var(--bg-secondary, rgba(255, 255, 255, 0.05))',
-              color: 'var(--text-color, #f3f4f6)',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-              opacity: isLoading ? 0.6 : 1,
-              transition: 'all 0.15s ease',
-            }}
+            className="code-confirm-dialog-btn-cancel"
           >
             {cancelText}
           </button>
@@ -302,21 +206,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             type="button"
             onClick={handleConfirmClick}
             disabled={isLoading}
-            style={{
-              padding: '8px 18px',
-              borderRadius: '8px',
-              border: 'none',
-              background: typeConfig.btnBg,
-              color: '#ffffff',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-              opacity: isLoading ? 0.75 : 1,
-              transition: 'all 0.15s ease',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-            }}
+            className={`code-confirm-dialog-btn-confirm code-confirm-dialog-btn-confirm--${type}`}
           >
             {isLoading && (
               <svg
@@ -326,7 +216,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2.5"
-                style={{ animation: 'spin 1s linear infinite' }}
+                className="code-confirm-dialog-spinner"
               >
                 <circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12" />
               </svg>

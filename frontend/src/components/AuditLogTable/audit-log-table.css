@@ -1,0 +1,315 @@
+/* ==========================================================================
+   Code Platform - AuditLogTable Component Styles
+   Namespace: .code-audit
+   ========================================================================== */
+
+.code-audit-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* 筛选与搜索工具栏卡片 */
+.code-audit-toolbar {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg, 10px);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.code-audit-toolbar-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.code-audit-toolbar-left {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.code-audit-toolbar-right {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+/* 表单输入与下拉框 */
+.code-audit-select {
+  padding: 0.45rem 0.65rem;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--color-border-subtle);
+  font-size: 0.85rem;
+  background: var(--color-bg-input);
+  color: var(--color-text-primary);
+  outline: none;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.code-audit-select:hover {
+  border-color: var(--color-border-hover);
+}
+
+.code-audit-select:focus {
+  border-color: var(--color-primary);
+}
+
+.code-audit-search-form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.code-audit-input {
+  padding: 0.45rem 0.75rem;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--color-border-subtle);
+  font-size: 0.85rem;
+  min-width: 260px;
+  background: var(--color-bg-input);
+  color: var(--color-text-primary);
+  outline: none;
+  transition: var(--transition-fast);
+}
+
+.code-audit-input:hover {
+  border-color: var(--color-border-hover);
+}
+
+.code-audit-input:focus {
+  border-color: var(--color-primary);
+}
+
+.code-audit-btn-search {
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-sm, 6px);
+  border: none;
+  background: var(--color-primary);
+  color: var(--color-text-white, #ffffff);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-audit-btn-search:hover {
+    background: var(--color-primary-hover);
+  }
+}
+
+.code-audit-btn-reset {
+  padding: 0.45rem 0.75rem;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--color-border-subtle);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-audit-btn-reset:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+    border-color: var(--color-border-hover);
+  }
+}
+
+.code-audit-btn-refresh {
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: var(--transition-fast);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-audit-btn-refresh:hover {
+    background: var(--color-bg-hover);
+    border-color: var(--color-border-hover);
+  }
+}
+
+/* 数据表格容器 */
+.code-audit-table-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg, 10px);
+  overflow: hidden;
+}
+
+.code-audit-table-scroll {
+  overflow-x: auto;
+}
+
+.code-audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.code-audit-thead-tr {
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: var(--color-bg-muted);
+  color: var(--color-text-secondary);
+  text-align: left;
+}
+
+.code-audit-th {
+  padding: 0.875rem 1rem;
+  font-weight: 600;
+}
+
+.code-audit-tbody-tr {
+  border-bottom: 1px solid var(--color-border-subtle);
+  transition: background 0.15s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-audit-tbody-tr:hover {
+    background: var(--color-bg-hover);
+  }
+}
+
+.code-audit-tbody-tr--clickable {
+  cursor: pointer;
+}
+
+.code-audit-td {
+  padding: 0.875rem 1rem;
+}
+
+/* 风险等级徽章 */
+.code-audit-level-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-xs, 4px);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.code-audit-level-badge--p0 {
+  background: var(--color-danger-subtle);
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger-border);
+}
+
+.code-audit-level-badge--p1 {
+  background: var(--color-warning-subtle);
+  color: var(--color-warning);
+  border: 1px solid var(--color-warning-border);
+}
+
+.code-audit-level-badge--p2 {
+  background: var(--color-bg-muted);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.code-audit-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-danger);
+  animation: codeAuditPulse 1.5s infinite;
+}
+
+@keyframes codeAuditPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.3); }
+}
+
+/* 服务标识徽章 */
+.code-audit-service-badge {
+  padding: 2px 8px;
+  border-radius: var(--radius-xs, 4px);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.code-audit-service-badge--bench {
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+}
+
+.code-audit-service-badge--pipeline {
+  background: rgba(168, 85, 247, 0.12);
+  color: #a855f7;
+}
+
+.code-audit-service-badge--shield {
+  background: var(--color-success-subtle);
+  color: var(--color-success);
+}
+
+.code-audit-service-badge--pdm {
+  background: rgba(249, 115, 22, 0.12);
+  color: #f97316;
+}
+
+.code-audit-service-badge--default {
+  background: var(--color-bg-muted);
+  color: var(--color-text-secondary);
+}
+
+/* Trace ID 复制 */
+.code-audit-trace-btn {
+  font-size: 0.7rem;
+  font-family: var(--font-family-mono, monospace);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+  transition: var(--transition-fast);
+}
+
+.code-audit-trace-btn--copied {
+  color: var(--color-success) !important;
+}
+
+/* 详情按钮 */
+.code-audit-btn-detail {
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-sm, 5px);
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-bg-surface);
+  color: var(--color-primary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-audit-btn-detail:hover {
+    background: var(--color-primary-subtle);
+    border-color: var(--color-primary-border);
+  }
+}
+
+/* 分页包裹容器 */
+.code-audit-pagination-wrapper {
+  padding: 1rem;
+  border-top: 1px solid var(--color-border-subtle);
+}

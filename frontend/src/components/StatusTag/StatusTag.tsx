@@ -1,4 +1,5 @@
 import React from 'react';
+import './status-tag.css';
 
 export type StatusType = 'success' | 'running' | 'failed' | 'error' | 'warning' | 'pending' | 'queued' | 'neutral';
 export type StatusTagShape = 'pill' | 'rounded';
@@ -24,82 +25,15 @@ export interface StatusTagProps {
   className?: string;
 }
 
-interface StatusTheme {
-  label: string;
-  color: string;
-  bgSubtle: string;
-  bgSolid: string;
-  border: string;
-  dotColor: string;
-  hasPulse?: boolean;
-}
-
-const THEME_MAP: Record<string, StatusTheme> = {
-  success: {
-    label: '成功 / 正常',
-    color: 'var(--color-success)',
-    bgSubtle: 'var(--color-success-subtle)',
-    bgSolid: 'var(--color-success)',
-    border: 'var(--color-success-border)',
-    dotColor: 'var(--color-success)',
-  },
-  running: {
-    label: '进行中 / 运行',
-    color: 'var(--color-primary)',
-    bgSubtle: 'var(--color-primary-subtle)',
-    bgSolid: 'var(--color-primary)',
-    border: 'var(--color-primary-border)',
-    dotColor: 'var(--color-primary)',
-    hasPulse: true,
-  },
-  failed: {
-    label: '失败 / 异常',
-    color: 'var(--color-danger)',
-    bgSubtle: 'var(--color-danger-subtle)',
-    bgSolid: 'var(--color-danger)',
-    border: 'var(--color-danger-border)',
-    dotColor: 'var(--color-danger)',
-  },
-  error: {
-    label: '错误 / 严重',
-    color: 'var(--color-danger)',
-    bgSubtle: 'var(--color-danger-subtle)',
-    bgSolid: 'var(--color-danger)',
-    border: 'var(--color-danger-border)',
-    dotColor: 'var(--color-danger)',
-  },
-  warning: {
-    label: '警告 / 注意',
-    color: 'var(--color-warning)',
-    bgSubtle: 'var(--color-warning-subtle)',
-    bgSolid: 'var(--color-warning)',
-    border: 'var(--color-warning-border)',
-    dotColor: 'var(--color-warning)',
-  },
-  pending: {
-    label: '排队中 / 等待',
-    color: 'var(--color-info)',
-    bgSubtle: 'var(--color-info-subtle)',
-    bgSolid: 'var(--color-info)',
-    border: 'var(--color-info-border)',
-    dotColor: 'var(--color-info)',
-  },
-  queued: {
-    label: '已入队',
-    color: 'var(--color-info)',
-    bgSubtle: 'var(--color-info-subtle)',
-    bgSolid: 'var(--color-info)',
-    border: 'var(--color-info-border)',
-    dotColor: 'var(--color-info)',
-  },
-  neutral: {
-    label: '未开始 / 默认',
-    color: 'var(--color-text-secondary)',
-    bgSubtle: 'var(--color-bg-muted)',
-    bgSolid: 'var(--color-text-muted)',
-    border: 'var(--color-border-subtle)',
-    dotColor: 'var(--color-text-secondary)',
-  },
+const DEFAULT_LABELS: Record<StatusType, string> = {
+  success: '成功 / 正常',
+  running: '进行中 / 运行',
+  failed: '失败 / 异常',
+  error: '错误 / 严重',
+  warning: '警告 / 注意',
+  pending: '排队中 / 等待',
+  queued: '已入队',
+  neutral: '未开始 / 默认',
 };
 
 export const StatusTag: React.FC<StatusTagProps> = ({
@@ -112,100 +46,27 @@ export const StatusTag: React.FC<StatusTagProps> = ({
   style,
   className = '',
 }) => {
-  const theme = THEME_MAP[status] || THEME_MAP.neutral;
+  const displayText = text || DEFAULT_LABELS[status] || DEFAULT_LABELS.neutral;
   const isSm = size === 'sm';
-  const displayText = text || theme.label;
+  const hasPulse = status === 'running';
 
-  const getVariantStyles = (): React.CSSProperties => {
-    switch (variant) {
-      case 'solid':
-        return {
-          backgroundColor: theme.bgSolid,
-          color: 'var(--color-text-white, #ffffff)',
-          border: '1px solid transparent',
-        };
-      case 'outline':
-        return {
-          background: 'transparent',
-          color: theme.color,
-          border: `1px solid ${theme.border}`,
-        };
-      case 'subtle':
-      default:
-        return {
-          background: theme.bgSubtle,
-          color: theme.color,
-          border: `1px solid ${theme.border}`,
-        };
-    }
-  };
-
-  const colors = getVariantStyles();
+  const statusClass = `code-status-tag--${status}`;
+  const sizeClass = `code-status-tag--${size}`;
+  const shapeClass = `code-status-tag--${shape}`;
+  const variantClass = `code-status-tag--${variant}`;
 
   return (
     <span
-      className={`status-tag-badge ${className}`.trim()}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: isSm ? '4px' : '6px',
-        padding: isSm ? '1px 7px' : '3px 10px',
-        borderRadius: shape === 'pill' ? '9999px' : '6px',
-        fontSize: isSm ? '0.725rem' : '0.8rem',
-        fontWeight: 600,
-        lineHeight: 1.25,
-        width: 'fit-content',
-        whiteSpace: 'nowrap',
-        userSelect: 'none',
-        ...colors,
-        ...style,
-      }}
+      className={`code-status-tag status-tag-badge ${statusClass} ${sizeClass} ${shapeClass} ${variantClass} ${className}`.trim()}
+      style={style}
     >
       {dot && (
-        <span
-          style={{
-            position: 'relative',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: isSm ? '6px' : '8px',
-            height: isSm ? '6px' : '8px',
-          }}
-        >
-          {theme.hasPulse && (
-            <span
-              style={{
-                position: 'absolute',
-                inset: 0,
-                borderRadius: '50%',
-                backgroundColor: theme.dotColor,
-                opacity: 0.75,
-                animation: 'statusTagPing 1.5s cubic-bezier(0, 0, 0.2, 1) infinite',
-              }}
-            />
-          )}
-          <span
-            style={{
-              position: 'relative',
-              display: 'inline-block',
-              width: isSm ? '5px' : '6px',
-              height: isSm ? '5px' : '6px',
-              borderRadius: '50%',
-              backgroundColor: variant === 'solid' ? 'var(--color-text-white, #ffffff)' : theme.dotColor,
-            }}
-          />
+        <span className={`code-status-tag-dot-wrapper ${isSm ? 'code-status-tag-dot-wrapper--sm' : 'code-status-tag-dot-wrapper--md'}`}>
+          {hasPulse && <span className="code-status-tag-pulse" />}
+          <span className={`code-status-tag-dot ${isSm ? 'code-status-tag-dot--sm' : 'code-status-tag-dot--md'}`} />
         </span>
       )}
       <span>{displayText}</span>
-
-      <style>{`
-        @keyframes statusTagPing {
-          75%, 100% {
-            transform: scale(2.2);
-            opacity: 0;
-          }
-        }
-      `}</style>
     </span>
   );
 };

@@ -1,4 +1,5 @@
 import React from 'react';
+import './empty-state.css';
 
 export type EmptyStateType = 'data' | 'search' | 'permission' | 'success' | 'error' | 'folder';
 
@@ -102,70 +103,31 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
   const content = (
     <div
-      className={`empty-state-container ${className}`.trim()}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: compact ? '1.5rem 1rem' : '3.5rem 1.5rem',
-        textAlign: 'center',
-        color: 'var(--color-text-secondary)',
-        ...style,
-      }}
+      className={`code-empty-state empty-state-container ${compact ? 'code-empty-state--compact' : ''} ${className}`.trim()}
+      style={style}
     >
       {/* 图标与背景光晕 */}
-      <div
-        style={{
-          width: compact ? 56 : 72,
-          height: compact ? 56 : 72,
-          borderRadius: 'var(--radius-full, 50%)',
-          background: 'var(--color-bg-muted)',
-          border: '1px solid var(--border-color, var(--color-border-subtle))',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: compact ? '0.75rem' : '1.25rem',
-          color: 'var(--color-text-muted)',
-          boxShadow: 'var(--shadow-sm, 0 4px 16px rgba(0, 0, 0, 0.1))',
-        }}
-      >
+      <div className="code-empty-state-icon-box">
         {icon || renderDefaultIcon(type, compact)}
       </div>
 
       {/* 标题 */}
       {displayTitle && (
-        <h4
-          style={{
-            margin: 0,
-            fontSize: compact ? '0.9rem' : '1.05rem',
-            fontWeight: 600,
-            color: 'var(--text-color, var(--color-text-primary))',
-            letterSpacing: '-0.2px',
-          }}
-        >
+        <h4 className="code-empty-state-title">
           {displayTitle}
         </h4>
       )}
 
       {/* 描述说明 */}
       {description && (
-        <p
-          style={{
-            margin: compact ? '0.25rem 0 0 0' : '0.5rem 0 0 0',
-            fontSize: compact ? '0.8rem' : '0.875rem',
-            color: 'var(--text-secondary, var(--color-text-secondary))',
-            maxWidth: compact ? '240px' : '420px',
-            lineHeight: 1.5,
-          }}
-        >
+        <p className="code-empty-state-description">
           {description}
         </p>
       )}
 
       {/* 引导操作 CTA */}
       {action && (
-        <div style={{ marginTop: compact ? '0.875rem' : '1.25rem' }}>
+        <div className="code-empty-state-action">
           {action}
         </div>
       )}
@@ -174,8 +136,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
   if (inTable) {
     return (
-      <tr className="empty-state-row">
-        <td colSpan={colSpan} style={{ padding: 0, border: 'none' }}>
+      <tr className="code-empty-state-table-row empty-state-row">
+        <td colSpan={colSpan} className="code-empty-state-table-cell">
           {content}
         </td>
       </tr>

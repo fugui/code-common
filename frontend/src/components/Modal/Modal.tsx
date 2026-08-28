@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { zIndexManager, escManager, lockBodyScroll, unlockBodyScroll, ZIndexLevels } from '../../utils/overlay';
+import './modal.css';
 
 export type ModalWidthPreset = 'sm' | 'md' | 'lg' | 'xl' | 'full';
 
@@ -194,40 +195,23 @@ export const Modal: React.FC<ModalProps> = ({
   const maskZIndex = zLevels ? zLevels.mask : 99901;
   const panelZIndex = zLevels ? zLevels.panel : 99905;
 
+  const pointerClass = (!mask && animateVisible)
+    ? 'code-modal-root--pointer-none'
+    : (animateVisible ? 'code-modal-root--pointer-auto' : 'code-modal-root--pointer-none');
+
+  const alignClass = centered ? 'code-modal-root--centered' : 'code-modal-root--top';
+
   return createPortal(
     <div
-      className={`modal-root-wrapper ${className}`.trim()}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: containerZIndex,
-        pointerEvents: (!mask && animateVisible) ? 'none' : (animateVisible ? 'auto' : 'none'),
-        display: 'flex',
-        alignItems: centered ? 'center' : 'flex-start',
-        justifyContent: 'center',
-        padding: centered ? '24px' : '64px 24px 24px 24px',
-        overflowY: 'auto',
-        background: 'transparent',
-        backgroundColor: 'transparent',
-      }}
+      className={`code-modal-root modal-root-wrapper ${alignClass} ${pointerClass} ${className}`.trim()}
+      style={{ zIndex: containerZIndex }}
     >
-      {/* 1. Backdrop 遮罩层 (与 Design Tokens 联动) */}
+      {/* 1. Backdrop 遮罩层 */}
       {mask && (
         <div
-          className={maskClassName}
+          className={`code-modal-mask ${animateVisible ? 'code-modal-mask--visible' : ''} ${!maskClosable ? 'code-modal-mask--unclosable' : ''} ${maskClassName}`.trim()}
           onClick={maskClosable ? handleClose : undefined}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'var(--color-bg-overlay, rgba(15, 23, 42, 0.38))',
-            backdropFilter: 'blur(3px)',
-            WebkitBackdropFilter: 'blur(3px)',
-            zIndex: maskZIndex,
-            opacity: animateVisible ? 1 : 0,
-            transition: 'opacity 260ms cubic-bezier(0.16, 1, 0.3, 1)',
-            cursor: maskClosable ? 'pointer' : 'default',
-            ...maskStyle,
-          }}
+          style={{ zIndex: maskZIndex, ...maskStyle }}
           title={maskClosable ? '点击背景区域关闭' : undefined}
         />
       )}
@@ -236,108 +220,41 @@ export const Modal: React.FC<ModalProps> = ({
       <div
         role="dialog"
         aria-modal="true"
+        aria-labelledby={typeof title === 'string' ? 'code-modal-title' : undefined}
+        className={`code-modal-panel ${animateVisible ? 'code-modal-panel--visible' : 'code-modal-panel--hidden'}`}
         style={{
-          position: 'relative',
           width: resolvedWidth,
-          maxWidth: '100%',
-          maxHeight: 'calc(100vh - 80px)',
           height: resolvedHeight,
           minHeight: resolvedMinHeight,
-          pointerEvents: animateVisible ? 'auto' : 'none',
-          background: 'var(--card-bg, var(--bg-secondary, #111827))',
-          color: 'var(--text-color, var(--text-main, #f3f4f6))',
-          borderRadius: '14px',
-          border: '1px solid var(--border-color, rgba(255, 255, 255, 0.1))',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05)',
           zIndex: panelZIndex,
-          opacity: animateVisible ? 1 : 0,
-          transform: animateVisible ? 'scale(1) translateY(0)' : 'scale(0.94) translateY(12px)',
-          transition: 'transform 280ms cubic-bezier(0.16, 1, 0.3, 1), opacity 260ms cubic-bezier(0.16, 1, 0.3, 1)',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
           ...style,
         }}
         onClick={e => e.stopPropagation()}
       >
         {/* 顶部高光装饰条 */}
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 3,
-            background: 'linear-gradient(90deg, var(--color-primary, #3b82f6), var(--color-primary-hover, #6366f1), var(--color-accent, #ec4899))',
-            zIndex: 10,
-          }}
-        />
+        <div className="code-modal-decorator" />
 
         {/* 头部 Header */}
         {(title || subtitle || extra || showCloseButton) && (
-          <div
-            style={{
-              padding: '20px 24px 16px 24px',
-              borderBottom: '1px solid var(--border-color, rgba(255, 255, 255, 0.08))',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-start',
-              background: 'var(--bg-color, var(--bg-primary, #090d16))',
-              flexShrink: 0,
-              gap: 16,
-              ...headerStyle,
-            }}
-          >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 0 }}>
+          <div className="code-modal-header" style={headerStyle}>
+            <div className="code-modal-header-content">
               {typeof title === 'string' ? (
-                <h3
-                  style={{
-                    fontSize: '1.15rem',
-                    fontWeight: 700,
-                    margin: 0,
-                    color: 'var(--text-color, var(--text-main, #f3f4f6))',
-                    letterSpacing: '-0.3px',
-                    wordBreak: 'break-word',
-                  }}
-                >
+                <h3 id="code-modal-title" className="code-modal-title">
                   {title}
                 </h3>
               ) : (
                 title
               )}
-              {subtitle && (
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary, #94a3b8)', marginTop: 2 }}>
-                  {subtitle}
-                </div>
-              )}
+              {subtitle && <div className="code-modal-subtitle">{subtitle}</div>}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+            <div className="code-modal-actions">
               {extra}
               {showCloseButton && (
                 <button
                   type="button"
                   onClick={handleClose}
-                  style={{
-                    padding: '6px',
-                    borderRadius: '8px',
-                    border: '1px solid transparent',
-                    background: 'var(--bg-secondary, rgba(255, 255, 255, 0.06))',
-                    color: 'var(--text-secondary, #94a3b8)',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.color = 'var(--color-danger, #ef4444)';
-                    e.currentTarget.style.background = 'var(--color-danger-bg, rgba(239, 68, 68, 0.12))';
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.color = 'var(--text-secondary, #94a3b8)';
-                    e.currentTarget.style.background = 'var(--bg-secondary, rgba(255, 255, 255, 0.06))';
-                  }}
+                  className="code-modal-close-btn"
                   title="关闭 (Esc)"
                   aria-label="关闭弹窗"
                 >
@@ -361,36 +278,13 @@ export const Modal: React.FC<ModalProps> = ({
         )}
 
         {/* 内容主体 Body */}
-        <div
-          style={{
-            flex: 1,
-            minHeight: 0,
-            padding: '24px',
-            overflowY: 'auto',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '16px',
-            ...bodyStyle,
-          }}
-        >
+        <div className="code-modal-body" style={bodyStyle}>
           {children}
         </div>
 
         {/* 底部 Footer */}
         {footer && (
-          <div
-            style={{
-              padding: '16px 24px',
-              borderTop: '1px solid var(--border-color, rgba(255, 255, 255, 0.08))',
-              display: 'flex',
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-              gap: '12px',
-              background: 'var(--bg-color, var(--bg-primary, #090d16))',
-              flexShrink: 0,
-              ...footerStyle,
-            }}
-          >
+          <div className="code-modal-footer" style={footerStyle}>
             {footer}
           </div>
         )}

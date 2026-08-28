@@ -1,0 +1,237 @@
+/* ==========================================================================
+   Code Platform - ConfirmDialog Component Styles
+   Namespace: .code-confirm-dialog
+   ========================================================================== */
+
+/* 1. 根包装器 (Portal Root) */
+.code-confirm-dialog-root {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.code-confirm-dialog-root--pointer-none {
+  pointer-events: none;
+}
+
+.code-confirm-dialog-root--pointer-auto {
+  pointer-events: auto;
+}
+
+/* 2. 遮罩层 (Backdrop Mask) */
+.code-confirm-dialog-mask {
+  position: fixed;
+  inset: 0;
+  background: var(--color-bg-overlay);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  opacity: 0;
+  transition: opacity 220ms ease;
+  cursor: pointer;
+}
+
+.code-confirm-dialog-mask--visible {
+  opacity: 1;
+}
+
+/* 3. 对话框主面板 (Panel) */
+.code-confirm-dialog-panel {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-lg, 12px);
+  border: 1px solid var(--color-border-subtle);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  opacity: 0;
+  transform: scale(0.95) translateY(8px);
+  transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1), opacity 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  will-change: transform, opacity;
+}
+
+.code-confirm-dialog-panel--visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  pointer-events: auto;
+}
+
+.code-confirm-dialog-panel--hidden {
+  pointer-events: none;
+}
+
+/* 4. 顶部彩色装饰条 (Decorator) */
+.code-confirm-dialog-decorator {
+  height: 3px;
+  width: 100%;
+}
+
+.code-confirm-dialog-decorator--danger {
+  background: var(--color-danger);
+}
+
+.code-confirm-dialog-decorator--warning {
+  background: var(--color-warning);
+}
+
+.code-confirm-dialog-decorator--info {
+  background: var(--color-info);
+}
+
+/* 5. 主体内容区 (Body) */
+.code-confirm-dialog-body {
+  padding: 24px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+/* 6. 图标容器 (Icon Box) */
+.code-confirm-dialog-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-lg, 12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.code-confirm-dialog-icon--danger {
+  background: var(--color-danger-subtle);
+  color: var(--color-danger);
+}
+
+.code-confirm-dialog-icon--warning {
+  background: var(--color-warning-subtle);
+  color: var(--color-warning);
+}
+
+.code-confirm-dialog-icon--info {
+  background: var(--color-info-subtle);
+  color: var(--color-info);
+}
+
+/* 7. 文本区域 (Title & Content) */
+.code-confirm-dialog-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.code-confirm-dialog-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.4;
+}
+
+.code-confirm-dialog-content {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+/* 8. 底部操作按钮栏 (Footer) */
+.code-confirm-dialog-footer {
+  padding: 12px 24px 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* 取消按钮 */
+.code-confirm-dialog-btn-cancel {
+  padding: 8px 16px;
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-confirm-dialog-btn-cancel:hover:not(:disabled) {
+    background: var(--color-bg-active);
+    border-color: var(--color-border-hover);
+  }
+}
+
+.code-confirm-dialog-btn-cancel:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* 确认按钮 */
+.code-confirm-dialog-btn-confirm {
+  padding: 8px 18px;
+  border-radius: var(--radius-md, 8px);
+  border: none;
+  color: var(--color-text-white, #ffffff);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.code-confirm-dialog-btn-confirm--danger {
+  background: var(--color-danger);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-confirm-dialog-btn-confirm--danger:hover:not(:disabled) {
+    background: var(--color-danger-hover);
+  }
+}
+
+.code-confirm-dialog-btn-confirm--warning {
+  background: var(--color-warning);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-confirm-dialog-btn-confirm--warning:hover:not(:disabled) {
+    background: var(--color-warning-hover);
+  }
+}
+
+.code-confirm-dialog-btn-confirm--info {
+  background: var(--color-primary);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-confirm-dialog-btn-confirm--info:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+  }
+}
+
+.code-confirm-dialog-btn-confirm:disabled {
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+/* Loading 旋转动画 */
+.code-confirm-dialog-spinner {
+  animation: code-spin 1s linear infinite;
+}
+
+@keyframes code-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
