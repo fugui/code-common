@@ -244,6 +244,147 @@
   border-color: var(--color-primary);
 }
 
+/* 栅格系统 */
+.grid-cols-2 { display: grid; grid-template-columns: repeat(2, 1fr); }
+.grid-cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); }
+.grid-cols-4 { display: grid; grid-template-columns: repeat(4, 1fr); }
+.grid-cols-auto { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+
+@media (max-width: 1024px) {
+  .grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-cols-3 { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .grid-cols-4, .grid-cols-2 { grid-template-columns: 1fr; }
+}
+
+/* 尺寸与通用属性 */
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+.cursor-pointer { cursor: pointer; }
+.overflow-hidden { overflow: hidden; }
+.overflow-x-auto { overflow-x: auto; }
+.overflow-y-auto { overflow-y: auto; }
+
+/* 通用标准表格 (Standard Code Table) */
+.code-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.8125rem;
+}
+
+.code-table thead tr,
+.code-table-head-tr {
+  background: var(--color-bg-muted);
+  border-bottom: 1px solid var(--color-border-subtle);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.code-table th {
+  padding: 0.75rem 1rem;
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.code-table tbody tr,
+.code-table-row {
+  border-bottom: 1px solid var(--color-border-subtle);
+  transition: background 0.15s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-table tbody tr:hover,
+  .code-table-row:hover {
+    background: var(--color-bg-hover);
+  }
+}
+
+.code-table td {
+  padding: 0.85rem 1rem;
+  vertical-align: middle;
+}
+
+/* 通用标准徽章 (Standard Badges) */
+.code-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-xs, 4px);
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.code-badge--primary {
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary-border);
+}
+
+.code-badge--success {
+  background: var(--color-success-subtle);
+  color: var(--color-success);
+  border: 1px solid var(--color-success-border);
+}
+
+.code-badge--warning {
+  background: var(--color-warning-subtle);
+  color: var(--color-warning);
+  border: 1px solid var(--color-warning-border);
+}
+
+.code-badge--danger {
+  background: var(--color-danger-subtle);
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger-border);
+}
+
+.code-badge--muted {
+  background: var(--color-bg-muted);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-subtle);
+}
+
+/* 通用统计卡片 (Metric / Stat Box) */
+.code-stat-card {
+  padding: 1rem 1.25rem;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: var(--transition-fast);
+}
+
+.code-stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.code-stat-label {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.code-stat-value {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-top: 0.15rem;
+}
+
 /* 动效无障碍支持 (Accessibility: Reduced Motion) */
 @media (prefers-reduced-motion: reduce) {
   .code-drawer-root *,
@@ -256,5 +397,3 @@
     animation-duration: 0.01ms !important;
   }
 }
-
-
