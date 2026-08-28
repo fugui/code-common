@@ -10,29 +10,33 @@
   flex-wrap: wrap;
   gap: 0.75rem;
   margin-top: 1rem;
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1rem;
   background: var(--color-bg-surface);
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-sm, 6px);
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .code-pagination-info {
   color: var(--color-text-secondary);
-  font-size: 0.875rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  user-select: none;
 }
 
 .code-pagination-controls {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  flex-wrap: nowrap;
-  min-width: 0;
-  max-width: 100%;
-  overflow-x: auto;
+  flex-wrap: wrap;
+  overflow: visible;
 }
 
 /* 通用分页按钮 */
-.code-pagination-btn {
+.code-pagination .code-pagination-btn {
+  height: 28px;
+  min-height: 28px;
   border: 1px solid var(--color-border-subtle);
   background: transparent;
   border-radius: var(--radius-xs, 4px);
@@ -40,51 +44,58 @@
   font-size: 0.825rem;
   white-space: nowrap;
   cursor: pointer;
-  transition: var(--transition-fast);
-}
-
-/* 导航按钮 (首页 / 上一页 / 下一页 / 末页) */
-.code-pagination-btn--nav {
-  padding: 0.3rem 0.6rem;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .code-pagination-btn--nav:hover:not(:disabled) {
-    background: var(--color-bg-hover);
-    border-color: var(--color-border-hover);
-  }
-}
-
-.code-pagination-btn--nav:active:not(:disabled) {
-  background: var(--color-bg-active);
-}
-
-.code-pagination-btn--nav:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-  color: var(--color-text-secondary);
-}
-
-/* 数字按钮 */
-.code-pagination-btn--num {
-  min-width: 28px;
-  height: 28px;
-  padding: 0 0.3rem;
-  font-weight: 400;
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: var(--transition-fast);
+  text-decoration: none;
+  line-height: 1;
+}
+
+/* 导航按钮 (首页 / 上一页 / 下一页 / 末页) */
+.code-pagination .code-pagination-btn--nav {
+  padding: 0 0.65rem;
+  font-weight: 500;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .code-pagination-btn--num:hover:not(.code-pagination-btn--active) {
+  .code-pagination .code-pagination-btn--nav:hover:not(:disabled) {
+    background: var(--color-bg-hover);
+    border-color: var(--color-border-hover);
+    color: var(--color-text-primary);
+  }
+}
+
+.code-pagination .code-pagination-btn--nav:active:not(:disabled) {
+  background: var(--color-bg-active);
+}
+
+.code-pagination .code-pagination-btn--nav:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  color: var(--color-text-muted);
+  border-color: var(--color-border-subtle);
+  background: transparent;
+}
+
+/* 数字按钮 */
+.code-pagination .code-pagination-btn--num {
+  min-width: 28px;
+  width: auto;
+  padding: 0 0.35rem;
+  font-weight: 500;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-pagination .code-pagination-btn--num:hover:not(.code-pagination-btn--active) {
     background: var(--color-primary-subtle);
     border-color: var(--color-primary-border);
     color: var(--color-primary);
   }
 }
 
-.code-pagination-btn--num.code-pagination-btn--active {
+.code-pagination .code-pagination-btn--num.code-pagination-btn--active {
   background: var(--color-primary);
   border-color: var(--color-primary);
   color: var(--color-text-white);
@@ -92,35 +103,46 @@
   cursor: default;
 }
 
-.code-pagination-btn:focus-visible {
+.code-pagination .code-pagination-btn:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 1px;
 }
 
-/* 每页条数下拉选择框 */
-.code-pagination-select {
-  width: auto;
-  min-width: 92px;
-  height: 28px;
-  line-height: 26px;
-  padding: 0 0.5rem;
-  border-radius: var(--radius-xs, 4px);
-  border: 1px solid var(--color-border-subtle);
-  font-size: 0.825rem;
-  outline: none;
-  background: var(--color-bg-surface);
-  color: var(--color-text-primary);
-  margin-left: 0.5rem;
-  cursor: pointer;
-  box-sizing: border-box;
-  flex-shrink: 0;
-  transition: var(--transition-fast);
+/* 每页条数下拉选择框 (高特异性保护，防止外层 input/select 样式污染) */
+.code-pagination select.code-pagination-select,
+.code-pagination .code-pagination-select {
+  width: auto !important;
+  max-width: 140px !important;
+  min-width: 100px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  line-height: 26px !important;
+  padding: 0 0.5rem !important;
+  border-radius: var(--radius-xs, 4px) !important;
+  border: 1px solid var(--color-border-subtle) !important;
+  font-size: 0.825rem !important;
+  outline: none !important;
+  background: var(--color-bg-input) !important;
+  color: var(--color-text-primary) !important;
+  margin-left: 0.35rem !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  margin-right: 0 !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+  transition: var(--transition-fast) !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
 }
 
-.code-pagination-select:hover {
-  border-color: var(--color-border-hover);
+.code-pagination select.code-pagination-select:hover,
+.code-pagination .code-pagination-select:hover {
+  border-color: var(--color-border-hover) !important;
 }
 
-.code-pagination-select:focus {
-  border-color: var(--color-primary);
+.code-pagination select.code-pagination-select:focus,
+.code-pagination .code-pagination-select:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px var(--color-primary-subtle) !important;
 }

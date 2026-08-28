@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { usePagination } from '../../hooks/usePagination';
+import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from '../../utils/constants';
 import './pagination.css';
 
 export interface PaginationProps {
@@ -16,8 +17,6 @@ export interface PaginationProps {
   className?: string;
 }
 
-const DEFAULT_PAGE_SIZE = 25;
-const PAGE_SIZE_OPTIONS = [15, 25, 50, 100];
 const WINDOW_SIZE = 5;
 
 interface PaginationRendererProps {
@@ -40,6 +39,16 @@ const PaginationRenderer: React.FC<PaginationRendererProps> = ({
   className = '',
 }) => {
   const totalPages = Math.ceil(totalItems / pageSize) || 1;
+
+  // 确保当前 pageSize 必然存在于选项列表中，防止浏览器 option 未匹配导致的渲染异常
+  const effectivePageSizeOptions = useMemo(() => {
+    const opts = [...pageSizeOptions];
+    if (pageSize && !opts.includes(pageSize)) {
+      opts.push(pageSize);
+      opts.sort((a, b) => a - b);
+    }
+    return opts;
+  }, [pageSizeOptions, pageSize]);
 
   // 极简平滑连续 5 个数字滑动窗口计算
   const getPageNumbers = () => {
@@ -143,7 +152,7 @@ const PaginationRenderer: React.FC<PaginationRendererProps> = ({
           className="code-pagination-select"
           aria-label="每页显示条数"
         >
-          {pageSizeOptions.map(size => (
+          {effectivePageSizeOptions.map(size => (
             <option key={size} value={size}>{size} 条/页</option>
           ))}
         </select>
