@@ -43,6 +43,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   getContainer,
   className = '',
 }) => {
+  const uniqueTitleId = useId();
   const [mounted, setMounted] = useState(open);
   const [animateVisible, setAnimateVisible] = useState(false);
   const [internalLoading, setInternalLoading] = useState(false);
@@ -150,8 +151,6 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   if (!containerTarget) return null;
 
   const pointerClass = animateVisible ? 'code-confirm-dialog-root--pointer-auto' : 'code-confirm-dialog-root--pointer-none';
-
-  const uniqueTitleId = useId();
 
   return createPortal(
     <div

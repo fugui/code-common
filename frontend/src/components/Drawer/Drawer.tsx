@@ -93,6 +93,7 @@ export const Drawer: React.FC<DrawerProps> = ({
   children,
 }) => {
   const isTargetOpen = open !== undefined ? open : (visible ?? false);
+  const uniqueTitleId = useId();
   const [mounted, setMounted] = useState(isTargetOpen);
   const [animateVisible, setAnimateVisible] = useState(false);
   const [zLevels, setZLevels] = useState<ZIndexLevels | null>(null);
@@ -195,7 +196,6 @@ export const Drawer: React.FC<DrawerProps> = ({
     ? 'code-drawer-root--pointer-none'
     : (animateVisible ? 'code-drawer-root--pointer-auto' : 'code-drawer-root--pointer-none');
 
-  const uniqueTitleId = useId();
   const hasStringTitle = typeof title === 'string';
 
   return createPortal(

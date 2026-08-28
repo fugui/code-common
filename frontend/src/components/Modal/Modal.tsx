@@ -97,6 +97,7 @@ export const Modal: React.FC<ModalProps> = ({
   children,
 }) => {
   const isTargetOpen = open !== undefined ? open : (visible ?? false);
+  const uniqueTitleId = useId();
   const [mounted, setMounted] = useState(isTargetOpen);
   const [animateVisible, setAnimateVisible] = useState(false);
   const [zLevels, setZLevels] = useState<ZIndexLevels | null>(null);
@@ -200,7 +201,6 @@ export const Modal: React.FC<ModalProps> = ({
     : (animateVisible ? 'code-modal-root--pointer-auto' : 'code-modal-root--pointer-none');
 
   const alignClass = centered ? 'code-modal-root--centered' : 'code-modal-root--top';
-  const uniqueTitleId = useId();
   const hasStringTitle = typeof title === 'string';
 
   return createPortal(
