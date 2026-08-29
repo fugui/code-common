@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Shared common library for code-shield, code-bench, code-pipeline, code-pdm",
   "main": "src/index.ts",
+  "sideEffects": [
+    "**/*.css"
+  ],
   "scripts": {
     "build": "tsc"
   },

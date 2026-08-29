@@ -58,14 +58,14 @@
 
 .code-drawer-panel--right {
   right: 0;
-  border-left: 1px solid var(--color-border-subtle);
+  border-left: 1px solid var(--color-border-primary);
   box-shadow: var(--shadow-drawer-right);
   transform: translateX(100%);
 }
 
 .code-drawer-panel--left {
   left: 0;
-  border-right: 1px solid var(--color-border-subtle);
+  border-right: 1px solid var(--color-border-primary);
   box-shadow: var(--shadow-drawer-left);
   transform: translateX(-100%);
 }
