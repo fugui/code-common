@@ -144,11 +144,32 @@ log_info "正在配置 Tmux 田字格布局会话: $SESSION_NAME ..."
 # 若已存在同名会话，先清理旧会话
 if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
     log_warn "检测到已存在的 Tmux 会话 '$SESSION_NAME'，正在终止重建..."
-    tmux kill-session -t "$SESSION_NAME"
+    tmux kill-session -t "$SESSION_NAME" 2>/dev/null || true
+    # 轮询等待旧会话完全销毁，避免 tmux server/socket 退出与重建竞态
+    wait_count=0
+    while tmux has-session -t "$SESSION_NAME" 2>/dev/null && [ "$wait_count" -lt 20 ]; do
+        sleep 0.05
+        wait_count=$((wait_count + 1))
+    done
+    # 微小缓冲，确保 tmux server 优雅完成 socket 释放
+    sleep 0.1
 fi
 
-# 1. 创建会话，初始窗格作为【左上格】: code-bench
-PANE_TL=$(tmux new-session -d -P -F '#{pane_id}' -s "$SESSION_NAME" -n "code-services" -c "$BASE_DIR/code-bench")
+# 1. 创建会话，初始窗格作为【左上格】: code-bench（增加轻量重试应对 socket 瞬态波动）
+PANE_TL=""
+for retry in {1..5}; do
+    if PANE_TL=$(tmux new-session -d -P -F '#{pane_id}' -s "$SESSION_NAME" -n "code-services" -c "$BASE_DIR/code-bench" 2>/dev/null); then
+        break
+    fi
+    sleep 0.15
+done
+
+if [ -z "$PANE_TL" ]; then
+    log_error "创建 Tmux 会话 '$SESSION_NAME' 失败！"
+    # 执行一次未静默命令以便输出具体错误原因
+    tmux new-session -d -P -F '#{pane_id}' -s "$SESSION_NAME" -n "code-services" -c "$BASE_DIR/code-bench"
+    exit 1
+fi
 
 # 2. 从左上格向下垂直切分，创建【左下格】: code-pipeline
 PANE_BL=$(tmux split-window -v -P -F '#{pane_id}' -t "$PANE_TL" -c "$BASE_DIR/code-pipeline")
