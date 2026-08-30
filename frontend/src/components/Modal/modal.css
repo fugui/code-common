@@ -63,7 +63,7 @@
   color: var(--color-text-primary);
   border-radius: var(--radius-lg, 12px);
   border: 1px solid var(--color-border-primary);
-  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -72,6 +72,17 @@
   transform: scale(0.95) translateY(10px);
   transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1), opacity 260ms cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform, opacity;
+}
+
+:root:not(.light-theme) .code-modal-panel,
+[data-theme='dark'] .code-modal-panel {
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+:root.light-theme .code-modal-panel,
+[data-theme='light'] .code-modal-panel {
+  border: 1px solid var(--color-border-primary);
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(0, 0, 0, 0.06);
 }
 
 .code-modal-panel--visible {
@@ -98,7 +109,7 @@
 /* 5. 头部区域 (Header) */
 .code-modal-header {
   padding: 18px 24px 16px 24px;
-  border-bottom: 1px solid var(--color-border-subtle);
+  border-bottom: 1px solid var(--color-border-primary);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -193,7 +204,7 @@
 /* 8. 底部固定操作区 (Footer) */
 .code-modal-footer {
   padding: 16px 24px;
-  border-top: 1px solid var(--color-border-subtle);
+  border-top: 1px solid var(--color-border-primary);
   display: flex;
   justify-content: flex-end;
   align-items: center;

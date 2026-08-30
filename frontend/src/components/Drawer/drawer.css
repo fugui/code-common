@@ -94,13 +94,14 @@
 /* 5. 头部区域 (Header) */
 .code-drawer-header {
   padding: 20px 24px 16px 24px;
-  border-bottom: 1px solid var(--color-border-subtle);
+  border-bottom: 1px solid var(--color-border-primary);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  background: var(--color-bg-app);
+  background: var(--color-bg-surface);
   flex-shrink: 0;
   gap: 16px;
+  box-sizing: border-box;
 }
 
 .code-drawer-header-content {
@@ -174,16 +175,18 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  box-sizing: border-box;
 }
 
 /* 8. 底部固定操作区 (Footer) */
 .code-drawer-footer {
   padding: 16px 24px;
-  border-top: 1px solid var(--color-border-subtle);
+  border-top: 1px solid var(--color-border-primary);
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: 12px;
-  background: var(--color-bg-app);
+  background: var(--color-bg-surface);
   flex-shrink: 0;
+  box-sizing: border-box;
 }

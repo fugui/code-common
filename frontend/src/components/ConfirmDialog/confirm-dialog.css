@@ -48,12 +48,23 @@
   color: var(--color-text-primary);
   border-radius: var(--radius-lg, 12px);
   border: 1px solid var(--color-border-primary);
-  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(0, 0, 0, 0.05);
   opacity: 0;
   transform: scale(0.95) translateY(8px);
   transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1), opacity 220ms cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
   will-change: transform, opacity;
+}
+
+:root:not(.light-theme) .code-confirm-dialog-panel,
+[data-theme='dark'] .code-confirm-dialog-panel {
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+:root.light-theme .code-confirm-dialog-panel,
+[data-theme='light'] .code-confirm-dialog-panel {
+  border: 1px solid var(--color-border-primary);
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(0, 0, 0, 0.06);
 }
 
 .code-confirm-dialog-panel--visible {
