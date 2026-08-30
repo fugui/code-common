@@ -29,26 +29,23 @@ code-common/
 │       └── response_test.go        # 响应单元测试
 ├── frontend/                       # React / TS 前端组件库 (@code/common)
 │   ├── src/
-│   │   ├── components/             # 公共 UI 组件
-│   │   │   ├── Pagination/         # 团队标准通用分页组件
-│   │   │   ├── ErrorBoundary/      # 全局运行时错误拦截与降级展示
-│   │   │   ├── Toast/              # 轻量级消息提示组件
-│   │   │   ├── MemberSearchSelect/ # 单选成员智能搜索下拉组件
-│   │   │   └── MultiMemberSearchSelect/ # 多选成员搜索选择组件
-│   │   ├── hooks/                  # 通用自定义 Hooks
-│   │   │   ├── usePagination.ts    # 遵循 URL 同步规范的分页管理 Hook
-│   │   │   ├── useTheme.ts         # 明亮/暗黑主题响应式切换 Hook
-│   │   │   ├── useAuthFetch.ts     # 自动注入 Bearer Token 的请求 Hook
-│   │   │   ├── useDebounce.ts      # 防抖 Hook
-│   │   │   └── useOutsideClick.ts  # 点击外部监听 Hook
-│   │   ├── utils/                  # 工具方法与常量
-│   │   │   ├── apiClient.ts        # 统一 API 请求客户端工厂 (createApiClient)
-│   │   │   ├── constants.ts        # 统一存储 Key 常量 (Token / User / Theme)
-│   │   │   ├── urlUtils.ts         # URL 与 Query 参数转换工具
-│   │   │   └── routing.ts          # 路由与子应用嵌套辅助
+│   │   ├── components/             # 公共 UI 组件 (Pagination, ErrorBoundary, Toast 等)
+│   │   ├── hooks/                  # 通用自定义 Hooks (usePagination, useTheme 等)
+│   │   ├── utils/                  # 工具方法与常量 (apiClient, constants 等)
 │   │   ├── types/                  # 全局通用 TypeScript 类型定义
 │   │   └── styles/                 # 统一 CSS 变量与设计规范 Token
 │   └── package.json
+├── infra/                          # 统一基础设施与反向代理网关配置
+│   └── Caddyfile                   # 统一反向代理网关配置
+├── rules/                          # 团队开发规章与 AI 助手行为准则
+│   ├── GEMINI.md                   # 统一开发规范、命名准则与样式规范
+│   └── AGENTS.md                   # 工作区行为准则与交付标准
+├── scripts/                        # 平台工程运维与全景启动脚本
+│   ├── start.sh                    # Tmux 田字格多服务并发拉取/构建/启动脚本
+│   ├── setup-symlinks.sh           # 工作区根目录软链接一键初始化脚本
+│   ├── count_lines.py              # 全平台源码语言行数统计
+│   ├── count_lines_by_project.py   # 按各子项目代码行数统计
+│   └── git-stats.js                # Git 提交与贡献度分析
 └── CONTRIBUTING.md                 # 准入标准与治理规范文档
 ```
 
@@ -200,6 +197,23 @@ const Header: React.FC = () => {
   );
 };
 ```
+
+---
+
+### 3. 基础设施、运维脚本与规范
+
+`code-common` 统一承载跨项目的工程脚本、网关配置与 AI 协作规范。在工作区根目录执行以下命令即可一键完成软链接映射：
+
+```bash
+# 在工作区根目录下初始化所有软链接
+bash code-common/scripts/setup-symlinks.sh
+```
+
+- **`scripts/start.sh`**：Tmux 田字格多服务并发拉取、按需编译并一键启动脚本（根目录 `./start.sh`）。
+- **`infra/Caddyfile`**：统一反向代理网关配置，默认将端口 80 流量转发至 `code-bench`（端口 8000）。
+- **`rules/GEMINI.md` & `rules/AGENTS.md`**：团队开发核心规章、约定式提交、前端 Design Token 与 AI 协同准则。
+- **`scripts/count_lines.py`**：全平台源码语言行数统计。
+- **`scripts/git-stats.js`**：Git 提交统计与贡献分析。
 
 ---
 
