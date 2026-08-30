@@ -219,6 +219,7 @@
 
 /* 标准通用输入框 */
 .code-input {
+  box-sizing: border-box;
   padding: 0.5rem 0.75rem;
   border-radius: var(--radius-sm, 6px);
   border: 1px solid var(--color-border-subtle);
@@ -226,6 +227,7 @@
   color: var(--color-text-primary);
   outline: none;
   font-size: 0.875rem;
+  font-family: inherit;
   transition: var(--transition-fast);
 }
 
@@ -239,6 +241,7 @@
 
 /* 标准通用下拉框 */
 .code-select {
+  box-sizing: border-box;
   padding: 0.5rem 0.75rem;
   border-radius: var(--radius-sm, 6px);
   border: 1px solid var(--color-border-subtle);
@@ -246,6 +249,7 @@
   color: var(--color-text-primary);
   outline: none;
   font-size: 0.875rem;
+  font-family: inherit;
   cursor: pointer;
   transition: var(--transition-fast);
 }
@@ -255,6 +259,29 @@
 }
 
 .code-select:focus {
+  border-color: var(--color-primary);
+}
+
+/* 标准通用多行文本框 */
+.code-textarea {
+  box-sizing: border-box;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-bg-input);
+  color: var(--color-text-primary);
+  outline: none;
+  font-size: 0.875rem;
+  font-family: inherit;
+  line-height: 1.5;
+  transition: var(--transition-fast);
+}
+
+.code-textarea:hover {
+  border-color: var(--color-border-hover);
+}
+
+.code-textarea:focus {
   border-color: var(--color-primary);
 }
 
