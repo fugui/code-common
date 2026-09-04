@@ -8,6 +8,7 @@ export interface SubMenuItem {
   badgeColor?: string;
   active?: boolean;
   adminOnly?: boolean;
+  superAdminOnly?: boolean;
   hidden?: boolean;
   requiredRole?: string;
 }
@@ -16,6 +17,7 @@ export interface MenuGroup {
   groupKey?: string;
   title: string;
   adminOnly?: boolean;
+  superAdminOnly?: boolean;
   items: SubMenuItem[];
 }
 
