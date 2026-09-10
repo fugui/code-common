@@ -25,5 +25,7 @@ export interface ModuleMenuConfig {
   moduleId?: string;
   moduleKey?: string;
   moduleName?: string;
+  superAdminOnly?: boolean;
+  adminOnly?: boolean;
   groups: MenuGroup[];
 }
