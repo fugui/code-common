@@ -25,7 +25,7 @@
 *   **任务与引擎**：AI 核心检视逻辑包含 `single`（单仓分析）和 `chunked`（分片并发分析）两种执行引擎，所有实现与接口均定义在 `shield-server/services` 目录下。
 
 ### 2. 前端 (React / TypeScript)
-*   **核心技术栈**：React 18, Vite 5, TypeScript, Ant Design (AntD)。
+*   **核心技术栈**：React 18, Vite 5, TypeScript。
 *   **样式与 UI 规范**：优先使用 **Vanilla CSS** 进行精细化布局与设计，拒绝粗糙的默认 UI 配置。保持界面的**高端质感**与**流畅动效**（例如：分片分析进度条的实时流畅呈现、防止界面卡死的优雅骨架屏等）。
 *   **深浅主题双模适配与 Design Tokens 规范 (Theme & Design Tokens)**：所有页面、组件、抽屉弹窗（Drawer/Modal）、表格及表单必须**严格同时兼顾亮色（Light）与暗色（Dark）主题模式**：
     *   **单一真实源 (SSOT)**：所有样式颜色变量必须统一以 `theme.css` 中的 `--color-*` 语义 Token 为唯一基准（如 `--color-bg-surface`、`--color-text-primary`、`--color-border-primary`）。旧别名（如 `--card-bg`、`--text-main`、`--border-color`）仅为向后兼容过渡，严禁在组件中写超过 1 层的嵌套 fallback。
