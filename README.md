@@ -37,9 +37,8 @@ code-common/
 │   └── package.json
 ├── infra/                          # 统一基础设施与反向代理网关配置
 │   └── Caddyfile                   # 统一反向代理网关配置
-├── rules/                          # 团队开发规章与 AI 助手行为准则
-│   ├── GEMINI.md                   # 统一开发规范、命名准则与样式规范
-│   └── AGENTS.md                   # 工作区行为准则与交付标准
+├── rules/                          # 团队开发规章与智能体行为准则
+│   └── AGENTS.md                   # 统一开发规范、命名准则与全栈样式准则
 ├── scripts/                        # 平台工程运维与全景启动脚本
 │   ├── start.sh                    # Tmux 田字格多服务并发拉取/构建/启动脚本
 │   ├── setup-symlinks.sh           # 工作区根目录软链接一键初始化脚本
@@ -211,7 +210,7 @@ bash code-common/scripts/setup-symlinks.sh
 
 - **`scripts/start.sh`**：Tmux 田字格多服务并发拉取、按需编译并一键启动脚本（根目录 `./start.sh`）。
 - **`infra/Caddyfile`**：统一反向代理网关配置，默认将端口 80 流量转发至 `code-bench`（端口 8000）。
-- **`rules/GEMINI.md` & `rules/AGENTS.md`**：团队开发核心规章、约定式提交、前端 Design Token 与 AI 协同准则。
+- **`rules/AGENTS.md`**：团队开发核心规章、约定式提交、前端 Design Token 与智能体协同准则。
 - **`scripts/count_lines.py`**：全平台源码语言行数统计。
 - **`scripts/git-stats.js`**：Git 提交统计与贡献分析。
 

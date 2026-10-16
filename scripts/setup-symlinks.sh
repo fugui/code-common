@@ -46,7 +46,7 @@ link_file() {
 # 根目录文件软链接
 link_file "code-common/scripts/start.sh" "start.sh"
 link_file "code-common/infra/Caddyfile" "Caddyfile"
-link_file "code-common/rules/GEMINI.md" "GEMINI.md"
+link_file "code-common/rules/AGENTS.md" "AGENTS.md"
 link_file "code-common/scripts/count_lines.py" "count_lines.py"
 link_file "code-common/scripts/count_lines_by_project.py" "count_lines_by_project.py"
 link_file "code-common/scripts/git-stats.js" "git-stats.js"
