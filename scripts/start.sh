@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # 脚本名称: start.sh
-# 功能描述: 在 Tmux 中以田字格 (2x2) 布局启动运行各个服务
-# 布局结构:
+# 功能描述: 在 Tmux 中以分屏布局启动运行各个核心服务
+# 布局结构 (默认启动: code-bench, code-shield, code-traefik):
 #   ┌───────────────────┬───────────────────┐
 #   │   code-bench      │    code-shield    │
-#   │    (左上格)       │      (右上格)     │
-#   ├───────────────────┼───────────────────┤
-#   │   code-pipeline   │     code-pdm      │
-#   │    (左下格)       │      (右下格)     │
-#   └───────────────────┴───────────────────┘
+#   │     (左上格)      │      (右上格)     │
+#   ├───────────────────┴───────────────────┤
+#   │              code-traefik             │
+#   │                 (下格)                │
+#   └───────────────────────────────────────┘
 # ==============================================================================
 
 set -euo pipefail
@@ -59,9 +59,9 @@ show_help() {
     echo "使用方式: $0 [选项]"
     echo ""
     echo "选项:"
-    echo "  (无参数)      默认模式：按需编译 (make build) 并启动 Tmux 田字格会话运行各个服务"
-    echo "  --update, -u  先拉取最新代码 (code-common 及 4 个服务模块) 并执行按需编译，然后启动服务"
-    echo "  --build, -b   强制重新编译 4 个服务模块 (make -B build)，然后启动服务"
+    echo "  (无参数)      默认模式：按需编译 (make build) 并启动 Tmux 分屏会话运行核心服务 (code-bench, code-shield, code-traefik)"
+    echo "  --update, -u  先拉取最新代码 (code-common 及 3 个服务模块) 并执行按需编译，然后启动服务"
+    echo "  --build, -b   强制重新编译 3 个服务模块 (make -B build)，然后启动服务"
     echo "  --help, -h    显示帮助信息"
     echo ""
 }
@@ -109,8 +109,9 @@ for cmd in "${REQUIRED_CMDS[@]}"; do
     fi
 done
 
-# 前置项目目录检查
-for dir in "code-bench" "code-shield" "code-pipeline" "code-pdm"; do
+# 前置项目目录检查（默认启动 code-bench, code-shield, code-traefik；pipeline 与 pdm 暂不启动）
+DEFAULT_MODULES=("code-bench" "code-shield" "code-traefik")
+for dir in "${DEFAULT_MODULES[@]}"; do
     if [ ! -d "$BASE_DIR/$dir" ]; then
         log_error "核心项目目录不存在: $BASE_DIR/$dir"
         exit 1
@@ -120,7 +121,7 @@ done
 # ==============================================================================
 # 第一步: 独立更新公共依赖代码 (仅当指定 --update 时执行)
 # ==============================================================================
-# 由于其他四个模块可能会依赖公共代码，因此先独立同步更新它
+# 由于其他服务模块可能会依赖公共代码，因此先独立同步更新它
 if [ "$DO_UPDATE" = true ]; then
     echo "=================================================================="
     echo "       开始更新公共模块 (git pull: code-common)                   "
@@ -137,9 +138,9 @@ if [ "$DO_UPDATE" = true ]; then
 fi
 
 # ==============================================================================
-# 第二步: 配置与启动 Tmux 田字格会话
+# 第二步: 配置与启动 Tmux 分屏会话
 # ==============================================================================
-log_info "正在配置 Tmux 田字格布局会话: $SESSION_NAME ..."
+log_info "正在配置 Tmux 分屏布局会话: $SESSION_NAME ..."
 
 # 若已存在同名会话，先清理旧会话
 if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
@@ -171,26 +172,19 @@ if [ -z "$PANE_TL" ]; then
     exit 1
 fi
 
-# 2. 从左上格向下垂直切分，创建【左下格】: code-pipeline
-PANE_BL=$(tmux split-window -v -P -F '#{pane_id}' -t "$PANE_TL" -c "$BASE_DIR/code-pipeline")
+# 2. 从左上格向下垂直切分，创建【下格】: code-traefik (独占下半屏宽度)
+PANE_BOTTOM=$(tmux split-window -v -P -F '#{pane_id}' -t "$PANE_TL" -c "$BASE_DIR/code-traefik")
 
-# 3. 从左上格向右水平切分，创建【右上格】: code-shield
+# 3. 从左上格向右水平切分，创建【右上格】: code-shield (与左上格平分上半屏)
 PANE_TR=$(tmux split-window -h -P -F '#{pane_id}' -t "$PANE_TL" -c "$BASE_DIR/code-shield")
 
-# 4. 从左下格向右水平切分，创建【右下格】: code-pdm
-PANE_BR=$(tmux split-window -h -P -F '#{pane_id}' -t "$PANE_BL" -c "$BASE_DIR/code-pdm")
-
-# 5. 调整为标准的 2x2 田字格 (tiled layout)
-tmux select-layout -t "$SESSION_NAME" tiled
-
-# 6. 配置各窗格的标题与边框显示
+# 4. 配置各窗格的标题与边框显示
 tmux set-option -t "$SESSION_NAME" pane-border-status top
 tmux set-option -t "$SESSION_NAME" pane-border-format " [ #{pane_title} ] "
 
 tmux select-pane -t "$PANE_TL" -T "左上: code-bench"
 tmux select-pane -t "$PANE_TR" -T "右上: code-shield"
-tmux select-pane -t "$PANE_BL" -T "左下: code-pipeline"
-tmux select-pane -t "$PANE_BR" -T "右下: code-pdm"
+tmux select-pane -t "$PANE_BOTTOM" -T "下格: code-traefik"
 
 # ==============================================================================
 # 第三步: 向各窗格分发启动指令 (并发执行 pull/build/run)
@@ -215,13 +209,12 @@ build_cmd() {
 
 tmux send-keys -t "$PANE_TL" "$(build_cmd code-bench-portal)" C-m
 tmux send-keys -t "$PANE_TR" "$(build_cmd code-shield-server)" C-m
-tmux send-keys -t "$PANE_BL" "$(build_cmd code-pipeline)" C-m
-tmux send-keys -t "$PANE_BR" "$(build_cmd code-pdm-server)" C-m
+tmux send-keys -t "$PANE_BOTTOM" "$(build_cmd code-traefik-server)" C-m
 
-# 默认将光标焦点置于左上格
+# 默认将光标焦点置于左上格 (code-bench)
 tmux select-pane -t "$PANE_TL"
 
-log_success "田字格 Tmux 会话创建并分发任务完成！"
+log_success "多服务 Tmux 会话创建并分发任务完成！"
 
 # ==============================================================================
 # 第四步: 连接进入 Tmux 会话
