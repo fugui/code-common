@@ -2,12 +2,12 @@
 # ==============================================================================
 # 脚本名称: start.sh
 # 功能描述: 在 Tmux 中以田字格 (2x2) 分屏布局启动运行各个核心服务
-# 布局结构 (默认启动: code-bench, code-shield, code-proto, code-traefik):
+# 布局结构 (默认启动: code-bench, code-shield, code-architecture, code-traefik):
 #   ┌───────────────────┬───────────────────┐
 #   │   code-bench      │    code-shield    │
 #   │     (左上格)      │      (右上格)     │
 #   ├───────────────────┼───────────────────┤
-#   │   code-proto      │   code-traefik    │
+#   │ code-architecture │   code-traefik    │
 #   │     (左下格)      │      (右下格)     │
 #   └───────────────────┴───────────────────┘
 # ==============================================================================
@@ -59,7 +59,7 @@ show_help() {
     echo "使用方式: $0 [选项]"
     echo ""
     echo "选项:"
-    echo "  (无参数)      默认模式：按需编译 (make build) 并启动 Tmux 田字格会话运行核心服务 (code-bench, code-shield, code-proto, code-traefik)"
+    echo "  (无参数)      默认模式：按需编译 (make build) 并启动 Tmux 田字格会话运行核心服务 (code-bench, code-shield, code-architecture, code-traefik)"
     echo "  --update, -u  先拉取最新代码 (code-common 及 4 个服务模块) 并执行按需编译，然后启动服务"
     echo "  --build, -b   强制重新编译 4 个服务模块 (make -B build)，然后启动服务"
     echo "  --help, -h    显示帮助信息"
@@ -109,8 +109,8 @@ for cmd in "${REQUIRED_CMDS[@]}"; do
     fi
 done
 
-# 前置项目目录检查（默认启动 code-bench, code-shield, code-proto, code-traefik；pipeline 与 pdm 暂不启动）
-DEFAULT_MODULES=("code-bench" "code-shield" "code-proto" "code-traefik")
+# 前置项目目录检查（默认启动 code-bench, code-shield, code-architecture, code-traefik；pipeline 与 pdm 暂不启动）
+DEFAULT_MODULES=("code-bench" "code-shield" "code-architecture" "code-traefik")
 for dir in "${DEFAULT_MODULES[@]}"; do
     if [ ! -d "$BASE_DIR/$dir" ]; then
         log_error "核心项目目录不存在: $BASE_DIR/$dir"
@@ -172,8 +172,8 @@ if [ -z "$PANE_TL" ]; then
     exit 1
 fi
 
-# 2. 从左上格向下垂直切分，创建【左下格】: code-proto
-PANE_BL=$(tmux split-window -v -P -F '#{pane_id}' -t "$PANE_TL" -c "$BASE_DIR/code-proto")
+# 2. 从左上格向下垂直切分，创建【左下格】: code-architecture
+PANE_BL=$(tmux split-window -v -P -F '#{pane_id}' -t "$PANE_TL" -c "$BASE_DIR/code-architecture")
 
 # 3. 从左上格向右水平切分，创建【右上格】: code-shield
 PANE_TR=$(tmux split-window -h -P -F '#{pane_id}' -t "$PANE_TL" -c "$BASE_DIR/code-shield")
@@ -190,7 +190,7 @@ tmux set-option -t "$SESSION_NAME" pane-border-format " [ #{pane_title} ] "
 
 tmux select-pane -t "$PANE_TL" -T "左上: code-bench"
 tmux select-pane -t "$PANE_TR" -T "右上: code-shield"
-tmux select-pane -t "$PANE_BL" -T "左下: code-proto"
+tmux select-pane -t "$PANE_BL" -T "左下: code-architecture"
 tmux select-pane -t "$PANE_BR" -T "右下: code-traefik"
 
 # ==============================================================================
@@ -216,7 +216,7 @@ build_cmd() {
 
 tmux send-keys -t "$PANE_TL" "$(build_cmd code-bench-portal)" C-m
 tmux send-keys -t "$PANE_TR" "$(build_cmd code-shield-server)" C-m
-tmux send-keys -t "$PANE_BL" "$(build_cmd code-proto-server)" C-m
+tmux send-keys -t "$PANE_BL" "$(build_cmd code-architecture-server)" C-m
 tmux send-keys -t "$PANE_BR" "$(build_cmd code-traefik-server)" C-m
 
 # 默认将光标焦点置于左上格 (code-bench)
