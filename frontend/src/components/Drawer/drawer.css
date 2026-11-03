@@ -12,6 +12,14 @@
   background-color: transparent !important;
 }
 
+.code-drawer-root--workspace {
+  top: var(--portal-header-height, 0px);
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(100vh - var(--portal-header-height, 0px));
+}
+
 .code-drawer-root--pointer-none {
   pointer-events: none;
 }
@@ -30,6 +38,14 @@
   opacity: 0;
   transition: opacity 280ms cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
+}
+
+.code-drawer-mask--workspace {
+  top: var(--portal-header-height, 0px);
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(100vh - var(--portal-header-height, 0px));
 }
 
 .code-drawer-mask--visible {
@@ -54,6 +70,12 @@
   overflow: hidden;
   transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform;
+}
+
+.code-drawer-panel--workspace {
+  top: var(--portal-header-height, 0px);
+  bottom: 0;
+  height: calc(100vh - var(--portal-header-height, 0px));
 }
 
 .code-drawer-panel--right {

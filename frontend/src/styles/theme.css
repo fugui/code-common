@@ -135,6 +135,21 @@
   --danger-color: var(--color-danger);
   --warning-color: var(--color-warning);
   --info-color: var(--color-info);
+
+  /* ===== 11. 微前端容器拓扑与尺寸规范 (Microfrontend Geometry & Layout) ===== */
+  --portal-header-height: 0px;
+  --portal-sidebar-width: 0px;
+
+  /* ===== 12. 全局分层 Z-Index 梯级 (Stacking Context Tokens) ===== */
+  --z-index-base: 1;
+  --z-index-sticky: 100;
+  --z-index-dropdown: 500;
+  --z-index-drawer-mask: 1040;
+  --z-index-drawer-panel: 1050;
+  --z-index-header: 1100;
+  --z-index-modal-mask: 1500;
+  --z-index-modal-panel: 1550;
+  --z-index-toast: 2000;
 }
 
 /* ===== 浅色主题模式 (Light Mode) ===== */

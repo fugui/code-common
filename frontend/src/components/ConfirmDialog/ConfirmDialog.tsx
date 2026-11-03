@@ -56,7 +56,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   useEffect(() => {
     if (open) {
       if (!zAcquiredRef.current) {
-        setZLevels(zIndexManager.acquire());
+        setZLevels(zIndexManager.acquire('confirm'));
         zAcquiredRef.current = true;
       }
       setMounted(true);
@@ -143,9 +143,9 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     ),
   }[type];
 
-  const containerZIndex = zLevels ? zLevels.container : 99990;
-  const maskZIndex = zLevels ? zLevels.mask : 99991;
-  const panelZIndex = zLevels ? zLevels.panel : 99995;
+  const containerZIndex = zLevels ? zLevels.container : 1500;
+  const maskZIndex = zLevels ? zLevels.mask : 1500;
+  const panelZIndex = zLevels ? zLevels.panel : 1505;
 
   const containerTarget = (getContainer ? getContainer() : null) || (typeof document !== 'undefined' ? document.body : null);
   if (!containerTarget) return null;

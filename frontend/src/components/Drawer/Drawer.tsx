@@ -53,6 +53,8 @@ export interface DrawerProps {
   bodyStyle?: React.CSSProperties;
   /** 底部自定义样式 */
   footerStyle?: React.CSSProperties;
+  /** 抽屉层叠范围：'workspace' (工作区抽屉，下沉避让宿主顶栏) 或 'fullscreen' (全屏模式)，默认 'workspace' */
+  scope?: 'workspace' | 'fullscreen';
   /** 子元素 */
   children?: React.ReactNode;
 }
@@ -90,6 +92,7 @@ export const Drawer: React.FC<DrawerProps> = ({
   headerStyle,
   bodyStyle,
   footerStyle,
+  scope = 'workspace',
   children,
 }) => {
   const isTargetOpen = open !== undefined ? open : (visible ?? false);
@@ -124,7 +127,7 @@ export const Drawer: React.FC<DrawerProps> = ({
   useEffect(() => {
     if (isTargetOpen) {
       if (!zAcquiredRef.current) {
-        setZLevels(zIndexManager.acquire());
+        setZLevels(zIndexManager.acquire(scope === 'fullscreen' ? 'modal' : 'drawer'));
         zAcquiredRef.current = true;
       }
       setMounted(true);
@@ -184,13 +187,20 @@ export const Drawer: React.FC<DrawerProps> = ({
 
   const actualExtra = extra || extraHeader;
   const isLeft = placement === 'left';
-  const containerTarget = (getContainer ? getContainer() : null) || (typeof document !== 'undefined' ? document.body : null);
+  const isWorkspace = scope === 'workspace';
 
-  if (!containerTarget) return null;
+  const containerTarget =
+    (getContainer ? getContainer() : null) ||
+    (typeof document !== 'undefined'
+      ? (isWorkspace && document.getElementById('portal-workspace-overlay-root')
+          ? document.getElementById('portal-workspace-overlay-root')!
+          : document.body)
+      : null);
 
-  const containerZIndex = zLevels ? zLevels.container : 99900;
-  const maskZIndex = zLevels ? zLevels.mask : 99901;
-  const panelZIndex = zLevels ? zLevels.panel : 99905;
+  const defaultBase = isWorkspace ? 1040 : 1500;
+  const containerZIndex = zLevels ? zLevels.container : defaultBase;
+  const maskZIndex = zLevels ? zLevels.mask : defaultBase;
+  const panelZIndex = zLevels ? zLevels.panel : defaultBase + 10;
 
   const pointerClass = (!mask && animateVisible)
     ? 'code-drawer-root--pointer-none'
@@ -198,15 +208,15 @@ export const Drawer: React.FC<DrawerProps> = ({
 
   const hasStringTitle = typeof title === 'string';
 
-  return createPortal(
+  const drawerContent = (
     <div
-      className={`code-drawer-root drawer-root-wrapper ${pointerClass} ${className}`.trim()}
+      className={`code-drawer-root drawer-root-wrapper ${isWorkspace ? 'code-drawer-root--workspace' : ''} ${pointerClass} ${className}`.trim()}
       style={{ zIndex: containerZIndex }}
     >
       {/* 1. 遮罩层 (Mask) */}
       {mask && (
         <div
-          className={`code-drawer-mask ${animateVisible ? 'code-drawer-mask--visible' : ''} ${!maskClosable ? 'code-drawer-mask--unclosable' : ''} ${maskClassName}`.trim()}
+          className={`code-drawer-mask ${isWorkspace ? 'code-drawer-mask--workspace' : ''} ${animateVisible ? 'code-drawer-mask--visible' : ''} ${!maskClosable ? 'code-drawer-mask--unclosable' : ''} ${maskClassName}`.trim()}
           onClick={maskClosable ? handleClose : undefined}
           style={{ zIndex: maskZIndex, ...maskStyle }}
           title={maskClosable ? '点击背景区域关闭' : undefined}
@@ -218,7 +228,7 @@ export const Drawer: React.FC<DrawerProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby={hasStringTitle ? uniqueTitleId : undefined}
-        className={`code-drawer-panel ${isLeft ? 'code-drawer-panel--left' : 'code-drawer-panel--right'} ${animateVisible ? 'code-drawer-panel--visible' : 'code-drawer-panel--hidden'}`}
+        className={`code-drawer-panel ${isWorkspace ? 'code-drawer-panel--workspace' : ''} ${isLeft ? 'code-drawer-panel--left' : 'code-drawer-panel--right'} ${animateVisible ? 'code-drawer-panel--visible' : 'code-drawer-panel--hidden'}`}
         style={{
           width: resolvedWidth,
           zIndex: panelZIndex,
@@ -283,7 +293,12 @@ export const Drawer: React.FC<DrawerProps> = ({
           </div>
         )}
       </div>
-    </div>,
-    containerTarget
+    </div>
   );
+
+  if (!containerTarget) {
+    return drawerContent;
+  }
+
+  return createPortal(drawerContent, containerTarget);
 };

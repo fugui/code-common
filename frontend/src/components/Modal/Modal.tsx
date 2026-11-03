@@ -131,7 +131,7 @@ export const Modal: React.FC<ModalProps> = ({
   useEffect(() => {
     if (isTargetOpen) {
       if (!zAcquiredRef.current) {
-        setZLevels(zIndexManager.acquire());
+        setZLevels(zIndexManager.acquire('modal'));
         zAcquiredRef.current = true;
       }
       setMounted(true);
@@ -192,9 +192,9 @@ export const Modal: React.FC<ModalProps> = ({
   const containerTarget = (getContainer ? getContainer() : null) || (typeof document !== 'undefined' ? document.body : null);
   if (!containerTarget) return null;
 
-  const containerZIndex = zLevels ? zLevels.container : 99900;
-  const maskZIndex = zLevels ? zLevels.mask : 99901;
-  const panelZIndex = zLevels ? zLevels.panel : 99905;
+  const containerZIndex = zLevels ? zLevels.container : 1500;
+  const maskZIndex = zLevels ? zLevels.mask : 1500;
+  const panelZIndex = zLevels ? zLevels.panel : 1505;
 
   const pointerClass = (!mask && animateVisible)
     ? 'code-modal-root--pointer-none'

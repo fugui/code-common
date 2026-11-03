@@ -10,17 +10,23 @@ export interface ZIndexLevels {
   panel: number;
 }
 
+export type OverlayType = 'drawer' | 'modal' | 'confirm' | 'popover';
+
 class ZIndexManager {
-  private base = 99900;
+  private drawerBase = 1040;
+  private modalBase = 1500;
   private step = 10;
   private stack: number[] = [];
 
-  acquire(): ZIndexLevels {
-    const currentBase = this.base + this.stack.length * this.step;
+  acquire(type: OverlayType = 'drawer', customBase?: number): ZIndexLevels {
+    const base = customBase !== undefined
+      ? customBase
+      : (type === 'modal' || type === 'confirm' ? this.modalBase : this.drawerBase);
+    const currentBase = base + this.stack.length * this.step;
     this.stack.push(currentBase);
     return {
       container: currentBase,
-      mask: currentBase + 1,
+      mask: currentBase,
       panel: currentBase + 5,
     };
   }
@@ -67,10 +73,11 @@ class EscManager {
 
 export const escManager = new EscManager();
 
-// 3. 滚动锁定与 Scrollbar 宽度补偿机制
+// 3. 滚动锁定与 Scrollbar 宽度补偿机制（兼容宿主与微前端容器）
 let lockCount = 0;
 let prevBodyOverflow = '';
 let prevBodyPaddingRight = '';
+let prevMainOverflow = '';
 
 export function lockBodyScroll() {
   if (typeof document === 'undefined') return;
@@ -82,6 +89,13 @@ export function lockBodyScroll() {
     if (scrollbarWidth > 0) {
       document.body.style.paddingRight = `${scrollbarWidth}px`;
     }
+
+    // 兼容微前端宿主：同时锁定当前处于视窗下的宿主主要滚动容器，防止长表格背景滚动穿透
+    const hostMain = document.querySelector('main.portal-content') || document.querySelector('main');
+    if (hostMain) {
+      prevMainOverflow = (hostMain as HTMLElement).style.overflow;
+      (hostMain as HTMLElement).style.overflow = 'hidden';
+    }
   }
   lockCount++;
 }
@@ -92,5 +106,10 @@ export function unlockBodyScroll() {
   if (lockCount === 0) {
     document.body.style.overflow = prevBodyOverflow;
     document.body.style.paddingRight = prevBodyPaddingRight;
+
+    const hostMain = document.querySelector('main.portal-content') || document.querySelector('main');
+    if (hostMain) {
+      (hostMain as HTMLElement).style.overflow = prevMainOverflow;
+    }
   }
 }
