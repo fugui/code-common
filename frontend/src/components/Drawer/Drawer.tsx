@@ -191,13 +191,9 @@ export const Drawer: React.FC<DrawerProps> = ({
 
   const containerTarget =
     (getContainer ? getContainer() : null) ||
-    (typeof document !== 'undefined'
-      ? (isWorkspace && document.getElementById('portal-workspace-overlay-root')
-          ? document.getElementById('portal-workspace-overlay-root')!
-          : document.body)
-      : null);
+    (typeof document !== 'undefined' ? document.body : null);
 
-  const defaultBase = isWorkspace ? 1040 : 1500;
+  const defaultBase = isWorkspace ? 1200 : 1500;
   const containerZIndex = zLevels ? zLevels.container : defaultBase;
   const maskZIndex = zLevels ? zLevels.mask : defaultBase;
   const panelZIndex = zLevels ? zLevels.panel : defaultBase + 10;

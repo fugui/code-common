@@ -13,7 +13,7 @@ export interface ZIndexLevels {
 export type OverlayType = 'drawer' | 'modal' | 'confirm' | 'popover';
 
 class ZIndexManager {
-  private drawerBase = 1040;
+  private drawerBase = 1200;
   private modalBase = 1500;
   private step = 10;
   private stack: number[] = [];

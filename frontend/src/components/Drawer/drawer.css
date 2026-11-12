@@ -13,11 +13,7 @@
 }
 
 .code-drawer-root--workspace {
-  top: var(--portal-header-height, 0px);
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: calc(100vh - var(--portal-header-height, 0px));
+  inset: 0;
 }
 
 .code-drawer-root--pointer-none {
@@ -41,11 +37,7 @@
 }
 
 .code-drawer-mask--workspace {
-  top: var(--portal-header-height, 0px);
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: calc(100vh - var(--portal-header-height, 0px));
+  inset: 0;
 }
 
 .code-drawer-mask--visible {
@@ -73,9 +65,9 @@
 }
 
 .code-drawer-panel--workspace {
-  top: var(--portal-header-height, 0px);
+  top: 0;
   bottom: 0;
-  height: calc(100vh - var(--portal-header-height, 0px));
+  height: 100vh;
 }
 
 .code-drawer-panel--right {
