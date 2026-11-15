@@ -1,6 +1,6 @@
 # 工作区通用开发规范与行为准则 (Workspace AGENTS Constitution) 🛡️
 
-本准则为工作区所有工程（`code-bench`、`code-common`、`code-template`、`code-shield`、`code-pipeline`、`code-pdm`、`code-gate`、`code-traefik` 等）的**上位架构宪法**。所有团队成员与 AI 代理（Agents）必须严格遵守。
+本准则为工作区所有工程（`code-bench`、`code-common`、`code-template`、`code-shield`、`code-pipeline`、`code-pdm`、`code-gate`、`code-contract` 等）的**上位架构宪法**。所有团队成员与 AI 代理（Agents）必须严格遵守。
 
 ---
 
@@ -65,8 +65,8 @@ docs/
 *   **一键派生新模块**：新建业务子系统时，统一在工作区根目录执行 `code-template/scripts/init-module.sh --key <module_key> --title "<中文名>"`，自动生成符合微前端契约与 SDD+TDD 规范的独立工程。
 *   **主从 `AGENTS.md` 协同治理**：
     *   工作区根目录 `/home/fugui/codes/AGENTS.md`（软链至 `code-common/rules/AGENTS.md`）定义全局通用准则；
-    *   各业务子系统根目录维护各自的 `AGENTS.md`（如 `code-shield/AGENTS.md`、`code-traefik/AGENTS.md`），聚焦本模块的业务边界、专有架构防腐红线、端口/表前缀契约与 SDD 路线图。
-*   **共享库表名前缀强制隔离**：各业务模块默认与 `code-bench` 共享同一 PostgreSQL 实例（复用 `users`、`departments`、`audit_logs`），子模块自建的 GORM 模型**必须显式实现 `TableName() string` 并冠以模块专属前缀**（如 `tpl_`、`traefik_`、`pdm_`），严禁创建无前缀的裸表。
+    *   各业务子系统根目录维护各自的 `AGENTS.md`（如 `code-shield/AGENTS.md`、`code-contract/AGENTS.md`），聚焦本模块的业务边界、专有架构防腐红线、端口/表前缀契约与 SDD 路线图。
+*   **共享库表名前缀强制隔离**：各业务模块默认与 `code-bench` 共享同一 PostgreSQL 实例（复用 `users`、`departments`、`audit_logs`），子模块自建的 GORM 模型**必须显式实现 `TableName() string` 并冠以模块专属前缀**（如 `tpl_`、`contract_`、`pdm_`），严禁创建无前缀的裸表。
 *   **双模运行与网关透明代理**：
     *   **后端**：统一通过 `code-common/backend/server.Run` 启动，自动识别并剥离宿主网关转发的 `/<module_key>` 路径前缀，通过 `go:embed all:frontend/dist` 实现单二进制交付。
     *   **前端**：通过 `@originjs/vite-plugin-federation` 暴露 `./App` 与 `./menu`；同时兼容嵌入门户模式（`isEmbedded=true`）与独立开发调试模式（`isEmbedded=false`）。
