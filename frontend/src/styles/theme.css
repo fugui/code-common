@@ -415,24 +415,144 @@
 }
 
 /* ===== 通用标准按钮系统 (Standard Code Buttons) ===== */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-sm, 6px);
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--transition-fast);
-  border: 1px solid transparent;
-  color: var(--color-text-white);
-  box-sizing: border-box;
-  font-family: inherit;
-  white-space: nowrap;
-  user-select: none;
-  text-decoration: none;
+/* 利用 CSS Cascade Layers 确保跨微前端多份 theme.css 动态注入时，优先级恒满足：
+   code-btn-base < code-btn-variants < 未分层的业务定制修饰类（如危险文本/Tab 激活态） */
+@layer code-btn-base, code-btn-variants;
+
+@layer code-btn-base {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm, 6px);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    border: 1px solid transparent;
+    background: var(--color-primary);
+    color: var(--color-text-white);
+    box-sizing: border-box;
+    font-family: inherit;
+    white-space: nowrap;
+    user-select: none;
+    text-decoration: none;
+  }
+}
+
+@layer code-btn-variants {
+  .btn-primary {
+    background: var(--color-primary);
+    color: var(--color-text-white);
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-sm);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .btn-primary:hover:not(:disabled) {
+      background: var(--color-primary-hover);
+      border-color: var(--color-primary-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+  }
+
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--color-border-primary);
+    color: var(--color-text-primary);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--color-bg-hover);
+      border-color: var(--color-border-hover);
+    }
+  }
+
+  .btn-danger {
+    background: var(--color-danger);
+    color: var(--color-text-white);
+    border-color: var(--color-danger);
+    box-shadow: var(--shadow-sm);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .btn-danger:hover:not(:disabled) {
+      background: var(--color-danger-hover);
+      border-color: var(--color-danger-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+  }
+
+  .btn-success {
+    background: var(--color-success);
+    color: var(--color-text-white);
+    border-color: var(--color-success);
+    box-shadow: var(--shadow-sm);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .btn-success:hover:not(:disabled) {
+      background: var(--color-success-hover);
+      border-color: var(--color-success-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+  }
+
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--color-border-primary);
+    color: var(--color-text-primary);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .btn-outline:hover:not(:disabled) {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+  }
+
+  .btn-small,
+  .btn-sm {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.75rem;
+    border-radius: var(--radius-xs, 4px);
+  }
+
+  /* .btn-text 置于 .btn-small/.btn-sm 之后，确保 btn btn-text btn-small 保持紧凑内边距与透明背景 */
+  .btn-text {
+    background: transparent;
+    border: none;
+    color: var(--color-primary);
+    padding: 0.25rem 0.5rem;
+    box-shadow: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .btn-text:hover:not(:disabled) {
+      background: var(--color-primary-subtle);
+    }
+  }
+
+  .btn-text-danger {
+    background: transparent;
+    border: none;
+    color: var(--color-danger);
+    padding: 0.25rem 0.5rem;
+    box-shadow: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .btn-text-danger:hover:not(:disabled) {
+      background: var(--color-danger-subtle);
+    }
+  }
 }
 
 .btn:disabled {
@@ -440,83 +560,6 @@
   cursor: not-allowed;
   transform: none !important;
   box-shadow: none !important;
-}
-
-.btn-primary {
-  background: var(--color-primary);
-  color: var(--color-text-white);
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-sm);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .btn-primary:hover:not(:disabled) {
-    background: var(--color-primary-hover);
-    border-color: var(--color-primary-hover);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
-  }
-}
-
-.btn-secondary {
-  background: transparent;
-  border: 1px solid var(--color-border-primary);
-  color: var(--color-text-primary);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .btn-secondary:hover:not(:disabled) {
-    background: var(--color-bg-hover);
-    border-color: var(--color-border-hover);
-  }
-}
-
-.btn-danger {
-  background: var(--color-danger);
-  color: var(--color-text-white);
-  border-color: var(--color-danger);
-  box-shadow: var(--shadow-sm);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .btn-danger:hover:not(:disabled) {
-    background: var(--color-danger-hover);
-    border-color: var(--color-danger-hover);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
-  }
-}
-
-.btn-outline {
-  background: transparent;
-  border: 1px solid var(--color-border-primary);
-  color: var(--color-text-primary);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .btn-outline:hover:not(:disabled) {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
-  }
-}
-
-.btn-text {
-  background: transparent;
-  border: none;
-  color: var(--color-primary);
-  padding: 0.25rem 0.5rem;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .btn-text:hover:not(:disabled) {
-    background: var(--color-primary-subtle);
-  }
-}
-
-.btn-small {
-  padding: 0.35rem 0.75rem;
-  font-size: 0.75rem;
-  border-radius: var(--radius-xs, 4px);
 }
 
 /* 通用统计卡片 (Metric / Stat Box) */

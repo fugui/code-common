@@ -98,6 +98,10 @@ docs/
     *   **严禁 JS 模拟伪类**：严禁在 `onMouseEnter`/`onMouseLeave` 中修改 DOM style 模拟 hover，必须使用原生 CSS `:hover`、`:active`、`:focus-visible` 伪类。
     *   **扁平化 BEM 命名**：公共组件统一使用 `.code-{component}-{element}--{modifier}` 命名空间。
 *   **优先复用已有 CSS 样式 (CSS Reuse First)**：公共工具类统一在 `@code/common`（`code-common/frontend/src/styles/`）中沉淀与维护。充分复用成熟样式类与组件（如 `.btn`, `.btn-primary`, `.btn-secondary`, `.btn-danger`, `.glass-card`, `.status-badge`, `Drawer`, `Pagination` 等），严禁随意编写同质冗余、割裂生硬的临时 ad-hoc CSS 样式。
+*   **微前端 CSS 隔离与防污染红线**：
+    *   严禁在宿主（`code-bench`）或任何业务子系统中重定义全局 `.btn` / `.btn-*` 裸类名或高特异性裸表单标签选择器，所有按钮与全局 Token 统一以 `@code/common/src/styles/theme.css`（基于 `@layer code-btn-base, code-btn-variants`）为唯一真实源。
+    *   所有微前端子系统 `src/index.css` 首行必须显式 `@import '@code/common/src/styles/theme.css';`（禁止依赖 `@code/common` JS 入口的副作用导入，防止 Rollup Tree-Shake 丢失样式），且 `main.tsx` / `App.tsx` 需先于页面组件导入 `./index.css`。
+    *   按钮必须显式声明语义变体（如 `btn btn-primary`、`btn btn-secondary`、`btn btn-text btn-small`），禁止仅写裸 `className="btn"`。
 *   **通用分页规范 (Pagination Standard)**：所有具备列表/表格分页功能的页面必须统一遵守以下交互与渲染规范：
     *   **URL 状态同步**：必须使用 `useSearchParams` 将 `page`、`pageSize` 以及筛选项同步至 URL Search Params，确保浏览器的“前进 / 后退”历史导航完全可用。
     *   **每页条数与默认值**：每页条数下拉选项统一为 `15`、`25`、`50`、`100` 条/页，缺省默认值统一为 `25` 条/页。
