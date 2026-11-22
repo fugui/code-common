@@ -59,8 +59,8 @@ func Sync(ctx context.Context, opts SyncOptions) (*SyncResult, error) {
 	if branch == "" {
 		branch = "master"
 	}
-	if strings.HasPrefix(branch, "-") {
-		return nil, fmt.Errorf("非法的分支名称: %q", branch)
+	if err := ValidateBranchName(branch); err != nil {
+		return nil, err
 	}
 
 	timeout := opts.Timeout
@@ -170,8 +170,12 @@ func Sync(ctx context.Context, opts SyncOptions) (*SyncResult, error) {
 
 // ExecGitSyncWithOptions 执行单次底层 Git Clone / Fetch / Checkout / Reset 操作，返回原始输出、实际检出分支与错误。
 func ExecGitSyncWithOptions(ctx context.Context, localPath, branch, repoURL string, depth int, cleanUntracked bool) ([]byte, string, error) {
-	if strings.TrimSpace(branch) == "" {
+	branch = strings.TrimSpace(branch)
+	if branch == "" {
 		branch = "master"
+	}
+	if err := ValidateBranchName(branch); err != nil {
+		return nil, branch, err
 	}
 
 	var output []byte
@@ -194,13 +198,28 @@ func ExecGitSyncWithOptions(ctx context.Context, localPath, branch, repoURL stri
 				return setOut, resolvedBranch, fmt.Errorf("set origin url: %w", setErr)
 			}
 
-			fetchArgs := []string{"-C", localPath, "fetch"}
-			if depth > 0 {
-				fetchArgs = append(fetchArgs, "--depth="+strconv.Itoa(depth))
+			fetchRefSpec := func(targetBr string) ([]byte, error) {
+				fetchArgs := []string{"-C", localPath, "fetch"}
+				if depth > 0 {
+					fetchArgs = append(fetchArgs, "--depth="+strconv.Itoa(depth))
+				}
+				refspec := fmt.Sprintf("+refs/heads/%s:refs/remotes/origin/%s", targetBr, targetBr)
+				fetchArgs = append(fetchArgs, "origin", refspec)
+				out, _, fErr := ExecCommandWithProcessGroup(ctx, localPath, "git", fetchArgs...)
+				return out, fErr
 			}
-			fetchArgs = append(fetchArgs, "--all", "--prune")
 
-			if out, _, err := ExecCommandWithProcessGroup(ctx, localPath, "git", fetchArgs...); err != nil {
+			out, err := fetchRefSpec(branch)
+			// 若默认分支为 master 但远端实际为 main，显式 refspec 回退拉取 main
+			if err != nil && branch == "master" && !IsAuthOrPermissionError(SanitizeGitOutput(string(out))+" "+SanitizeGitOutput(err.Error())) {
+				if outMain, errMain := fetchRefSpec("main"); errMain == nil {
+					branch = "main"
+					resolvedBranch = "main"
+					out = outMain
+					err = nil
+				}
+			}
+			if err != nil {
 				output = out
 				gitErr = err
 			}
@@ -208,19 +227,9 @@ func ExecGitSyncWithOptions(ctx context.Context, localPath, branch, repoURL stri
 
 		if gitErr == nil {
 			if hasOrigin {
-				targetRef := "origin/" + branch
-				// 若默认分支为 master 但远端实际为 main，智能适配目标引用
-				if branch == "master" {
-					if _, _, refErr := ExecCommandWithProcessGroup(ctx, localPath, "git", "-C", localPath, "rev-parse", "--verify", targetRef); refErr != nil {
-						if _, _, mainErr := ExecCommandWithProcessGroup(ctx, localPath, "git", "-C", localPath, "rev-parse", "--verify", "origin/main"); mainErr == nil {
-							targetRef = "origin/main"
-							branch = "main"
-							resolvedBranch = "main"
-						}
-					}
-				}
+				targetRef := "refs/remotes/origin/" + branch
 
-				// 使用 checkout -B 强制对齐 targetRef，天然免疫 force-push / rebase 导致的分叉
+				// 使用 checkout -B 强制对齐 targetRef，天然免疫 force-push / rebase 导致的分叉与浅克隆跨分支切换
 				if out, _, err := ExecCommandWithProcessGroup(ctx, localPath, "git", "-C", localPath, "checkout", "-B", branch, targetRef); err != nil {
 					if outFallback, _, errFallback := ExecCommandWithProcessGroup(ctx, localPath, "git", "-C", localPath, "checkout", "-f", branch); errFallback != nil {
 						output = out

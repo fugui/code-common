@@ -5,10 +5,14 @@ import (
 	"fmt"
 	"path"
 	"regexp"
+	"sort"
 	"strings"
 )
 
-var commitSHAPattern = regexp.MustCompile(`^[0-9a-fA-F]{7,40}$`)
+var (
+	commitSHAPattern  = regexp.MustCompile(`^[0-9a-fA-F]{7,40}$`)
+	branchNamePattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._/-]{0,127}$`)
+)
 
 // ChangedFile 描述两次提交间的文件级变更。
 type ChangedFile struct {
@@ -17,9 +21,110 @@ type ChangedFile struct {
 	OldPath string // 重命名时非空
 }
 
+// RemoteBranch 描述远端 Git 仓库的单个分支摘要。
+type RemoteBranch struct {
+	Name      string `json:"name"`
+	CommitSHA string `json:"commit_sha"`
+	IsHead    bool   `json:"is_head"`
+}
+
+// ValidateBranchName 校验 Git 分支名称是否合法且安全，阻断命令行选项注入（- 前缀）与路径穿越。
+func ValidateBranchName(branch string) error {
+	if strings.TrimSpace(branch) == "" {
+		return fmt.Errorf("分支名称不能为空")
+	}
+	if len(branch) > 128 {
+		return fmt.Errorf("分支名称长度不能超过 128 个字符")
+	}
+	if strings.HasPrefix(branch, "-") {
+		return fmt.Errorf("非法的分支名称: %q", branch)
+	}
+	if !branchNamePattern.MatchString(branch) {
+		return fmt.Errorf("非法的分支名称: %q", branch)
+	}
+	if strings.Contains(branch, "..") || strings.Contains(branch, "//") || strings.Contains(branch, "@{") {
+		return fmt.Errorf("非法的分支名称: %q", branch)
+	}
+	if strings.HasSuffix(branch, "/") || strings.HasSuffix(branch, ".") || strings.HasSuffix(branch, ".lock") {
+		return fmt.Errorf("非法的分支名称: %q", branch)
+	}
+	for _, seg := range strings.Split(branch, "/") {
+		if seg == "" || strings.HasPrefix(seg, ".") || strings.HasSuffix(seg, ".lock") {
+			return fmt.Errorf("非法的分支名称: %q", branch)
+		}
+	}
+	return nil
+}
+
+// ListRemoteBranches 轻量枚举远端仓库全部分支与默认 HEAD 分支（仅执行 git ls-remote --symref，零对象拉取）。
+func ListRemoteBranches(ctx context.Context, repoURL string) (branches []RemoteBranch, headBranch string, err error) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	repoURL = strings.TrimSpace(repoURL)
+	if repoURL == "" || strings.HasPrefix(repoURL, "-") {
+		return nil, "", fmt.Errorf("仓库地址非法或为空")
+	}
+
+	out, _, cmdErr := ExecCommandWithProcessGroup(ctx, "", "git", "ls-remote", "--symref", repoURL, "HEAD", "refs/heads/*")
+	if cmdErr != nil {
+		return nil, "", fmt.Errorf("git ls-remote failed: %s: %w", strings.TrimSpace(SanitizeGitOutput(string(out))), cmdErr)
+	}
+
+	seen := make(map[string]bool)
+	lines := strings.Split(string(out), "\n")
+	for _, rawLine := range lines {
+		line := strings.TrimSpace(rawLine)
+		if line == "" {
+			continue
+		}
+		if strings.HasPrefix(line, "ref:") {
+			rest := strings.TrimSpace(strings.TrimPrefix(line, "ref:"))
+			fields := strings.Fields(rest)
+			if len(fields) >= 2 && fields[len(fields)-1] == "HEAD" && strings.HasPrefix(fields[0], "refs/heads/") {
+				headBranch = strings.TrimPrefix(fields[0], "refs/heads/")
+			}
+			continue
+		}
+		fields := strings.Fields(line)
+		if len(fields) >= 2 && commitSHAPattern.MatchString(fields[0]) && strings.HasPrefix(fields[1], "refs/heads/") {
+			name := strings.TrimPrefix(fields[1], "refs/heads/")
+			if name == "" || seen[name] {
+				continue
+			}
+			seen[name] = true
+			branches = append(branches, RemoteBranch{
+				Name:      name,
+				CommitSHA: fields[0],
+			})
+		}
+	}
+
+	for i := range branches {
+		if headBranch != "" && branches[i].Name == headBranch {
+			branches[i].IsHead = true
+		}
+	}
+
+	sort.Slice(branches, func(i, j int) bool {
+		if branches[i].IsHead != branches[j].IsHead {
+			return branches[i].IsHead
+		}
+		return branches[i].Name < branches[j].Name
+	})
+
+	if branches == nil {
+		branches = []RemoteBranch{}
+	}
+	return branches, headBranch, nil
+}
+
 // LsRemoteHead 轻量查询远端指定分支的最新提交哈希（仅执行 git ls-remote，不拉取对象、不克隆）。
 // 当 branch 为空或为 "master" 且远端不存在 refs/heads/master 时，自动回退查询 refs/heads/main。
 func LsRemoteHead(ctx context.Context, repoURL, branch string) (commitSHA string, resolvedBranch string, err error) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	repoURL = strings.TrimSpace(repoURL)
 	if repoURL == "" || strings.HasPrefix(repoURL, "-") {
 		return "", "", fmt.Errorf("仓库地址非法或为空")
@@ -29,8 +134,8 @@ func LsRemoteHead(ctx context.Context, repoURL, branch string) (commitSHA string
 	if targetBranch == "" {
 		targetBranch = "master"
 	}
-	if strings.HasPrefix(targetBranch, "-") {
-		return "", "", fmt.Errorf("非法的分支名称: %q", targetBranch)
+	if err := ValidateBranchName(targetBranch); err != nil {
+		return "", "", err
 	}
 
 	sha, found, err := lsRemoteSingleBranch(ctx, repoURL, targetBranch)

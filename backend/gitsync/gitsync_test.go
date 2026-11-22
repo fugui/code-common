@@ -369,3 +369,144 @@ func TestAuthErrorFastFailNoHealRetry(t *testing.T) {
 		t.Fatalf("SSH 快速失败超出 30s 上限: %v", sshElapsed)
 	}
 }
+
+func TestValidateBranchName(t *testing.T) {
+	valid := []string{
+		"main",
+		"master",
+		"develop",
+		"release/v1.2.3",
+		"feature/ADR-07_branch",
+		"v2.0.0-rc.1",
+		"hotfix/issue-42",
+	}
+	for _, b := range valid {
+		if err := ValidateBranchName(b); err != nil {
+			t.Errorf("合法分支 %q 不应报错，实际: %v", b, err)
+		}
+	}
+
+	invalid := []string{
+		"",
+		"   ",
+		"-upload-pack=evil",
+		"--orphan",
+		"main..dev",
+		"release//v1",
+		"feat@{1}",
+		`feat\bar`,
+		"feat bar",
+		".hidden",
+		"release/.hidden",
+		"main.lock",
+		"release/v1.lock/foo",
+		"release/",
+		"release.",
+		strings.Repeat("a", 129),
+	}
+	for _, b := range invalid {
+		if err := ValidateBranchName(b); err == nil {
+			t.Errorf("非法分支 %q 期望返回错误，实际 nil", b)
+		}
+	}
+}
+
+func TestListRemoteBranchesAndShallowSwitchBranch(t *testing.T) {
+	bareDir, seedDir, mainSHA := initBareRepoWithCommits(t, "main")
+
+	// 在 seed 仓上创建分支 develop 与 release/1.0 并推送
+	runTestGit(t, seedDir, "checkout", "-b", "develop")
+	if err := os.WriteFile(filepath.Join(seedDir, "develop_only.txt"), []byte("from develop\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	runTestGit(t, seedDir, "add", "develop_only.txt")
+	runTestGit(t, seedDir, "commit", "-m", "develop commit")
+	runTestGit(t, seedDir, "push", "-u", "origin", "develop")
+	devSHA := runTestGit(t, seedDir, "rev-parse", "HEAD")
+
+	runTestGit(t, seedDir, "checkout", "main")
+	runTestGit(t, seedDir, "checkout", "-b", "release/1.0")
+	if err := os.WriteFile(filepath.Join(seedDir, "release.txt"), []byte("from release\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	runTestGit(t, seedDir, "add", "release.txt")
+	runTestGit(t, seedDir, "commit", "-m", "release commit")
+	runTestGit(t, seedDir, "push", "-u", "origin", "release/1.0")
+	relSHA := runTestGit(t, seedDir, "rev-parse", "HEAD")
+
+	// 1. 验证 ListRemoteBranches 识别 HEAD 并置顶排序
+	branches, headBranch, err := ListRemoteBranches(context.Background(), bareDir)
+	if err != nil {
+		t.Fatalf("ListRemoteBranches 失败: %v", err)
+	}
+	if headBranch != "main" {
+		t.Fatalf("期望 headBranch=main，实际为 %q", headBranch)
+	}
+	if len(branches) != 3 {
+		t.Fatalf("期望 3 个远端分支，实际 %d: %+v", len(branches), branches)
+	}
+	if branches[0].Name != "main" || !branches[0].IsHead || branches[0].CommitSHA != mainSHA {
+		t.Fatalf("首项应为 HEAD 分支 main: %+v", branches[0])
+	}
+	if branches[1].Name != "develop" || branches[1].IsHead || branches[1].CommitSHA != devSHA {
+		t.Fatalf("次项期望为 develop: %+v", branches[1])
+	}
+	if branches[2].Name != "release/1.0" || branches[2].IsHead || branches[2].CommitSHA != relSHA {
+		t.Fatalf("第三项期望为 release/1.0: %+v", branches[2])
+	}
+
+	// 2. 验证 Depth=1 浅克隆下无缝跨分支切换 (main -> develop -> main)
+	localPath := filepath.Join(t.TempDir(), "shallow_switch_work")
+	resMain1, err := Sync(context.Background(), SyncOptions{
+		RepoURL:        bareDir,
+		LocalPath:      localPath,
+		Branch:         "main",
+		Depth:          1,
+		AutoHealCache:  true,
+		CleanUntracked: true,
+	})
+	if err != nil {
+		t.Fatalf("浅克隆 main 失败: %v", err)
+	}
+	if resMain1.CommitSHA != mainSHA || resMain1.ResolvedBranch != "main" {
+		t.Fatalf("首次同步 main 结果不符: %+v", resMain1)
+	}
+
+	// 同路径切到 develop
+	resDev, err := Sync(context.Background(), SyncOptions{
+		RepoURL:        bareDir,
+		LocalPath:      localPath,
+		Branch:         "develop",
+		Depth:          1,
+		AutoHealCache:  true,
+		CleanUntracked: true,
+	})
+	if err != nil {
+		t.Fatalf("浅克隆同路径切换至 develop 失败: %v", err)
+	}
+	if resDev.CommitSHA != devSHA || resDev.ResolvedBranch != "develop" {
+		t.Fatalf("切换 develop 结果不符: %+v (want sha=%s)", resDev, devSHA)
+	}
+	if data, rErr := os.ReadFile(filepath.Join(localPath, "develop_only.txt")); rErr != nil || string(data) != "from develop\n" {
+		t.Fatalf("切换至 develop 后工作区内容异常: data=%q err=%v", string(data), rErr)
+	}
+
+	// 再同路径切回 main，develop_only.txt 应消失
+	resMain2, err := Sync(context.Background(), SyncOptions{
+		RepoURL:        bareDir,
+		LocalPath:      localPath,
+		Branch:         "main",
+		Depth:          1,
+		AutoHealCache:  true,
+		CleanUntracked: true,
+	})
+	if err != nil {
+		t.Fatalf("浅克隆同路径切回 main 失败: %v", err)
+	}
+	if resMain2.CommitSHA != mainSHA || resMain2.ResolvedBranch != "main" {
+		t.Fatalf("切回 main 结果不符: %+v", resMain2)
+	}
+	if _, statErr := os.Stat(filepath.Join(localPath, "develop_only.txt")); !os.IsNotExist(statErr) {
+		t.Fatalf("切回 main 后 develop_only.txt 不应残留, err=%v", statErr)
+	}
+}
