@@ -3,11 +3,17 @@
   "version": "1.0.0",
   "description": "Shared common library for code-shield, code-bench, code-pipeline, code-pdm",
   "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./mermaid": "./src/components/MermaidDiagram/index.ts",
+    "./src/*": "./src/*"
+  },
   "sideEffects": [
     "**/*.css"
   ],
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "node --test src/components/MermaidDiagram/mermaidSvgUtils.test.ts"
   },
   "peerDependencies": {
     "react": ">=18.0.0",

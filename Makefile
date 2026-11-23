@@ -9,6 +9,8 @@ build:
 test:
 	@echo "Running Go tests for code-common backend..."
 	cd backend && go test ./...
+	@echo "Running frontend unit tests for code-common..."
+	cd frontend && npm test
 
 clean:
 	@echo "Cleaning code-common..."
