@@ -43,9 +43,7 @@ link_file() {
     echo -e "${GREEN}[LINK]${NC} $link_name -> $target_rel"
 }
 
-# 根目录文件软链接
-link_file "code-common/scripts/start.sh" "start.sh"
-link_file "code-common/infra/Caddyfile" "Caddyfile"
+# 根目录文件软链接（start.sh 与 Caddyfile 按环境独立维护，不纳入软链）
 link_file "code-common/rules/AGENTS.md" "AGENTS.md"
 link_file "code-common/scripts/count_lines.py" "count_lines.py"
 link_file "code-common/scripts/count_lines_by_project.py" "count_lines_by_project.py"
