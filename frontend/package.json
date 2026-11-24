@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "test": "node --test src/components/MermaidDiagram/mermaidSvgUtils.test.ts"
+    "test": "node --test src/components/MermaidDiagram/mermaidSvgUtils.test.ts src/utils/overlay.test.ts"
   },
   "peerDependencies": {
     "react": ">=18.0.0",

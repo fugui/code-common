@@ -36,4 +36,7 @@
 - **双模主题 Token（SSOT）**：所有页面/弹窗/表格兼顾亮暗主题，统一使用 `theme.css` 的 `--color-*`（如 `--color-bg-surface/muted/input/hover`、`--color-text-primary/secondary/muted/white`、`--color-border-primary`、`--shadow-lg`）；**严禁硬编码 `#fff`/`#000` 等绝对色值**，旧别名嵌套 fallback 不超过 1 层。
 - **微前端 CSS 防污染**：严禁重定义全局裸 `.btn` / `.btn-*` 或高特异性裸表单选择器（以 `@code/common/src/styles/theme.css` 的 `@layer` 为唯一基准）；子系统 `src/index.css` 首行必须 `@import '@code/common/src/styles/theme.css';`，且 `main.tsx`/`App.tsx` 先于页面组件导入 `./index.css`；按钮必须带语义变体（如 `btn btn-primary`，禁裸 `className="btn"`）。
 - **通用分页**：用 `useSearchParams` 同步 `page`/`pageSize`/筛选项；每页选项 `15/25/50/100`（默认 `25`）；布局固定 `[首页][上一页][5页连续滑动窗口][下一页][末页][条/页]`，无省略号与跳转输入框。
+- **弹层与层叠上下文规范**：
+  - 业务侧边抽屉与模态弹窗必须统一使用 `@code/common` 的 `<Drawer>` / `<Modal>` / `useConfirm`，严禁业务代码手写 `position: fixed` 全屏遮罩或伪造复用 `.code-drawer-*` / `.code-modal-*` 内部类名；
+  - 所有 `z-index` 必须引用 `theme.css` 定义的语义化 `--z-index-*` Token（宿主顶栏固定 `--z-index-header: 200`，远低于弹层基线 `1200/1500`），禁止业务代码硬编码 `>= 1000` 的裸数值，并纳入各仓库 `make lint` 静态门禁（`code-common/scripts/check-overlay-guard.mjs`）。
 - **类型安全**：严禁滥用 `any`，为 API 响应、Props、State 定义明确 `interface`。

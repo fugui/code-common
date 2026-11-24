@@ -56,6 +56,8 @@ export interface ModalProps {
   footerStyle?: React.CSSProperties;
   /** 最外层自定义类名 */
   className?: string;
+  /** 面板 data-testid 属性 */
+  testId?: string;
   /** 子元素内容 */
   children?: React.ReactNode;
 }
@@ -94,6 +96,7 @@ export const Modal: React.FC<ModalProps> = ({
   headerStyle,
   footerStyle,
   className = '',
+  testId,
   children,
 }) => {
   const isTargetOpen = open !== undefined ? open : (visible ?? false);
@@ -102,6 +105,7 @@ export const Modal: React.FC<ModalProps> = ({
   const [animateVisible, setAnimateVisible] = useState(false);
   const [zLevels, setZLevels] = useState<ZIndexLevels | null>(null);
   const zAcquiredRef = useRef(false);
+  const zLevelRef = useRef<number | undefined>(undefined);
   const closeTimerRef = useRef<number>();
 
   const resolvedWidth = typeof width === 'number'
@@ -131,7 +135,9 @@ export const Modal: React.FC<ModalProps> = ({
   useEffect(() => {
     if (isTargetOpen) {
       if (!zAcquiredRef.current) {
-        setZLevels(zIndexManager.acquire('modal'));
+        const acquired = zIndexManager.acquire('modal');
+        zLevelRef.current = acquired.container;
+        setZLevels(acquired);
         zAcquiredRef.current = true;
       }
       setMounted(true);
@@ -145,7 +151,8 @@ export const Modal: React.FC<ModalProps> = ({
       const timer = window.setTimeout(() => {
         setMounted(false);
         if (zAcquiredRef.current) {
-          zIndexManager.release();
+          zIndexManager.release(zLevelRef.current);
+          zLevelRef.current = undefined;
           zAcquiredRef.current = false;
           setZLevels(null);
         }
@@ -162,7 +169,8 @@ export const Modal: React.FC<ModalProps> = ({
         closeTimerRef.current = undefined;
       }
       if (zAcquiredRef.current) {
-        zIndexManager.release();
+        zIndexManager.release(zLevelRef.current);
+        zLevelRef.current = undefined;
         zAcquiredRef.current = false;
       }
     };
@@ -190,7 +198,6 @@ export const Modal: React.FC<ModalProps> = ({
   if (!mounted && !isTargetOpen) return null;
 
   const containerTarget = (getContainer ? getContainer() : null) || (typeof document !== 'undefined' ? document.body : null);
-  if (!containerTarget) return null;
 
   const containerZIndex = zLevels ? zLevels.container : 1500;
   const maskZIndex = zLevels ? zLevels.mask : 1500;
@@ -203,7 +210,7 @@ export const Modal: React.FC<ModalProps> = ({
   const alignClass = centered ? 'code-modal-root--centered' : 'code-modal-root--top';
   const hasStringTitle = typeof title === 'string';
 
-  return createPortal(
+  const modalContent = (
     <div
       className={`code-modal-root modal-root-wrapper ${alignClass} ${pointerClass} ${className}`.trim()}
       style={{ zIndex: containerZIndex }}
@@ -223,6 +230,7 @@ export const Modal: React.FC<ModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby={hasStringTitle ? uniqueTitleId : undefined}
+        data-testid={testId}
         className={`code-modal-panel ${animateVisible ? 'code-modal-panel--visible' : 'code-modal-panel--hidden'}`}
         style={{
           width: resolvedWidth,
@@ -291,7 +299,12 @@ export const Modal: React.FC<ModalProps> = ({
           </div>
         )}
       </div>
-    </div>,
-    containerTarget
+    </div>
   );
+
+  if (!containerTarget) {
+    return modalContent;
+  }
+
+  return createPortal(modalContent, containerTarget);
 };

@@ -53,8 +53,12 @@ export interface DrawerProps {
   bodyStyle?: React.CSSProperties;
   /** 底部自定义样式 */
   footerStyle?: React.CSSProperties;
-  /** 抽屉层叠范围：'workspace' (工作区抽屉，下沉避让宿主顶栏) 或 'fullscreen' (全屏模式)，默认 'workspace' */
+  /**
+   * 抽屉层叠范围（已统一为全高视口遮罩覆盖宿主顶栏；'fullscreen' 仍保留以 Modal 基准层级渲染）
+   */
   scope?: 'workspace' | 'fullscreen';
+  /** 面板 data-testid 属性 */
+  testId?: string;
   /** 子元素 */
   children?: React.ReactNode;
 }
@@ -93,6 +97,7 @@ export const Drawer: React.FC<DrawerProps> = ({
   bodyStyle,
   footerStyle,
   scope = 'workspace',
+  testId,
   children,
 }) => {
   const isTargetOpen = open !== undefined ? open : (visible ?? false);
@@ -101,6 +106,7 @@ export const Drawer: React.FC<DrawerProps> = ({
   const [animateVisible, setAnimateVisible] = useState(false);
   const [zLevels, setZLevels] = useState<ZIndexLevels | null>(null);
   const zAcquiredRef = useRef(false);
+  const zLevelRef = useRef<number | undefined>(undefined);
   const closeTimerRef = useRef<number>();
 
   // 解析宽度
@@ -127,7 +133,9 @@ export const Drawer: React.FC<DrawerProps> = ({
   useEffect(() => {
     if (isTargetOpen) {
       if (!zAcquiredRef.current) {
-        setZLevels(zIndexManager.acquire(scope === 'fullscreen' ? 'modal' : 'drawer'));
+        const acquired = zIndexManager.acquire(scope === 'fullscreen' ? 'modal' : 'drawer');
+        zLevelRef.current = acquired.container;
+        setZLevels(acquired);
         zAcquiredRef.current = true;
       }
       setMounted(true);
@@ -141,14 +149,15 @@ export const Drawer: React.FC<DrawerProps> = ({
       const timer = window.setTimeout(() => {
         setMounted(false);
         if (zAcquiredRef.current) {
-          zIndexManager.release();
+          zIndexManager.release(zLevelRef.current);
+          zLevelRef.current = undefined;
           zAcquiredRef.current = false;
           setZLevels(null);
         }
       }, 300);
       return () => window.clearTimeout(timer);
     }
-  }, [isTargetOpen, afterOpenChange]);
+  }, [isTargetOpen, afterOpenChange, scope]);
 
   // 组件卸载时释放 Z-Index 栈并清理定时器
   useEffect(() => {
@@ -158,7 +167,8 @@ export const Drawer: React.FC<DrawerProps> = ({
         closeTimerRef.current = undefined;
       }
       if (zAcquiredRef.current) {
-        zIndexManager.release();
+        zIndexManager.release(zLevelRef.current);
+        zLevelRef.current = undefined;
         zAcquiredRef.current = false;
       }
     };
@@ -224,6 +234,7 @@ export const Drawer: React.FC<DrawerProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby={hasStringTitle ? uniqueTitleId : undefined}
+        data-testid={testId}
         className={`code-drawer-panel ${isWorkspace ? 'code-drawer-panel--workspace' : ''} ${isLeft ? 'code-drawer-panel--left' : 'code-drawer-panel--right'} ${animateVisible ? 'code-drawer-panel--visible' : 'code-drawer-panel--hidden'}`}
         style={{
           width: resolvedWidth,

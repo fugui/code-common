@@ -49,6 +49,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   const [internalLoading, setInternalLoading] = useState(false);
   const [zLevels, setZLevels] = useState<ZIndexLevels | null>(null);
   const zAcquiredRef = useRef(false);
+  const zLevelRef = useRef<number | undefined>(undefined);
 
   const isLoading = loading || internalLoading;
 
@@ -56,7 +57,9 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   useEffect(() => {
     if (open) {
       if (!zAcquiredRef.current) {
-        setZLevels(zIndexManager.acquire('confirm'));
+        const acquired = zIndexManager.acquire('confirm');
+        zLevelRef.current = acquired.container;
+        setZLevels(acquired);
         zAcquiredRef.current = true;
       }
       setMounted(true);
@@ -67,7 +70,8 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       const timer = setTimeout(() => {
         setMounted(false);
         if (zAcquiredRef.current) {
-          zIndexManager.release();
+          zIndexManager.release(zLevelRef.current);
+          zLevelRef.current = undefined;
           zAcquiredRef.current = false;
           setZLevels(null);
         }
@@ -80,7 +84,8 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   useEffect(() => {
     return () => {
       if (zAcquiredRef.current) {
-        zIndexManager.release();
+        zIndexManager.release(zLevelRef.current);
+        zLevelRef.current = undefined;
         zAcquiredRef.current = false;
       }
     };
@@ -148,11 +153,10 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   const panelZIndex = zLevels ? zLevels.panel : 1505;
 
   const containerTarget = (getContainer ? getContainer() : null) || (typeof document !== 'undefined' ? document.body : null);
-  if (!containerTarget) return null;
 
   const pointerClass = animateVisible ? 'code-confirm-dialog-root--pointer-auto' : 'code-confirm-dialog-root--pointer-none';
 
-  return createPortal(
+  const dialogContent = (
     <div
       className={`code-confirm-dialog-root confirm-dialog-root-wrapper modal-root-wrapper ${pointerClass} ${className}`.trim()}
       style={{ zIndex: containerZIndex }}
@@ -226,9 +230,14 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           </button>
         </div>
       </div>
-    </div>,
-    containerTarget
+    </div>
   );
+
+  if (!containerTarget) {
+    return dialogContent;
+  }
+
+  return createPortal(dialogContent, containerTarget);
 };
 
 // Hook & Context 便捷调用支持
