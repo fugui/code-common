@@ -31,6 +31,7 @@
 
 ## 5. 前端规范（React 18 / Vite 5 / TypeScript）
 
+- **禁止提交 `package-lock.json`**：因研发与现网网络/镜像源环境不同，锁文件会导致三方包下载失败；各工程严禁生成或提交 `package-lock.json`（亦禁使用 `npm ci`），须在 `.gitignore` 中忽略 `package-lock.json`、在 `frontend/.npmrc` 配置 `package-lock=false`，并在 `Makefile`/`Dockerfile` 中使用 `npm install --no-package-lock`。
 - **样式复用与命名**：优先 Vanilla CSS，复用 `@code/common`（`code-common/frontend/src/styles/`）组件与工具类，公共样式采用扁平 BEM（`.code-{component}-{element}--{modifier}`）；禁滥用内联 `style`（仅允许动态计算值），禁 JS 模拟 hover（用原生 CSS 伪类）。
 - **双模主题 Token（SSOT）**：所有页面/弹窗/表格兼顾亮暗主题，统一使用 `theme.css` 的 `--color-*`（如 `--color-bg-surface/muted/input/hover`、`--color-text-primary/secondary/muted/white`、`--color-border-primary`、`--shadow-lg`）；**严禁硬编码 `#fff`/`#000` 等绝对色值**，旧别名嵌套 fallback 不超过 1 层。
 - **微前端 CSS 防污染**：严禁重定义全局裸 `.btn` / `.btn-*` 或高特异性裸表单选择器（以 `@code/common/src/styles/theme.css` 的 `@layer` 为唯一基准）；子系统 `src/index.css` 首行必须 `@import '@code/common/src/styles/theme.css';`，且 `main.tsx`/`App.tsx` 先于页面组件导入 `./index.css`；按钮必须带语义变体（如 `btn btn-primary`，禁裸 `className="btn"`）。
