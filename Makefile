@@ -4,7 +4,7 @@ all: test
 
 build:
 	@echo "Building code-common frontend..."
-	cd frontend && ( [ -d node_modules ] || npm install ) && npm run build
+	cd frontend && ( [ -d node_modules ] || npm install --no-package-lock ) && npm run build
 
 test:
 	@echo "Running Go tests for code-common backend..."
