@@ -19,7 +19,7 @@ BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 echo -e "${BLUE}[INFO]${NC} 开始为工作区根目录 ($BASE_DIR) 初始化软链接..."
 
 # 确保脚本具备可执行权限
-chmod +x "$SCRIPT_DIR/start.sh" "$SCRIPT_DIR/count_lines.py" "$SCRIPT_DIR/count_lines_by_project.py" "$SCRIPT_DIR/git-stats.js" "$SCRIPT_DIR/setup-symlinks.sh" 2>/dev/null || true
+chmod +x "$SCRIPT_DIR/start.sh" "$SCRIPT_DIR/count_lines.py" "$SCRIPT_DIR/count_lines_by_project.py" "$SCRIPT_DIR/git-stats.js" "$SCRIPT_DIR/git-reset-pull.sh" "$SCRIPT_DIR/setup-symlinks.sh" 2>/dev/null || true
 
 # 辅助函数：创建或更新软链接
 link_file() {
@@ -48,6 +48,7 @@ link_file "code-common/rules/AGENTS.md" "AGENTS.md"
 link_file "code-common/scripts/count_lines.py" "count_lines.py"
 link_file "code-common/scripts/count_lines_by_project.py" "count_lines_by_project.py"
 link_file "code-common/scripts/git-stats.js" "git-stats.js"
+link_file "code-common/scripts/git-reset-pull.sh" "git-reset-pull.sh"
 
 # .agents 目录处理
 mkdir -p "$BASE_DIR/.agents"
