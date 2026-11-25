@@ -6,6 +6,9 @@
 
 set -euo pipefail
 
+# 本地缺失仓库时的 clone 来源（SSH 模式，github.com/fugui/ 下）
+GITHUB_SSH_PREFIX="git@github.com:fugui/"
+
 # 颜色高亮定义
 GREEN="\033[0;32m"
 BLUE="\033[0;34m"
@@ -63,6 +66,9 @@ show_help() {
 
 参数:
   [仓库名...]          可选，仅处理指定子目录名称（例如: code-common code-bench）
+                       若指定的目录在本地不存在，将先通过 SSH 从
+                       ${GITHUB_SSH_PREFIX}<仓库名>.git clone 下来再处理
+                       （--dry-run 下仅提示，不实际 clone）
 EOF
 }
 
@@ -150,8 +156,25 @@ main() {
         for name in "${target_repos[@]}"; do
             name="${name%/}"
             local candidate="$base_dir/$name"
+            if [[ ! -e "$candidate" ]]; then
+                if [[ ! "$name" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
+                    log_error "仓库名不合法，无法 clone: $name"
+                    exit 1
+                fi
+                local clone_url="${GITHUB_SSH_PREFIX}${name}.git"
+                if [[ "$dry_run" == true ]]; then
+                    log_info "[DRY-RUN] 本地不存在 $name，实际执行时将 clone: $clone_url"
+                    continue
+                fi
+                log_info "本地不存在 $name，正在通过 SSH clone: $clone_url"
+                if ! git clone -- "$clone_url" "$candidate"; then
+                    log_error "clone 失败: $clone_url（请检查 SSH 密钥与仓库是否存在）"
+                    exit 1
+                fi
+                log_success "已 clone: $candidate"
+            fi
             if [[ ! -d "$candidate" ]]; then
-                log_error "仓库目录不存在: $candidate"
+                log_error "目标路径不是目录: $candidate"
                 exit 1
             fi
             if [[ ! -e "$candidate/.git" ]]; then
