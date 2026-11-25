@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Drawer } from '../Drawer';
+import { CopyButton } from '../CopyButton';
 import { SysAuditLog, FieldDiff } from '../../types/audit';
 import './audit-diff-drawer.css';
 
@@ -42,7 +43,6 @@ interface TriggerBatchDetail {
 
 export const AuditDiffDrawer: React.FC<AuditDiffDrawerProps> = ({ open, onClose, log }) => {
   const [activeTab, setActiveTab] = useState<'diff' | 'raw_before' | 'raw_after'>('diff');
-  const [copiedTrace, setCopiedTrace] = useState(false);
   const [triggerDetail, setTriggerDetail] = useState<TriggerBatchDetail | null>(null);
   const [loadingTrigger, setLoadingTrigger] = useState(false);
 
@@ -75,15 +75,6 @@ export const AuditDiffDrawer: React.FC<AuditDiffDrawerProps> = ({ open, onClose,
       return log.after_data;
     }
   }, [log?.after_data]);
-
-  // 复制 TraceID
-  const handleCopyTrace = () => {
-    if (log?.trace_id) {
-      navigator.clipboard.writeText(log.trace_id);
-      setCopiedTrace(true);
-      setTimeout(() => setCopiedTrace(false), 2000);
-    }
-  };
 
   // 识别到 task_trigger_log 时，自动异步下钻拉取二级执行明细
   useEffect(() => {
@@ -194,14 +185,16 @@ export const AuditDiffDrawer: React.FC<AuditDiffDrawerProps> = ({ open, onClose,
                 {log.trace_id || '-'}
               </code>
               {log.trace_id && (
-                <button
-                  type="button"
-                  onClick={handleCopyTrace}
-                  className={`code-audit-diff-copy-btn ${copiedTrace ? 'code-audit-diff-copy-btn--copied' : ''}`}
+                <CopyButton
+                  text={log.trace_id}
+                  label="复制"
+                  copiedLabel="已复制"
+                  variant="ghost"
+                  size="xs"
+                  showIcon={false}
+                  resetDelay={2000}
                   title="复制 Trace ID"
-                >
-                  {copiedTrace ? '已复制' : '复制'}
-                </button>
+                />
               )}
             </div>
           </div>

@@ -4,6 +4,7 @@ import { SysAuditLog, AuditLevel } from '../../types/audit';
 import { Pagination } from '../Pagination/Pagination';
 import { usePagination } from '../../hooks/usePagination';
 import { EmptyState } from '../EmptyState';
+import { copyTextSafe } from '../../utils/clipboard';
 import './audit-log-table.css';
 
 export interface AuditLogTableProps {
@@ -100,11 +101,13 @@ export const AuditLogTable: React.FC<AuditLogTableProps> = ({
     setSearchParams(newParams);
   };
 
-  const handleCopyTrace = (e: React.MouseEvent, traceId: string) => {
+  const handleCopyTrace = async (e: React.MouseEvent, traceId: string) => {
     e.stopPropagation();
-    navigator.clipboard.writeText(traceId);
-    setCopiedTraceId(traceId);
-    setTimeout(() => setCopiedTraceId(null), 2000);
+    const ok = await copyTextSafe(traceId);
+    if (ok) {
+      setCopiedTraceId(traceId);
+      setTimeout(() => setCopiedTraceId(null), 2000);
+    }
   };
 
   const renderLevelBadge = (lvl: AuditLevel) => {

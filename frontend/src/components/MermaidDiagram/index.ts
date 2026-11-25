@@ -6,6 +6,8 @@ export {
   type MermaidInitConfig,
 } from './MermaidDiagram';
 
+export { copyTextSafe } from '../../utils/clipboard';
+
 export {
   ClipboardImageUnsupportedError,
   EXPORT_PADDING,
@@ -21,7 +23,6 @@ export {
   calculateZoomTowardsPoint,
   clampZoom,
   copyPngToClipboard,
-  copyTextSafe,
   downloadPngDiagram,
   downloadSvgDiagram,
   encodeUtf8ToBase64,

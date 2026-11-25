@@ -1,0 +1,153 @@
+/* ==========================================================================
+   Code Platform - CopyButton Component Styles
+   Namespace: .code-copy-btn
+   ========================================================================== */
+
+.code-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-weight: 500;
+  line-height: 1.25;
+  white-space: nowrap;
+  user-select: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: var(--transition-fast);
+}
+
+.code-copy-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.code-copy-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.code-copy-btn-label {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* 尺寸变体 */
+.code-copy-btn--xs {
+  gap: 0.25rem;
+  padding: 0.2rem 0.45rem;
+  font-size: 0.75rem;
+  border-radius: var(--radius-xs, 4px);
+}
+
+.code-copy-btn--sm {
+  padding: 0.32rem 0.65rem;
+  font-size: 0.8rem;
+}
+
+.code-copy-btn--md {
+  padding: 0.5rem 0.9rem;
+  font-size: 0.85rem;
+}
+
+.code-copy-btn--icon-only.code-copy-btn--xs {
+  padding: 0.25rem;
+}
+
+.code-copy-btn--icon-only.code-copy-btn--sm {
+  padding: 0.35rem;
+}
+
+.code-copy-btn--icon-only.code-copy-btn--md {
+  padding: 0.5rem;
+}
+
+/* 风格变体 */
+.code-copy-btn--secondary {
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-primary);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-copy-btn--secondary:hover:not(:disabled) {
+    background: var(--color-bg-hover);
+    border-color: var(--color-border-hover);
+  }
+}
+
+.code-copy-btn--primary {
+  background: var(--color-primary);
+  color: var(--color-text-white);
+  border-color: var(--color-primary);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-copy-btn--primary:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+    border-color: var(--color-primary-hover);
+  }
+}
+
+.code-copy-btn--ghost {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border-color: transparent;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .code-copy-btn--ghost:hover:not(:disabled) {
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+  }
+}
+
+.code-copy-btn--unstyled {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+  border-radius: 0;
+}
+
+/* 状态变体：复制成功 */
+.code-copy-btn--secondary.code-copy-btn--copied,
+.code-copy-btn--ghost.code-copy-btn--copied {
+  color: var(--color-success);
+  background: var(--color-success-subtle);
+  border-color: var(--color-success-border);
+}
+
+.code-copy-btn--primary.code-copy-btn--copied {
+  background: var(--color-success);
+  color: var(--color-text-white);
+  border-color: var(--color-success);
+}
+
+.code-copy-btn--unstyled.code-copy-btn--copied {
+  color: var(--color-success);
+}
+
+/* 状态变体：复制失败 */
+.code-copy-btn--secondary.code-copy-btn--error,
+.code-copy-btn--ghost.code-copy-btn--error {
+  color: var(--color-danger);
+  background: var(--color-danger-subtle);
+  border-color: var(--color-danger-border);
+}
+
+.code-copy-btn--primary.code-copy-btn--error {
+  background: var(--color-danger);
+  color: var(--color-text-white);
+  border-color: var(--color-danger);
+}
+
+.code-copy-btn--unstyled.code-copy-btn--error {
+  color: var(--color-danger);
+}

@@ -573,33 +573,3 @@ export async function copyPngToClipboard(
     await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
   }
 }
-
-/**
- * 复制纯文本（兼容 HTTPS Clipboard API 与内网 HTTP 降级方案）
- */
-export async function copyTextSafe(text: string): Promise<boolean> {
-  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-    try {
-      await navigator.clipboard.writeText(text);
-      return true;
-    } catch {
-      // 降级到只读 textarea 复制方案
-    }
-  }
-
-  try {
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.setAttribute('readonly', '');
-    textarea.style.position = 'fixed';
-    textarea.style.left = '-9999px';
-    textarea.style.top = '0';
-    document.body.appendChild(textarea);
-    textarea.select();
-    const ok = document.execCommand('copy');
-    textarea.remove();
-    return ok;
-  } catch {
-    return false;
-  }
-}

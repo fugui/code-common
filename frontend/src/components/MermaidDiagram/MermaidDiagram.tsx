@@ -23,6 +23,7 @@ import {
   ZoomInIcon,
   ZoomOutIcon,
 } from './MermaidIcons';
+import { copyTextSafe } from '../../utils/clipboard';
 import {
   ClipboardImageUnsupportedError,
   MAX_ZOOM,
@@ -32,7 +33,6 @@ import {
   calculateZoomTowardsPoint,
   clampZoom,
   copyPngToClipboard,
-  copyTextSafe,
   downloadPngDiagram,
   downloadSvgDiagram,
   extractSvgDimensions,
