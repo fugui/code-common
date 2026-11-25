@@ -9,6 +9,17 @@ set -euo pipefail
 # 本地缺失仓库时的 clone 来源（SSH 模式，github.com/fugui/ 下）
 GITHUB_SSH_PREFIX="git@github.com:fugui/"
 
+# --clone 时默认补齐的仓库集合
+DEFAULT_CLONE_REPOS=(
+    code-bench
+    code-shield
+    code-archdoc
+    code-markdocx
+    code-contract
+    code-pdm
+    code-pipeline
+)
+
 # 颜色高亮定义
 GREEN="\033[0;32m"
 BLUE="\033[0;34m"
@@ -47,6 +58,29 @@ resolve_base_dir() {
     cd "$script_real_dir/../.." && pwd
 }
 
+# 本地缺失时 clone 到 <base_dir>/<name>；失败直接退出（此时尚未做任何破坏性操作）
+# 参数: <base_dir> <name> <dry_run>
+clone_repo_if_missing() {
+    local base_dir="$1"
+    local name="$2"
+    local dry_run="$3"
+    if [[ ! "$name" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
+        log_error "仓库名不合法，无法 clone: $name"
+        exit 1
+    fi
+    local clone_url="${GITHUB_SSH_PREFIX}${name}.git"
+    if [[ "$dry_run" == true ]]; then
+        log_info "[DRY-RUN] 本地不存在 $name，实际执行时将 clone: $clone_url"
+        return 0
+    fi
+    log_info "本地不存在 $name，正在通过 SSH clone: $clone_url"
+    if ! git clone -- "$clone_url" "$base_dir/$name"; then
+        log_error "clone 失败: $clone_url（请检查 SSH 密钥与仓库是否存在）"
+        exit 1
+    fi
+    log_success "已 clone: $base_dir/$name"
+}
+
 show_help() {
     cat <<EOF
 使用方式: $(basename "$0") [选项] [仓库名...]
@@ -61,6 +95,8 @@ show_help() {
   -n, --dry-run        仅 fetch 并展示状态预览表，不修改任何工作区文件或分支指针
   -f, --force-remote   强制对齐远端追踪分支（git reset --hard <upstream>），连同未推送提交一并丢弃
   --no-clean           仅还原已跟踪文件修改（git reset --hard HEAD），保留未跟踪文件
+  --clone              先将默认仓库集合中本地缺失的仓库 clone 下来（已存在的跳过），再按常规流程处理：
+                       ${DEFAULT_CLONE_REPOS[*]}
   --dir <路径>         指定要扫描的工作区根目录（默认自动定位脚本所在工作区根目录）
   -h, --help           显示此帮助信息
 
@@ -77,6 +113,7 @@ main() {
     local dry_run=false
     local force_remote=false
     local no_clean=false
+    local clone_defaults=false
     local custom_dir=""
     local target_repos=()
 
@@ -96,6 +133,10 @@ main() {
                 ;;
             --no-clean)
                 no_clean=true
+                shift
+                ;;
+            --clone)
+                clone_defaults=true
                 shift
                 ;;
             --dir)
@@ -146,6 +187,18 @@ main() {
         base_dir="$(resolve_base_dir)"
     fi
 
+    # --clone：先补齐默认仓库集合中本地缺失的仓库，已存在的跳过
+    if [[ "$clone_defaults" == true ]]; then
+        local default_name=""
+        for default_name in "${DEFAULT_CLONE_REPOS[@]}"; do
+            if [[ -e "$base_dir/$default_name" ]]; then
+                log_info "本地已存在 $default_name，跳过 clone。"
+                continue
+            fi
+            clone_repo_if_missing "$base_dir" "$default_name" "$dry_run"
+        done
+    fi
+
     # 收集待处理的 Git 仓库列表
     local repo_paths=()
     local repo_names=()
@@ -157,21 +210,9 @@ main() {
             name="${name%/}"
             local candidate="$base_dir/$name"
             if [[ ! -e "$candidate" ]]; then
-                if [[ ! "$name" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
-                    log_error "仓库名不合法，无法 clone: $name"
-                    exit 1
-                fi
-                local clone_url="${GITHUB_SSH_PREFIX}${name}.git"
-                if [[ "$dry_run" == true ]]; then
-                    log_info "[DRY-RUN] 本地不存在 $name，实际执行时将 clone: $clone_url"
-                    continue
-                fi
-                log_info "本地不存在 $name，正在通过 SSH clone: $clone_url"
-                if ! git clone -- "$clone_url" "$candidate"; then
-                    log_error "clone 失败: $clone_url（请检查 SSH 密钥与仓库是否存在）"
-                    exit 1
-                fi
-                log_success "已 clone: $candidate"
+                clone_repo_if_missing "$base_dir" "$name" "$dry_run"
+                # dry-run 下未真正 clone，跳过后续检查
+                [[ -e "$candidate" ]] || continue
             fi
             if [[ ! -d "$candidate" ]]; then
                 log_error "目标路径不是目录: $candidate"
