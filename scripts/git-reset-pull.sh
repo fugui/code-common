@@ -58,6 +58,23 @@ resolve_base_dir() {
     cd "$script_real_dir/../.." && pwd
 }
 
+# 探测仓库使用的远端名：优先上游所属远端，其次 origin，最后第一个远端
+detect_remote() {
+    local repo="$1"
+    local upstream remotes_raw
+    upstream="$(git -C "$repo" rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null || true)"
+    if [[ -n "$upstream" ]]; then
+        echo "${upstream%%/*}"
+        return 0
+    fi
+    remotes_raw="$(git -C "$repo" remote 2>/dev/null || true)"
+    if printf '%s\n' "$remotes_raw" | grep -qx "origin"; then
+        echo "origin"
+    else
+        printf '%s\n' "$remotes_raw" | head -n 1
+    fi
+}
+
 # 本地缺失时 clone 到 <base_dir>/<name>；失败直接退出（此时尚未做任何破坏性操作）
 # 参数: <base_dir> <name> <dry_run>
 clone_repo_if_missing() {
@@ -273,9 +290,29 @@ main() {
     local repo_behind=()
     local repo_in_progress=()
     local repo_notes=()
+    local repo_needs=()
 
     local any_fetch_failed=false
     local i=0
+
+    # 并行 fetch 所有仓库，结果落盘后由下方循环汇总
+    local fetch_dir=""
+    fetch_dir="$(mktemp -d)"
+    trap 'rm -rf "$fetch_dir"' EXIT
+    for ((i = 0; i < ${#repo_paths[@]}; i++)); do
+        (
+            r="$(detect_remote "${repo_paths[$i]}")"
+            if [[ -z "$r" ]]; then
+                echo 0 >"$fetch_dir/$i.rc"
+                : >"$fetch_dir/$i.err"
+            else
+                rc=0
+                git -C "${repo_paths[$i]}" fetch --prune "$r" >"$fetch_dir/$i.err" 2>&1 || rc=$?
+                echo "$rc" >"$fetch_dir/$i.rc"
+            fi
+        ) &
+    done
+    wait
     for ((i = 0; i < ${#repo_paths[@]}; i++)); do
         local repo="${repo_paths[$i]}"
         local branch=""
@@ -285,25 +322,16 @@ main() {
         upstream="$(git -C "$repo" rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null || true)"
 
         local remote=""
-        if [[ -n "$upstream" ]]; then
-            remote="${upstream%%/*}"
-        else
-            local remotes_raw=""
-            remotes_raw="$(git -C "$repo" remote 2>/dev/null || true)"
-            if printf '%s\n' "$remotes_raw" | grep -qx "origin"; then
-                remote="origin"
-            else
-                remote="$(printf '%s\n' "$remotes_raw" | head -n 1)"
-            fi
-        fi
+        remote="$(detect_remote "$repo")"
 
         local fetch_ok=1
         local fetch_err=""
         if [[ -n "$remote" ]]; then
-            if ! fetch_err="$(git -C "$repo" fetch --prune "$remote" 2>&1)"; then
+            if [[ "$(cat "$fetch_dir/$i.rc")" -ne 0 ]]; then
                 fetch_ok=0
                 any_fetch_failed=true
             fi
+            fetch_err="$(cat "$fetch_dir/$i.err")"
         fi
 
         # 若未配置上游但非游离 HEAD 且远端存在同名分支，则自动关联有效上游以计算领先/落后
@@ -396,6 +424,15 @@ main() {
         repo_behind+=("$behind")
         repo_in_progress+=("$in_prog")
         repo_notes+=("$note")
+
+        # 是否需要实际操作：fetch 失败（需报告）、存在可清理改动、落后远端、或 -f 且领先远端
+        local needs=0
+        if [[ "$fetch_ok" -eq 0 ]] || [[ -n "$in_prog" ]] || [[ "$tracked_cnt" -gt 0 ]] \
+            || { [[ "$no_clean" == false ]] && [[ "$untracked_cnt" -gt 0 ]]; } \
+            || [[ "$behind" -gt 0 ]] || { [[ "$force_remote" == true ]] && [[ "$ahead" -gt 0 ]]; }; then
+            needs=1
+        fi
+        repo_needs+=("$needs")
     done
 
     echo ""
@@ -425,13 +462,31 @@ main() {
         exit 0
     fi
 
+    local pending_cnt=0
+    for ((i = 0; i < ${#repo_paths[@]}; i++)); do
+        [[ "${repo_needs[$i]}" -eq 1 ]] && pending_cnt=$((pending_cnt + 1))
+    done
+    if [[ "$pending_cnt" -eq 0 ]]; then
+        log_success "所有仓库均已是最新且无需清理，无需任何操作。"
+        exit 0
+    fi
+    log_info "其中 $pending_cnt 个仓库需要处理，其余将自动跳过。"
+    local pending_names=()
+    for ((i = 0; i < ${#repo_paths[@]}; i++)); do
+        [[ "${repo_needs[$i]}" -eq 1 ]] && pending_names+=("${repo_names[$i]}")
+    done
+
     if [[ "$auto_yes" == false ]]; then
         if [[ ! -t 0 ]]; then
             log_error "当前为非交互终端且未指定 -y / --yes，已中止以防误删本地改动。"
             exit 1
         fi
 
-        echo -e "${YELLOW}${BOLD}警告：即将对上述仓库执行不可逆清理操作：${NC}"
+        echo -e "${YELLOW}${BOLD}警告：即将对以下 ${pending_cnt} 个仓库执行不可逆清理操作：${NC}"
+        local pn=""
+        for pn in "${pending_names[@]}"; do
+            echo -e "    * ${pn}"
+        done
         echo -e "  - 永久丢弃所有已跟踪文件的本地修改与暂存内容（git reset --hard HEAD）"
         if [[ "$no_clean" == true ]]; then
             echo -e "  - 已指定 --no-clean：保留未跟踪文件及 .gitignore 忽略文件"
@@ -458,6 +513,7 @@ main() {
     local succeeded_repos=()
     local skipped_repos=()
     local failed_repos=()
+    local uptodate_repos=()
 
     for ((i = 0; i < ${#repo_paths[@]}; i++)); do
         local repo="${repo_paths[$i]}"
@@ -467,6 +523,11 @@ main() {
         local remote="${repo_remotes[$i]}"
         local fetch_ok="${repo_fetch_ok[$i]}"
         local in_prog="${repo_in_progress[$i]}"
+
+        if [[ "${repo_needs[$i]}" -eq 0 ]]; then
+            uptodate_repos+=("$name")
+            continue
+        fi
 
         echo "------------------------------------------------------------------"
         log_info "正在处理: $name ($repo)"
@@ -544,6 +605,7 @@ main() {
         done
     fi
 
+    echo -e "已是最新无需处理 (${#uptodate_repos[@]}): ${uptodate_repos[*]:-(无)}"
     echo -e "${YELLOW}仅清理本地并跳过拉取 (${#skipped_repos[@]}):${NC}"
     if [[ ${#skipped_repos[@]} -eq 0 ]]; then
         echo "  (无)"
