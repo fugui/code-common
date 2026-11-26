@@ -17,8 +17,9 @@ const defaultSyncTimeout = 5 * time.Minute
 type SyncOptions struct {
 	RepoURL        string        // 远端仓库地址（SSH/HTTPS/本地路径）
 	LocalPath      string        // 宿主机本地目标目录
+	CodesRoot      string        // 共享缓存根目录（用于放置跨进程 .locks/<sha1>.lock；为空时回退至 LocalPath 父目录）
 	Branch         string        // 目标分支（为空时默认 master，并兼容 fallback 至 main）
-	Depth          int           // 浅克隆深度（0 表示完整克隆，>0 表示浅克隆深度）
+	Depth          int           // 浅克隆深度（0 表示完整克隆，>0 表示浅克隆深度；对既有非 shallow 仓库自动忽略）
 	Timeout        time.Duration // 单次同步超时（<=0 时默认 5 分钟；鉴权失败快速熔断 < 30s）
 	AutoHealCache  bool          // 非权限类本地损坏时是否清理重建缓存
 	CleanUntracked bool          // 同步前是否执行 reset --hard && clean -fd
@@ -55,10 +56,7 @@ func Sync(ctx context.Context, opts SyncOptions) (*SyncResult, error) {
 		return nil, fmt.Errorf("创建仓库父目录失败: %w", err)
 	}
 
-	branch := strings.TrimSpace(opts.Branch)
-	if branch == "" {
-		branch = "master"
-	}
+	branch := ResolveBranchDefault(opts.Branch)
 	if err := ValidateBranchName(branch); err != nil {
 		return nil, err
 	}
@@ -71,9 +69,19 @@ func Sync(ctx context.Context, opts SyncOptions) (*SyncResult, error) {
 	syncCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	pathLock := GetPathLock(localPath)
-	pathLock.Lock()
-	defer pathLock.Unlock()
+	repoLock, lockErr := AcquireRepoLock(syncCtx, opts.CodesRoot, localPath, LockExclusive)
+	if lockErr != nil {
+		return nil, lockErr
+	}
+	defer func() {
+		_ = repoLock.Release()
+	}()
+
+	if opts.CodesRoot != "" {
+		if err := VerifyOriginURLConsistency(syncCtx, localPath, repoURL); err != nil {
+			return nil, err
+		}
+	}
 
 	CleanStaleGitLocks(localPath)
 
@@ -115,7 +123,7 @@ func Sync(ctx context.Context, opts SyncOptions) (*SyncResult, error) {
 			continue
 		}
 
-		// 3. 本地缓存损坏自愈：首次非权限失败后销毁本地目录并执行全新 clone
+		// 3. 本地缓存损坏自愈：首次非权限失败后在 LOCK_EX 下销毁本地目录并执行全新 clone
 		if attempt == 1 && opts.AutoHealCache {
 			if _, statErr := os.Stat(localPath); statErr == nil {
 				log.Printf("[GitSync] 第 1 次同步非权限失败 (%s): %s，触发本地缓存自愈重建", localPath, errStr)
@@ -198,10 +206,18 @@ func ExecGitSyncWithOptions(ctx context.Context, localPath, branch, repoURL stri
 				return setOut, resolvedBranch, fmt.Errorf("set origin url: %w", setErr)
 			}
 
+			// 对已存在的非 shallow 仓库，一律忽略 --depth 参数，防止写入 shallow 边界导致历史降级
+			effectiveDepth := depth
+			if effectiveDepth > 0 {
+				if shallow, sErr := IsShallowRepository(ctx, localPath); sErr == nil && !shallow {
+					effectiveDepth = 0
+				}
+			}
+
 			fetchRefSpec := func(targetBr string) ([]byte, error) {
 				fetchArgs := []string{"-C", localPath, "fetch"}
-				if depth > 0 {
-					fetchArgs = append(fetchArgs, "--depth="+strconv.Itoa(depth))
+				if effectiveDepth > 0 {
+					fetchArgs = append(fetchArgs, "--depth="+strconv.Itoa(effectiveDepth))
 				}
 				refspec := fmt.Sprintf("+refs/heads/%s:refs/remotes/origin/%s", targetBr, targetBr)
 				fetchArgs = append(fetchArgs, "origin", refspec)

@@ -246,7 +246,8 @@ func ShowFileAtCommit(ctx context.Context, localPath, commitSHA, relPath string)
 	return out, nil
 }
 
-// FetchCommitMetadata 按需拉取指定历史提交对象至本地浅克隆仓库（用于历史版本源码预览与双提交 Diff）。
+// FetchCommitMetadata 按需拉取指定历史提交对象至本地仓库（用于历史版本源码预览与双提交 Diff）。
+// 对已存在的非 shallow 仓库，严格禁止使用 `--depth=1`（防止写入 `.git/shallow` 导致共享缓存历史降级）。
 func FetchCommitMetadata(ctx context.Context, localPath, repoURL, commitSHA string) error {
 	if !commitSHAPattern.MatchString(commitSHA) {
 		return fmt.Errorf("非法的 commitSHA: %q", commitSHA)
@@ -257,9 +258,13 @@ func FetchCommitMetadata(ctx context.Context, localPath, repoURL, commitSHA stri
 		return nil
 	}
 
-	pathLock := GetPathLock(localPath)
-	pathLock.Lock()
-	defer pathLock.Unlock()
+	repoLock, err := AcquireRepoLock(ctx, "", localPath, LockExclusive)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		_ = repoLock.Release()
+	}()
 
 	// 加锁后二次确认
 	if _, _, err := ExecCommandWithProcessGroup(ctx, localPath, "git", "-C", localPath, "cat-file", "-e", commitSHA+"^{commit}"); err == nil {
@@ -273,18 +278,33 @@ func FetchCommitMetadata(ctx context.Context, localPath, repoURL, commitSHA stri
 		remote = strings.TrimSpace(repoURL)
 	}
 
-	// 优先按单提交深度拉取
-	if _, _, err := ExecCommandWithProcessGroup(ctx, localPath, "git", "-C", localPath, "fetch", "--depth=1", remote, commitSHA); err == nil {
-		return nil
+	shallow, _ := IsShallowRepository(ctx, localPath)
+	if shallow {
+		// 仅对本就是浅克隆的仓库按单提交深度补齐
+		if _, _, err := ExecCommandWithProcessGroup(ctx, localPath, "git", "-C", localPath, "fetch", "--depth=1", remote, commitSHA); err == nil {
+			return nil
+		}
+	} else {
+		// 非 shallow 仓库严禁传递 --depth，避免写入 .git/shallow
+		if _, _, err := ExecCommandWithProcessGroup(ctx, localPath, "git", "-c", "gc.auto=0", "-c", "maintenance.auto=false", "-C", localPath, "fetch", "--no-tags", remote, commitSHA); err == nil {
+			return nil
+		}
 	}
 
-	// 兼容未开启 allowAnySHA1InWant 的远端或本地裸仓：退化为解除浅克隆限制全量补齐
-	out, _, unshallowErr := ExecCommandWithProcessGroup(ctx, localPath, "git", "-C", localPath, "fetch", "--unshallow", remote)
-	if unshallowErr != nil {
-		// 若当前仓库本身不是浅克隆，尝试常规 fetch
-		if out2, _, fetchErr := ExecCommandWithProcessGroup(ctx, localPath, "git", "-C", localPath, "fetch", remote); fetchErr != nil {
-			return fmt.Errorf("fetch commit %s failed: %s / %s: %w", commitSHA,
-				strings.TrimSpace(SanitizeGitOutput(string(out))),
+	if shallow {
+		// 兼容未开启 allowAnySHA1InWant 的远端或本地裸仓：退化为解除浅克隆限制全量补齐
+		out, _, unshallowErr := ExecCommandWithProcessGroup(ctx, localPath, "git", "-C", localPath, "fetch", "--unshallow", remote)
+		if unshallowErr != nil {
+			if out2, _, fetchErr := ExecCommandWithProcessGroup(ctx, localPath, "git", "-C", localPath, "fetch", "--no-tags", remote); fetchErr != nil {
+				return fmt.Errorf("fetch commit %s failed: %s / %s: %w", commitSHA,
+					strings.TrimSpace(SanitizeGitOutput(string(out))),
+					strings.TrimSpace(SanitizeGitOutput(string(out2))),
+					fetchErr)
+			}
+		}
+	} else {
+		if out2, _, fetchErr := ExecCommandWithProcessGroup(ctx, localPath, "git", "-c", "gc.auto=0", "-c", "maintenance.auto=false", "-C", localPath, "fetch", "--no-tags", remote); fetchErr != nil {
+			return fmt.Errorf("fetch commit %s failed: %s: %w", commitSHA,
 				strings.TrimSpace(SanitizeGitOutput(string(out2))),
 				fetchErr)
 		}

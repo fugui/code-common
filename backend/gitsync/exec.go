@@ -56,6 +56,11 @@ func IsAuthOrPermissionError(msg string) bool {
 // 当 Context 被取消或超时时，向整个负进程组 (-pgid) 发送 SIGKILL 强杀并等待回收，彻底杜绝孤儿进程泄漏。
 // 当执行 git 命令时，强制注入 GIT_TERMINAL_PROMPT=0 与非交互式 SSH BatchMode 参数，确保鉴权失败快速返回。
 func ExecCommandWithProcessGroup(ctx context.Context, dir string, name string, args ...string) ([]byte, int, error) {
+	return ExecCommandWithProcessGroupEnv(ctx, dir, nil, name, args...)
+}
+
+// ExecCommandWithProcessGroupEnv 执行外部命令，支持附加自定义环境变量（如临时 GIT_ASKPASS / GIT_SSH_COMMAND）。
+func ExecCommandWithProcessGroupEnv(ctx context.Context, dir string, extraEnv []string, name string, args ...string) ([]byte, int, error) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -70,7 +75,9 @@ func ExecCommandWithProcessGroup(ctx context.Context, dir string, name string, a
 	}
 
 	if name == "git" {
-		cmd.Env = buildGitEnv(os.Environ())
+		cmd.Env = buildGitEnv(os.Environ(), extraEnv)
+	} else if len(extraEnv) > 0 {
+		cmd.Env = append(os.Environ(), extraEnv...)
 	}
 
 	var outputBuf bytes.Buffer
@@ -106,17 +113,41 @@ func ExecCommandWithProcessGroup(ctx context.Context, dir string, name string, a
 	}
 }
 
-func buildGitEnv(baseEnv []string) []string {
-	env := make([]string, 0, len(baseEnv)+2)
+func buildGitEnv(baseEnv, extraEnv []string) []string {
+	overrides := make(map[string]string, len(extraEnv)+2)
+	for _, entry := range extraEnv {
+		if idx := strings.IndexByte(entry, '='); idx > 0 {
+			overrides[entry[:idx]] = entry[idx+1:]
+		}
+	}
+	env := make([]string, 0, len(baseEnv)+len(overrides)+2)
 	hasSSHCommand := false
 	for _, entry := range baseEnv {
-		if strings.HasPrefix(entry, "GIT_TERMINAL_PROMPT=") {
+		idx := strings.IndexByte(entry, '=')
+		if idx <= 0 {
+			env = append(env, entry)
 			continue
 		}
-		if strings.HasPrefix(entry, "GIT_SSH_COMMAND=") {
+		k := entry[:idx]
+		if k == "GIT_TERMINAL_PROMPT" {
+			continue
+		}
+		if _, replaced := overrides[k]; replaced {
+			continue
+		}
+		if k == "GIT_SSH_COMMAND" {
 			hasSSHCommand = true
 		}
 		env = append(env, entry)
+	}
+	for k, v := range overrides {
+		if k == "GIT_TERMINAL_PROMPT" {
+			continue
+		}
+		if k == "GIT_SSH_COMMAND" {
+			hasSSHCommand = true
+		}
+		env = append(env, k+"="+v)
 	}
 	env = append(env, "GIT_TERMINAL_PROMPT=0")
 	if !hasSSHCommand {
