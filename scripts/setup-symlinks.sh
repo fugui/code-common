@@ -19,7 +19,18 @@ BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 echo -e "${BLUE}[INFO]${NC} 开始为工作区根目录 ($BASE_DIR) 初始化软链接..."
 
 # 确保脚本具备可执行权限
-chmod +x "$SCRIPT_DIR/start.sh" "$SCRIPT_DIR/count_lines.py" "$SCRIPT_DIR/count_lines_by_project.py" "$SCRIPT_DIR/git-stats.js" "$SCRIPT_DIR/git-reset-pull.sh" "$SCRIPT_DIR/setup-symlinks.sh" 2>/dev/null || true
+chmod +x "$SCRIPT_DIR/start.sh" "$SCRIPT_DIR/line-count.py" "$SCRIPT_DIR/git-stats.js" "$SCRIPT_DIR/reset-pull.sh" "$SCRIPT_DIR/setup-symlinks.sh" "$SCRIPT_DIR/check-overlay-guard.mjs" 2>/dev/null || true
+
+# 辅助函数：安全清理历史遗留的旧软链接（仅清理符号链接，避免误删普通文件）
+unlink_obsolete() {
+    local link_name=$1
+    local link_path="$BASE_DIR/$link_name"
+
+    if [ -L "$link_path" ]; then
+        rm -f "$link_path"
+        echo -e "${YELLOW}[CLEAN]${NC} 移除旧软链接: $link_name"
+    fi
+}
 
 # 辅助函数：创建或更新软链接
 link_file() {
@@ -43,12 +54,16 @@ link_file() {
     echo -e "${GREEN}[LINK]${NC} $link_name -> $target_rel"
 }
 
+# 清理历史遗留软链接
+unlink_obsolete "count_lines.py"
+unlink_obsolete "count_lines_by_project.py"
+unlink_obsolete "git-reset-pull.sh"
+
 # 根目录文件软链接（start.sh 与 Caddyfile 按环境独立维护，不纳入软链）
 link_file "code-common/rules/AGENTS.md" "AGENTS.md"
-link_file "code-common/scripts/count_lines.py" "count_lines.py"
-link_file "code-common/scripts/count_lines_by_project.py" "count_lines_by_project.py"
+link_file "code-common/scripts/line-count.py" "line-count.py"
 link_file "code-common/scripts/git-stats.js" "git-stats.js"
-link_file "code-common/scripts/git-reset-pull.sh" "git-reset-pull.sh"
+link_file "code-common/scripts/reset-pull.sh" "reset-pull.sh"
 
 # .agents 目录处理
 mkdir -p "$BASE_DIR/.agents"

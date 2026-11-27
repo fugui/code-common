@@ -42,9 +42,8 @@ code-common/
 ├── scripts/                        # 平台工程运维与全景启动脚本
 │   ├── start.sh                    # Tmux 田字格多服务并发拉取/构建/启动脚本
 │   ├── setup-symlinks.sh           # 工作区根目录软链接一键初始化脚本
-│   ├── git-reset-pull.sh           # 全仓清除本地修改并拉取远端最新代码脚本
-│   ├── count_lines.py              # 全平台源码语言行数统计
-│   ├── count_lines_by_project.py   # 按各子项目代码行数统计
+│   ├── reset-pull.sh               # 全仓清除本地修改并拉取远端最新代码脚本
+│   ├── line-count.py               # 分项目按语言与按项目全量代码行数统计
 │   └── git-stats.js                # Git 提交与贡献度分析
 └── CONTRIBUTING.md                 # 准入标准与治理规范文档
 ```
@@ -212,9 +211,9 @@ bash code-common/scripts/setup-symlinks.sh
 - **`scripts/start.sh`**：Tmux 田字格多服务并发拉取、按需编译并一键启动脚本（根目录 `./start.sh`）。
 - **`infra/Caddyfile`**：统一反向代理网关配置，默认将端口 80 流量转发至 `code-bench`（端口 8000）。
 - **`rules/AGENTS.md`**：团队开发核心规章、约定式提交、前端 Design Token 与智能体协同准则。
-- **`scripts/count_lines.py`**：全平台源码语言行数统计。
-- **`scripts/git-stats.js`**：Git 提交统计与贡献分析。
-- **`scripts/git-reset-pull.sh`**：批量清除工作区全部 Git 仓库的本地修改（保留 `.gitignore` 忽略文件）并拉取远端最新代码（根目录 `./git-reset-pull.sh`，支持 `--dry-run`、`-y`、`-f/--force-remote`、`--no-clean`）。
+- **`scripts/line-count.py`**：全平台源码行数统计（根目录 `./line-count.py`，依次输出分项目按语言明细与按项目全量汇总）。
+- **`scripts/git-stats.js`**：Git 提交统计与贡献分析（根目录 `./git-stats.js`，支持 `--days`、`--author`、`--all`）。
+- **`scripts/reset-pull.sh`**：批量清除工作区全部 Git 仓库的本地修改（保留 `.gitignore` 忽略文件）并拉取远端最新代码（根目录 `./reset-pull.sh`，支持 `--dry-run`、`-y`、`-f/--force-remote`、`--no-clean`）。
 
 ---
 
