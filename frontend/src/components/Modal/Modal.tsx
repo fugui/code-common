@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { zIndexManager, escManager, lockBodyScroll, unlockBodyScroll, ZIndexLevels } from '../../utils/overlay';
 import './modal.css';
 
-export type ModalWidthPreset = 'sm' | 'md' | 'lg' | 'xl' | 'full';
+export type ModalWidthPreset = 'sm' | 'md' | 'lg' | 'xl' | 'full' | 'fullscreen';
 
 export interface ModalProps {
   /** 控制弹窗打开状态 (标准属性) */
@@ -20,8 +20,10 @@ export interface ModalProps {
   extra?: React.ReactNode;
   /** 底部操作栏 */
   footer?: React.ReactNode;
-  /** 弹窗宽度预设或自定义数值 (sm: 440px, md: 580px, lg: 760px, xl: 960px, full: 94vw) */
+  /** 弹窗宽度预设或自定义数值 (sm: 440px, md: 580px, lg: 760px, xl: 960px, full: 94vw, fullscreen: 100vw) */
   width?: ModalWidthPreset | string | number;
+  /** 贴边工作台沉浸全屏模式（100vw × 100vh，无圆角、无外边距、隐藏顶部装饰条） */
+  fullscreen?: boolean;
   /** 弹窗高度数值或 CSS 字符串 (如 '75vh', '600px', 500) */
   height?: string | number;
   /** 弹窗最小高度数值或 CSS 字符串 */
@@ -68,6 +70,7 @@ const WIDTH_MAP: Record<ModalWidthPreset, string> = {
   lg: '760px',
   xl: '960px',
   full: 'min(1200px, 94vw)',
+  fullscreen: '100vw',
 };
 
 export const Modal: React.FC<ModalProps> = ({
@@ -79,6 +82,7 @@ export const Modal: React.FC<ModalProps> = ({
   extra,
   footer,
   width = 'md',
+  fullscreen = false,
   height,
   minHeight,
   style,
@@ -108,13 +112,17 @@ export const Modal: React.FC<ModalProps> = ({
   const zLevelRef = useRef<number | undefined>(undefined);
   const closeTimerRef = useRef<number>();
 
-  const resolvedWidth = typeof width === 'number'
-    ? `${width}px`
-    : (WIDTH_MAP[width as ModalWidthPreset] || width);
+  const isFullscreen = Boolean(fullscreen || width === 'fullscreen');
+
+  const resolvedWidth = isFullscreen
+    ? '100vw'
+    : typeof width === 'number'
+      ? `${width}px`
+      : (WIDTH_MAP[width as ModalWidthPreset] || width);
 
   const resolvedHeight = typeof height === 'number'
     ? `${height}px`
-    : height;
+    : (height ?? (isFullscreen ? '100vh' : undefined));
 
   const resolvedMinHeight = typeof minHeight === 'number'
     ? `${minHeight}px`
@@ -212,7 +220,7 @@ export const Modal: React.FC<ModalProps> = ({
 
   const modalContent = (
     <div
-      className={`code-modal-root modal-root-wrapper ${alignClass} ${pointerClass} ${className}`.trim()}
+      className={`code-modal-root modal-root-wrapper ${alignClass} ${pointerClass} ${isFullscreen ? 'code-modal-root--fullscreen' : ''} ${className}`.trim()}
       style={{ zIndex: containerZIndex }}
     >
       {/* 1. Backdrop 遮罩层 */}
@@ -231,7 +239,7 @@ export const Modal: React.FC<ModalProps> = ({
         aria-modal="true"
         aria-labelledby={hasStringTitle ? uniqueTitleId : undefined}
         data-testid={testId}
-        className={`code-modal-panel ${animateVisible ? 'code-modal-panel--visible' : 'code-modal-panel--hidden'}`}
+        className={`code-modal-panel ${animateVisible ? 'code-modal-panel--visible' : 'code-modal-panel--hidden'} ${isFullscreen ? 'code-modal-panel--fullscreen' : ''}`.trim()}
         style={{
           width: resolvedWidth,
           height: resolvedHeight,
@@ -242,7 +250,7 @@ export const Modal: React.FC<ModalProps> = ({
         onClick={e => e.stopPropagation()}
       >
         {/* 顶部高光装饰条 */}
-        <div className="code-modal-decorator" />
+        {!isFullscreen && <div className="code-modal-decorator" />}
 
         {/* 头部 Header */}
         {(title || subtitle || extra || showCloseButton) && (

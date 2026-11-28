@@ -95,6 +95,23 @@
   pointer-events: none;
 }
 
+/* 贴边工作台沉浸全屏预设 */
+.code-modal-root.code-modal-root--fullscreen {
+  padding: 0;
+  overflow: hidden;
+}
+
+.code-modal-panel.code-modal-panel--fullscreen {
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  transform: none;
+}
+
 /* 4. 顶部高光渐变装饰条 (Top Decorator) */
 .code-modal-decorator {
   position: absolute;
