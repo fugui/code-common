@@ -21,8 +21,13 @@ interface SharedOverlayState {
   onKeyDown: (e: KeyboardEvent) => void;
   lockCount: number;
   prevBodyOverflow: string;
+  prevBodyOverflowX?: string;
+  prevBodyOverflowY?: string;
   prevBodyPaddingRight: string;
   prevMainOverflow: string;
+  prevMainOverflowX?: string;
+  prevMainOverflowY?: string;
+  lockedMainEl?: HTMLElement | null;
 }
 
 function createSharedOverlayState(): SharedOverlayState {
@@ -43,8 +48,13 @@ function createSharedOverlayState(): SharedOverlayState {
     },
     lockCount: 0,
     prevBodyOverflow: '',
+    prevBodyOverflowX: '',
+    prevBodyOverflowY: '',
     prevBodyPaddingRight: '',
     prevMainOverflow: '',
+    prevMainOverflowX: '',
+    prevMainOverflowY: '',
+    lockedMainEl: null,
   };
   return state;
 }
@@ -76,8 +86,13 @@ export function resetOverlayStateForTest() {
   state.escBoundTarget = null;
   state.lockCount = 0;
   state.prevBodyOverflow = '';
+  state.prevBodyOverflowX = '';
+  state.prevBodyOverflowY = '';
   state.prevBodyPaddingRight = '';
   state.prevMainOverflow = '';
+  state.prevMainOverflowX = '';
+  state.prevMainOverflowY = '';
+  state.lockedMainEl = null;
 }
 
 // 1. 动态 Z-Index 栈分配器
@@ -149,19 +164,29 @@ export function lockBodyScroll() {
   if (typeof document === 'undefined') return;
   const state = getSharedOverlayState();
   if (state.lockCount === 0) {
-    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    const scrollbarWidth =
+      typeof window !== 'undefined' ? window.innerWidth - document.documentElement.clientWidth : 0;
     state.prevBodyOverflow = document.body.style.overflow;
+    state.prevBodyOverflowX = document.body.style.overflowX;
+    state.prevBodyOverflowY = document.body.style.overflowY;
     state.prevBodyPaddingRight = document.body.style.paddingRight;
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflowX = 'hidden';
+    document.body.style.overflowY = 'hidden';
     if (scrollbarWidth > 0) {
       document.body.style.paddingRight = `${scrollbarWidth}px`;
     }
 
     // 兼容微前端宿主：同时锁定当前处于视窗下的宿主主要滚动容器，防止长表格背景滚动穿透
-    const hostMain = document.querySelector('main.portal-content') || document.querySelector('main');
+    const hostMain = (document.querySelector('main.portal-content') || document.querySelector('main')) as HTMLElement | null;
     if (hostMain) {
-      state.prevMainOverflow = (hostMain as HTMLElement).style.overflow;
-      (hostMain as HTMLElement).style.overflow = 'hidden';
+      state.lockedMainEl = hostMain;
+      state.prevMainOverflow = hostMain.style.overflow;
+      state.prevMainOverflowX = hostMain.style.overflowX;
+      state.prevMainOverflowY = hostMain.style.overflowY;
+      hostMain.style.overflowX = 'hidden';
+      hostMain.style.overflowY = 'hidden';
+    } else {
+      state.lockedMainEl = null;
     }
   }
   state.lockCount++;
@@ -172,12 +197,27 @@ export function unlockBodyScroll() {
   const state = getSharedOverlayState();
   state.lockCount = Math.max(0, state.lockCount - 1);
   if (state.lockCount === 0) {
-    document.body.style.overflow = state.prevBodyOverflow;
-    document.body.style.paddingRight = state.prevBodyPaddingRight;
-
-    const hostMain = document.querySelector('main.portal-content') || document.querySelector('main');
-    if (hostMain) {
-      (hostMain as HTMLElement).style.overflow = state.prevMainOverflow;
+    if (state.prevBodyOverflowX !== undefined || state.prevBodyOverflowY !== undefined) {
+      document.body.style.overflowX = state.prevBodyOverflowX ?? '';
+      document.body.style.overflowY = state.prevBodyOverflowY ?? '';
+    } else {
+      document.body.style.overflow = state.prevBodyOverflow ?? '';
     }
+    document.body.style.paddingRight = state.prevBodyPaddingRight ?? '';
+
+    const lockedMain =
+      state.lockedMainEl && state.lockedMainEl.isConnected !== false ? state.lockedMainEl : null;
+    const hostMain = (lockedMain ||
+      document.querySelector('main.portal-content') ||
+      document.querySelector('main')) as HTMLElement | null;
+    if (hostMain) {
+      if (state.prevMainOverflowX !== undefined || state.prevMainOverflowY !== undefined) {
+        hostMain.style.overflowX = state.prevMainOverflowX ?? '';
+        hostMain.style.overflowY = state.prevMainOverflowY ?? '';
+      } else {
+        hostMain.style.overflow = state.prevMainOverflow ?? '';
+      }
+    }
+    state.lockedMainEl = null;
   }
 }

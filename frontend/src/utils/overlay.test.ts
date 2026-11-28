@@ -6,7 +6,9 @@ import { fileURLToPath } from 'node:url';
 import {
   OVERLAY_GLOBAL_KEY,
   escManager,
+  lockBodyScroll,
   resetOverlayStateForTest,
+  unlockBodyScroll,
   zIndexManager,
 } from './overlay.ts';
 
@@ -20,6 +22,7 @@ describe('overlay 跨应用单例与层级管理', () => {
   afterEach(() => {
     resetOverlayStateForTest();
     delete (globalThis as Record<string, unknown>).window;
+    delete (globalThis as Record<string, unknown>).document;
   });
 
   it('zIndexManager 严格递增，Modal 之上打开 Drawer 仍能压过 Modal 且支持乱序精确释放', () => {
@@ -138,5 +141,103 @@ describe('overlay 跨应用单例与层级管理', () => {
     assert.ok(drawerMask < drawerPanel, `drawerMask(${drawerMask}) 应小于 drawerPanel(${drawerPanel})`);
     assert.ok(drawerPanel < modalMask, `drawerPanel(${drawerPanel}) 应小于 modalMask(${modalMask})`);
     assert.ok(modalMask < modalPanel, `modalMask(${modalMask}) 应小于 modalPanel(${modalPanel})`);
+  });
+
+  it('lockBodyScroll/unlockBodyScroll 按 overflowX/overflowY 分写保存并恢复，避免简写清空内联 overflowY', () => {
+    function createCssomStyle(init: { overflowX?: string; overflowY?: string } = {}) {
+      const state = {
+        overflowX: init.overflowX ?? '',
+        overflowY: init.overflowY ?? '',
+        paddingRight: '',
+      };
+      return {
+        get overflow() {
+          // 模拟真实浏览器 CSSOM：当仅设置了其中一个分写属性时，简写 overflow 返回空字符串
+          return state.overflowX === state.overflowY ? state.overflowX : '';
+        },
+        set overflow(val: string) {
+          state.overflowX = val;
+          state.overflowY = val;
+        },
+        get overflowX() {
+          return state.overflowX;
+        },
+        set overflowX(val: string) {
+          state.overflowX = val;
+        },
+        get overflowY() {
+          return state.overflowY;
+        },
+        set overflowY(val: string) {
+          state.overflowY = val;
+        },
+        get paddingRight() {
+          return state.paddingRight;
+        },
+        set paddingRight(val: string) {
+          state.paddingRight = val;
+        },
+      };
+    }
+
+    const bodyEl = { style: createCssomStyle({ overflowX: 'hidden' }) };
+    const mainEl = { style: createCssomStyle({ overflowY: 'auto' }), isConnected: true };
+
+    (globalThis as Record<string, unknown>).window = {
+      innerWidth: 1440,
+    };
+    (globalThis as Record<string, unknown>).document = {
+      documentElement: { clientWidth: 1425 },
+      body: bodyEl,
+      querySelector(selector: string) {
+        if (selector === 'main.portal-content') return mainEl;
+        return null;
+      },
+    };
+
+    lockBodyScroll();
+    assert.equal(bodyEl.style.overflowX, 'hidden');
+    assert.equal(bodyEl.style.overflowY, 'hidden');
+    assert.equal(bodyEl.style.paddingRight, '15px');
+    assert.equal(mainEl.style.overflowX, 'hidden');
+    assert.equal(mainEl.style.overflowY, 'hidden');
+
+    unlockBodyScroll();
+    assert.equal(bodyEl.style.overflowX, 'hidden');
+    assert.equal(bodyEl.style.overflowY, '');
+    assert.equal(bodyEl.style.paddingRight, '');
+    assert.equal(mainEl.style.overflowX, '');
+    assert.equal(mainEl.style.overflowY, 'auto');
+  });
+
+  it('嵌套多次 lockBodyScroll/unlockBodyScroll 保持引用计数，且解锁恢复最初锁定的 main 节点', () => {
+    const bodyEl = { style: { overflow: '', overflowX: '', overflowY: '', paddingRight: '' } };
+    const initialMain = { style: { overflow: '', overflowX: '', overflowY: 'auto' }, isConnected: true };
+    const anotherMain = { style: { overflow: '', overflowX: '', overflowY: 'scroll' }, isConnected: true };
+    let currentMain = initialMain;
+
+    (globalThis as Record<string, unknown>).window = { innerWidth: 1280 };
+    (globalThis as Record<string, unknown>).document = {
+      documentElement: { clientWidth: 1280 },
+      body: bodyEl,
+      querySelector(selector: string) {
+        if (selector === 'main.portal-content' || selector === 'main') return currentMain;
+        return null;
+      },
+    };
+
+    lockBodyScroll();
+    lockBodyScroll();
+    assert.equal(initialMain.style.overflowY, 'hidden');
+
+    // 锁定期间模拟页面内出现了新的 main 节点
+    currentMain = anotherMain;
+
+    unlockBodyScroll();
+    assert.equal(initialMain.style.overflowY, 'hidden', '未完全解锁前不应提前恢复滚动');
+
+    unlockBodyScroll();
+    assert.equal(initialMain.style.overflowY, 'auto', '完全解锁后应恢复最初被锁定的节点');
+    assert.equal(anotherMain.style.overflowY, 'scroll', '不应误改后出现的其他 main 节点');
   });
 });
